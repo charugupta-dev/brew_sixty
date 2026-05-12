@@ -8,11 +8,26 @@
 import SwiftUI
 
 struct LaunchView: View {
+    @State private var thought = CoffeeThought.random
+    @Binding var showLaunch: Bool
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            // Base layer structure
+            Color.clear.ignoresSafeArea()
+            
+            // Content structure
+            VStack {
+                Text(thought)
+            }
+        }
+        .onAppear {
+            Task {
+                try? await Task.sleep(for: .seconds(2))
+                withAnimation(.easeInOut(duration: 0.8)) {
+                    showLaunch = false
+                }
+            }
+        }
     }
-}
-
-#Preview {
-    LaunchView()
 }

@@ -5,14 +5,16 @@
 //  Created by Charu Gupta on 11/05/26.
 //
 
-import SwiftUI
+import Foundation
 
-struct CoffeeThought: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+struct CoffeeThought {
+    static let thoughts = [
+        "Ratio & Ritual.",
+        "Precision in every pour.",
+        "Water, bean, time."
+    ]
+    
+    static var random: String {
+        thoughts.randomElement() ?? thoughts[0]
     }
-}
-
-#Preview {
-    CoffeeThought()
 }
