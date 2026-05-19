@@ -14,5 +14,6 @@ struct brew_sixtyApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: BrewLog.self)
     }
 }

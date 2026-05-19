@@ -6,17 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TimerView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     
-    // Dependencies passed in from the BrewFormView
-    let targetWater: Double
-    let bloomWater: Double
-    
-    // Temporary State (Will be moved to ViewModel)
-    @State private var startDate: Date? = nil
-    @State private var isRunning = false
+    let viewModel: BrewViewModel
     
     var body: some View {
         ZStack {
@@ -24,14 +20,14 @@ struct TimerView: View {
             
             VStack(spacing: 60) {
                 
-                Text(isRunning ? "Brewing..." : "Ready to Brew")
+                Text(viewModel.isRunning ? "Brewing..." : "Ready to Brew")
                     .font(.title3)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
                 
                 TimelineView(.animation) { context in
-                    let elapsed = calculateElapsed(from: context.date)
-                    let progress = min(elapsed / 150.0, 1.0)
+                    let elapsed = viewModel.calculateElapsed(from: context.date)
+                    let progress = viewModel.getProgress(for: elapsed)
                     
                     ZStack {
                         
@@ -48,7 +44,7 @@ struct TimerView: View {
                                 .font(.system(size: 72, weight: .light, design: .rounded))
                                 .contentTransition(.numericText(value: elapsed))
                             
-                            Text(currentPhase(elapsed: elapsed))
+                            Text(viewModel.getPhaseText(for: elapsed))
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                         }
@@ -68,16 +64,15 @@ struct TimerView: View {
                     }
                     
                     Button {
-                        if isRunning {
-                            // Stop & Save logic goes here later
-                            isRunning = false
+                        if viewModel.isRunning {
+                            viewModel.toggleTimer()
+                            viewModel.saveLog(in: modelContext)
                             dismiss()
                         } else {
-                            startDate = Date()
-                            isRunning = true
+                            viewModel.toggleTimer()
                         }
                     } label: {
-                        Image(systemName: isRunning ? "stop.fill" : "play.fill")
+                        Image(systemName: viewModel.isRunning ? "stop.fill" : "play.fill")
                             .font(.title)
                             .foregroundStyle(.background)
                             .frame(width: 80, height: 80)
@@ -88,11 +83,12 @@ struct TimerView: View {
             }
         }
         .navigationBarHidden(true)
-    }
-    
-    private func calculateElapsed(from contextDate: Date) -> TimeInterval {
-        guard let start = startDate, isRunning else { return 0 }
-        return contextDate.timeIntervalSince(start)
+        .onChange(of: viewModel.isFinished) { oldValue, newValue in
+            if newValue == true {
+                viewModel.saveLog(in: modelContext)
+                dismiss()
+            }
+        }
     }
     
     private func formatTime(_ time: TimeInterval) -> String {
@@ -100,14 +96,7 @@ struct TimerView: View {
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-    
-    private func currentPhase(elapsed: TimeInterval) -> String {
-        if elapsed == 0 { return "Target: \(Int(targetWater))g" }
-        if elapsed < 45 { return "Bloom: Pour \(Int(bloomWater))g" }
-        if elapsed < 150 { return "Drawdown: Pour to \(Int(targetWater))g" }
-        return "Enjoy your coffee"
-    }
 }
 #Preview {
-    TimerView(targetWater: 10.0, bloomWater: 5.0)
+    TimerView(viewModel: BrewViewModel(beanWeight: 8, ratio: 1.12))
 }

@@ -63,7 +63,7 @@ struct BrewFormView: View {
                 
                 
                 NavigationLink {
-                    TimerView(targetWater: totalWater, bloomWater: beanWeight * 3)
+                    TimerView(viewModel: BrewViewModel(beanWeight: beanWeight, ratio: brewRatio))
                 } label: {
                     Text("Start Timer")
                         .font(.headline)
