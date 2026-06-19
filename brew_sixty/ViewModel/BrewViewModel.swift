@@ -18,9 +18,9 @@ final class BrewViewModel: Identifiable {
     var startDate: Date? = nil
     var isRunning: Bool = false
     
-    //(Standard V60 timings) //change before pushing
-    let bloomDuration: TimeInterval = 5.0
-    private let totalDuration: TimeInterval = 15.0
+    //(Standard V60 timings)
+    let bloomDuration: TimeInterval = 45.0
+    private let totalDuration: TimeInterval = 150.0
     var finalElapsed: TimeInterval = 0
     var isFinished: Bool = false
     

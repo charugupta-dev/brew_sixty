@@ -24,27 +24,34 @@ struct LaunchView: View {
                 
                 Text("Brew Sixty")
                     .font(.system(size: 32, weight: .bold, design: .serif))
-                    .foregroundStyle(Color(red: 0.92, green: 0.85, blue: 0.78))
+                    .foregroundStyle(Color.coffeeCream)
                     .scaleEffect(animateText ? 1.0 : 0.9)
                     .opacity(animateText ? 1.0 : 0.0)
                 
                 Text(thought)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Color(red: 0.62, green: 0.44, blue: 0.32))
+                    .foregroundStyle(Color.coffeeAccent)
                     .scaleEffect(animateText ? 1.0 : 0.9)
                     .opacity(animateText ? 0.7 : 0.0)
             }
         }
-        .onAppear {
+        .task {
             withAnimation(.easeOut(duration: 1.2)) {
                 animateText = true
             }
-            Task {
-                try? await Task.sleep(for: .seconds(2.5))
+            do {
+                try await Task.sleep(for: .seconds(2.5))
                 withAnimation(.easeInOut(duration: 0.8)) {
                     showLaunch = false
                 }
+            } catch {
+                // Task was cancelled, safely ignore
             }
         }
     }
+}
+
+#Preview {
+    @Previewable @State var showLaunch = true
+    LaunchView(showLaunch: $showLaunch)
 }
