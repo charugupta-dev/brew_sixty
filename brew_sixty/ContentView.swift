@@ -32,6 +32,7 @@ struct ContentView: View {
                 .transition(.opacity)
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 
