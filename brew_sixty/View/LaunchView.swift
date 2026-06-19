@@ -31,6 +31,7 @@ struct LaunchView: View {
                 Text(thought)
                     .font(.system(size: 16, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color(red: 0.62, green: 0.44, blue: 0.32))
+                    .scaleEffect(animateText ? 1.0 : 0.9)
                     .opacity(animateText ? 0.7 : 0.0)
             }
         }
