@@ -12,6 +12,7 @@ import SwiftData
 struct HomeView: View {
     @Query(sort: [SortDescriptor(\BrewLog.timestamp, order: .reverse)]) private var logs: [BrewLog]
     @State private var showingBrewForm = false
+    @State private var animateChart = false
     
     var body: some View {
         NavigationStack {
@@ -19,7 +20,9 @@ struct HomeView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         headerSection
-                        graphSection
+                        if !logs.isEmpty {
+                            graphSection
+                        }
                         brewLogSection
                     }
                     .padding(.horizontal)
@@ -28,7 +31,7 @@ struct HomeView: View {
                 
                 fab
             }
-            .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showingBrewForm) {
                 BrewFormView()
                     .presentationDetents([.fraction(0.65)])
@@ -39,6 +42,7 @@ struct HomeView: View {
     }
 }
 
+
 extension HomeView {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -48,34 +52,48 @@ extension HomeView {
             Text("Your brew lab is ready.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-        } .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var graphSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Bean Usage History (g)")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fontWeight(.semibold)
+            
             Chart {
                 ForEach(logs) { log in
-                    BarMark(x: .value("Time", log.timestamp.formatted(date: .omitted, time: .shortened)),
-                            y: .value("Beans (g)", log.beanWeightGram))
+                    BarMark(x: .value("Time", log.timestamp),
+                            y: .value("Beans (g)", animateChart ? log.beanWeightGram : 0.0))
                     .cornerRadius(4)
                 }
             }
             .frame(height: 200)
+            .animation(.interactiveSpring(response: 0.8, dampingFraction: 0.7, blendDuration: 0), value: animateChart)
         }
+        .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .task {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            withAnimation {
+                animateChart = true
+            }
+        }
     }
     
     private var brewLogSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Recent Brews")
                 .font(.headline)
-            if(logs.isEmpty) {
+            if logs.isEmpty {
                 Text("No logs yet, tap '+' to brew")
                     .foregroundStyle(.secondary)
-                    .padding(.vertical,20)
+                    .padding(.vertical, 20)
             } else {
                 LazyVStack(spacing: 12) {
-                    ForEach(logs) {log in
+                    ForEach(logs) { log in
                         logRow(for: log)
                     }
                 }
