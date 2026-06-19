@@ -208,7 +208,7 @@ struct TimerView: View {
                             
                             Text(viewModel.getPhaseText(for: elapsed))
                                 .font(.headline)
-                                .foregroundStyle(Color(red: 0.92, green: 0.85, blue: 0.78))
+                                .foregroundStyle(Color.coffeeCream)
                         }
                     }
                 }
