@@ -17,8 +17,19 @@ struct ContentView: View {
                 LaunchView(showLaunch: $showLaunchScreen)
                     .transition(.opacity)
             } else {
-                HomeView()
-                    .transition(.opacity)
+                TabView {
+                    HomeView()
+                        .tabItem {
+                            Label("Brews", systemImage: "cup.and.saucer.fill")
+                        }
+                    
+                    SettingsView()
+                        .tabItem {
+                            Label("Settings", systemImage: "gearshape.fill")
+                        }
+                }
+                .tint(Color(red: 0.62, green: 0.44, blue: 0.32)) // Warm Coffee Accent
+                .transition(.opacity)
             }
         }
     }
@@ -26,4 +37,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .modelContainer(for: BrewLog.self, inMemory: true)
 }
