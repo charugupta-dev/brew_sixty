@@ -8,8 +8,73 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @AppStorage("preferredRatio") private var brewRatio: Double = 12.0
+    @AppStorage("preferredBeanWeight") private var preferredBeanWeight: Double = 8.0
+    
+    @State private var beanWeightInput: String = ""
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            Form {
+                Section(header: Text("Brew Recipe Defaults")) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Default Brew Ratio")
+                                .fontWeight(.medium)
+                            Spacer()
+                            Text("1 : \(String(format: "%.1f", brewRatio))")
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.coffeeAccent)
+                        }
+                        
+                        Slider(value: $brewRatio, in: 8...22, step: 0.5)
+                            .tint(Color.coffeeAccent)
+                        
+                        HStack {
+                            Text("1:8 (Strong)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("1:15 (Standard)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("1:22 (Mild)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Default Bean Weight")
+                                .fontWeight(.medium)
+                            Spacer()
+                            HStack(spacing: 4) {
+                                TextField("8.0", text: $beanWeightInput)
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.trailing)
+                                    .frame(width: 60)
+                                    .textFieldStyle(.roundedBorder)
+                                    .onChange(of: beanWeightInput) { _, newValue in
+                                        if let doubleVal = Double(newValue), doubleVal > 0 {
+                                            preferredBeanWeight = doubleVal
+                                        }
+                                    }
+                                Text("g")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .navigationTitle("Settings")
+            .onAppear {
+                beanWeightInput = String(format: "%.1f", preferredBeanWeight)
+            }
+        }
     }
 }
 

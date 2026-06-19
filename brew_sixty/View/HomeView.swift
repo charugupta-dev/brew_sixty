@@ -16,7 +16,6 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         headerSection
@@ -56,7 +55,7 @@ extension HomeView {
         VStack(alignment: .leading, spacing: 4) {
             Chart {
                 ForEach(logs) { log in
-                    BarMark(x: .value("Time", log.timestamp, unit: .day),
+                    BarMark(x: .value("Time", log.timestamp.formatted(date: .omitted, time: .shortened)),
                             y: .value("Beans (g)", log.beanWeightGram))
                     .cornerRadius(4)
                 }

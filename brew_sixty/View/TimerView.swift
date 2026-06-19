@@ -13,6 +13,7 @@ struct TimerView: View {
     @Environment(\.modelContext) private var modelContext
     
     let viewModel: BrewViewModel
+    var onDismissAll: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -29,6 +30,20 @@ struct TimerView: View {
                     let elapsed = viewModel.calculateElapsed(from: context.date)
                     let progress = viewModel.getProgress(for: elapsed)
                     
+                    // We want a beautiful smooth transition from black to brown once drawdown starts.
+                    // The bloom period ends at 45.0s. Let's make the transition duration 0.8 seconds.
+                    let transitionDuration: TimeInterval = 0.8
+                    let transitionProgress: Double = {
+                        if elapsed < viewModel.bloomDuration {
+                            return 0.0
+                        } else {
+                            return min((elapsed - viewModel.bloomDuration) / transitionDuration, 1.0)
+                        }
+                    }()
+                    
+                    let coffeeBrown = Color(red: 0.45, green: 0.31, blue: 0.22)
+                    let currentColor = interpolateColor(from: .black, to: coffeeBrown, fraction: transitionProgress)
+                    
                     ZStack {
                         
                         Circle()
@@ -36,7 +51,7 @@ struct TimerView: View {
                         
                         Circle()
                             .trim(from: 0, to: progress)
-                            .stroke(Color.primary, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                            .stroke(currentColor, style: StrokeStyle(lineWidth: 16, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                         
                         VStack(spacing: 8) {
@@ -54,7 +69,11 @@ struct TimerView: View {
                 
                 HStack(spacing: 40) {
                     Button {
-                        dismiss()
+                        if let onDismissAll = onDismissAll {
+                            onDismissAll()
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Image(systemName: "xmark")
                             .font(.title2)
@@ -67,7 +86,11 @@ struct TimerView: View {
                         if viewModel.isRunning {
                             viewModel.toggleTimer()
                             viewModel.saveLog(in: modelContext)
-                            dismiss()
+                            if let onDismissAll = onDismissAll {
+                                onDismissAll()
+                            } else {
+                                dismiss()
+                            }
                         } else {
                             viewModel.toggleTimer()
                         }
@@ -83,12 +106,41 @@ struct TimerView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            if !viewModel.isRunning {
+                viewModel.toggleTimer()
+            }
+        }
         .onChange(of: viewModel.isFinished) { oldValue, newValue in
             if newValue == true {
                 viewModel.saveLog(in: modelContext)
-                dismiss()
+                if let onDismissAll = onDismissAll {
+                    onDismissAll()
+                } else {
+                    dismiss()
+                }
             }
         }
+    }
+    
+    private func interpolateColor(from start: Color, to end: Color, fraction: Double) -> Color {
+        let f = min(max(fraction, 0), 1)
+        #if canImport(UIKit)
+        let uiStart = UIColor(start)
+        let uiEnd = UIColor(end)
+        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+        
+        uiStart.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        uiEnd.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        
+        return Color(red: Double(r1 + (r2 - r1) * CGFloat(f)),
+                     green: Double(g1 + (g2 - g1) * CGFloat(f)),
+                     blue: Double(b1 + (b2 - b1) * CGFloat(f)),
+                     opacity: Double(a1 + (a2 - a1) * CGFloat(f)))
+        #else
+        return end
+        #endif
     }
     
     private func formatTime(_ time: TimeInterval) -> String {

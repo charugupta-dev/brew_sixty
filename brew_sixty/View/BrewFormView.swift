@@ -10,7 +10,13 @@ import SwiftUI
 struct BrewFormView: View {
     @AppStorage("preferredRatio") private var brewRatio: Double = 12.0
     @Environment(\.dismiss) private var dismiss
-    @State private var beanWeight: Double = 8.0
+    @State private var beanWeightString: String = "8.0"
+    @State private var timerViewModel: BrewViewModel? = nil
+    
+    private var beanWeight: Double {
+        Double(beanWeightString) ?? 8.0
+    }
+    
     private var totalWater: Double {
         beanWeight * brewRatio
     }
@@ -25,18 +31,25 @@ struct BrewFormView: View {
                     
                     HStack(spacing: 32) {
                         Button {
-                            if beanWeight > 1 { beanWeight -= 0.5 }
+                            if var val = Double(beanWeightString), val > 1 {
+                                val -= 0.5
+                                beanWeightString = String(format: "%.1f", val)
+                            }
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .font(.largeTitle)
                                 .foregroundStyle(.primary)
                         }
-                        Text(String(format: "%.1f", beanWeight))
+                        TextField("8.0", text: $beanWeightString)
+                            .keyboardType(.decimalPad)
                             .font(.system(size: 64, weight: .bold, design: .rounded))
                             .frame(width: 140)
                             .multilineTextAlignment(.center)
                         Button {
-                            beanWeight += 0.5
+                            if var val = Double(beanWeightString) {
+                                val += 0.5
+                                beanWeightString = String(format: "%.1f", val)
+                            }
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.largeTitle)
@@ -61,9 +74,9 @@ struct BrewFormView: View {
                 .padding(.horizontal, 24)
                 Spacer()
                 
-                
-                NavigationLink {
-                    TimerView(viewModel: BrewViewModel(beanWeight: beanWeight, ratio: brewRatio))
+                Button {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    timerViewModel = BrewViewModel(beanWeight: beanWeight, ratio: brewRatio)
                 } label: {
                     Text("Start Timer")
                         .font(.headline)
@@ -87,6 +100,11 @@ struct BrewFormView: View {
                         .foregroundStyle(.primary)
                 }
                 .tint(.primary)
+            }
+            .fullScreenCover(item: $timerViewModel) { vm in
+                TimerView(viewModel: vm, onDismissAll: {
+                    dismiss()
+                })
             }
         }
     }

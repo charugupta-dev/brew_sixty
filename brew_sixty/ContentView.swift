@@ -28,7 +28,7 @@ struct ContentView: View {
                             Label("Settings", systemImage: "gearshape.fill")
                         }
                 }
-                .tint(Color(red: 0.62, green: 0.44, blue: 0.32)) // Warm Coffee Accent
+                .tint(.coffeeAccent)
                 .transition(.opacity)
             }
         }
