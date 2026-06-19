@@ -11,19 +11,13 @@ struct TimerView: View {
     var body: some View {
         ZStack {
             // Ambient Radial Gradient Background
-            RadialGradient(
-                colors: [Color(red: 0.18, green: 0.12, blue: 0.09), Color(red: 0.05, green: 0.04, blue: 0.03)],
-                center: .top,
-                startRadius: 10,
-                endRadius: 500
-            )
-            .ignoresSafeArea()
+            RadialGradient.coffeeBackground.ignoresSafeArea()
             
             VStack(spacing: 40) {
                 Text(viewModel.isRunning ? "Brewing..." : "Ready to Brew")
                     .font(.title3)
                     .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
                 
                 TimelineView(.animation) { context in
                     let elapsed: TimeInterval = viewModel.calculateElapsed(from: context.date)
@@ -38,8 +32,8 @@ struct TimerView: View {
                             return min((elapsed - viewModel.bloomDuration) / transitionDuration, 1.0)
                         }
                     }()
-                    let coffeeBrown = Color(red: 0.43, green: 0.30, blue: 0.22)
-                    let currentColor = interpolateColor(from: .black, to: coffeeBrown, fraction: transitionProgress)
+                    let coffeeColor = Color.coffeeCream
+                    let currentColor = interpolateColor(from: Color.white.opacity(0.15), to: coffeeColor, fraction: transitionProgress)
                     
                     VStack(spacing: 30) {
                         ZStack {
@@ -107,7 +101,7 @@ struct TimerView: View {
                                     fillPath.addLine(to: CGPoint(x: cupX + 2, y: cupY + cupH - 2))
                                     fillPath.closeSubpath()
                                     
-                                    ctx.fill(fillPath, with: .color(Color(red: 0.31, green: 0.20, blue: 0.13)))
+                                    ctx.fill(fillPath, with: .color(Color.coffeeCream.opacity(0.8)))
                                 }
                                 
                                 // 2. DRAW KETTLE (Spout aligned to center vertically)
@@ -191,7 +185,7 @@ struct TimerView: View {
                                             endAngle: .degrees(360),
                                             clockwise: false
                                         )
-                                        ctx.fill(dropPath, with: .color(coffeeBrown))
+                                        ctx.fill(dropPath, with: .color(Color.coffeeCream))
                                     }
                                 }
                             }
@@ -223,7 +217,7 @@ struct TimerView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.title2)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.white)
                             .frame(width: 80, height: 80)
                             .background(.ultraThinMaterial, in: Circle())
                     }
