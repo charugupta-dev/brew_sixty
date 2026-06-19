@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct BrewFormView: View {
-    @AppStorage("preferredRatio") private var brewRatio: Double = 12.0
+    @AppStorage(String.SettingsKeys.preferredRatio) private var brewRatio: Double = 12.0
+    @AppStorage(String.SettingsKeys.preferredBeanWeight) private var preferredBeanWeight: Double = 8.0
     @Environment(\.dismiss) private var dismiss
-    @State private var beanWeightString: String = "8.0"
+    @State private var beanWeightString: String = ""
     @State private var timerViewModel: BrewViewModel? = nil
     
     private var beanWeight: Double {
-        Double(beanWeightString) ?? 8.0
+        parseLocaleDouble(beanWeightString) ?? preferredBeanWeight
     }
     
     private var totalWater: Double {
@@ -31,8 +32,9 @@ struct BrewFormView: View {
                     
                     HStack(spacing: 32) {
                         Button {
-                            if var val = Double(beanWeightString), val > 1 {
-                                val -= 0.5
+                            let currentVal = parseLocaleDouble(beanWeightString) ?? preferredBeanWeight
+                            if currentVal > 1 {
+                                let val = currentVal - 0.5
                                 beanWeightString = String(format: "%.1f", val)
                             }
                         } label: {
@@ -40,16 +42,17 @@ struct BrewFormView: View {
                                 .font(.largeTitle)
                                 .foregroundStyle(.primary)
                         }
-                        TextField("8.0", text: $beanWeightString)
+                        TextField(String(format: "%.1f", preferredBeanWeight), text: $beanWeightString)
                             .keyboardType(.decimalPad)
                             .font(.system(size: 64, weight: .bold, design: .rounded))
-                            .frame(width: 140)
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+                            .frame(minWidth: 140)
                             .multilineTextAlignment(.center)
                         Button {
-                            if var val = Double(beanWeightString) {
-                                val += 0.5
-                                beanWeightString = String(format: "%.1f", val)
-                            }
+                            let currentVal = parseLocaleDouble(beanWeightString) ?? preferredBeanWeight
+                            let val = currentVal + 0.5
+                            beanWeightString = String(format: "%.1f", val)
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.largeTitle)
@@ -105,6 +108,9 @@ struct BrewFormView: View {
                 TimerView(viewModel: vm, onDismissAll: {
                     dismiss()
                 })
+            }
+            .onAppear {
+                beanWeightString = String(format: "%.1f", preferredBeanWeight)
             }
         }
     }

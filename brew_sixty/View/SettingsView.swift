@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("preferredRatio") private var brewRatio: Double = 12.0
-    @AppStorage("preferredBeanWeight") private var preferredBeanWeight: Double = 8.0
+    @AppStorage(String.SettingsKeys.preferredRatio) private var brewRatio: Double = 12.0
+    @AppStorage(String.SettingsKeys.preferredBeanWeight) private var preferredBeanWeight: Double = 8.0
     
     @State private var beanWeightInput: String = ""
     
@@ -58,7 +58,7 @@ struct SettingsView: View {
                                     .frame(width: 60)
                                     .textFieldStyle(.roundedBorder)
                                     .onChange(of: beanWeightInput) { _, newValue in
-                                        if let doubleVal = Double(newValue), doubleVal > 0 {
+                                        if let doubleVal = parseLocaleDouble(newValue), doubleVal > 0 {
                                             preferredBeanWeight = doubleVal
                                         }
                                     }
