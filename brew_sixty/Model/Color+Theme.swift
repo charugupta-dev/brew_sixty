@@ -13,6 +13,9 @@ extension Color {
     
     /// Coffee Cream color for text and highlights
     static let coffeeCream = Color(red: 0.92, green: 0.85, blue: 0.78)
+    
+    /// Coffee Peach color token
+    static let coffeePeach = Color(red: 0.94, green: 0.67, blue: 0.48)
 }
 
 extension RadialGradient {
