@@ -18,13 +18,14 @@ struct ContentView: View {
             } else {
                 ZStack(alignment: .bottom) {
                     // Active View
-                    Group {
-                        switch selectedTab {
-                        case .brews:
-                            HomeView()
-                        case .settings:
-                            SettingsView()
-                        }
+                    TabView(selection: $selectedTab) {
+                        HomeView()
+                            .tag(Tab.brews)
+                            .toolbar(.hidden, for: .tabBar)
+                        
+                        SettingsView()
+                            .tag(Tab.settings)
+                            .toolbar(.hidden, for: .tabBar)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     
