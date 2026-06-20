@@ -10,6 +10,7 @@ import Charts
 import SwiftData
 
 struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\BrewLog.timestamp, order: .reverse)]) private var logs: [BrewLog]
     @State private var showingBrewForm = false
     @State private var animateChart = false
@@ -30,6 +31,7 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top, 24)
+                    .padding(.bottom, 100)
                 }
                 
                 fab
@@ -48,24 +50,42 @@ struct HomeView: View {
 
 extension HomeView {
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Hello Charu")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundStyle(Color.coffeeCream)
-            Text("Your brew lab is ready.")
-                .font(.subheadline)
-                .foregroundStyle(Color.coffeeCream.opacity(0.6))
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Hello Charu")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                Text("Your brew lab is ready.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.coffeeCream.opacity(0.6))
+            }
+            
+            Spacer()
+            
+            Button {
+                // Placeholder action
+            } label: {
+                Image(systemName: "coffeeholder")
+                    .foregroundStyle(Color.coffeeCream)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var graphSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Bean Usage History (g)")
-                .font(.subheadline)
-                .foregroundStyle(Color.coffeeCream.opacity(0.6))
+            Text("BEAN USAGE HISTORY (G)")
+                .font(.caption)
                 .fontWeight(.semibold)
+                .foregroundStyle(Color.coffeeCream.opacity(0.5))
+                .tracking(1.0)
             
             if todayLogs.isEmpty {
                 VStack(spacing: 8) {
@@ -82,21 +102,20 @@ extension HomeView {
                     ForEach(todayLogs) { log in
                         BarMark(x: .value("Time", log.timestamp.formatted(date: .omitted, time: .shortened)),
                                 y: .value("Beans (g)", animateChart ? log.beanWeightGram : 0.0))
-                        .foregroundStyle(Color.coffeeAccent)
+                        .foregroundStyle(Color.coffeePeach)
                         .cornerRadius(4)
                     }
                 }
                 .frame(height: 200)
                 .chartXAxis {
                     AxisMarks(values: .automatic) { _ in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5)).foregroundStyle(Color.white.opacity(0.1))
-                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.6))
+                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.5))
                     }
                 }
                 .chartYAxis {
-                    AxisMarks(values: .automatic) { _ in
+                    AxisMarks(position: .trailing, values: .automatic) { _ in
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5)).foregroundStyle(Color.white.opacity(0.1))
-                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.6))
+                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.5))
                     }
                 }
                 .animation(.easeOut(duration: 1.5), value: animateChart)
@@ -105,12 +124,12 @@ extension HomeView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.04))
+                .fill(Color(red: 0.10, green: 0.08, blue: 0.08))
                 .background(.ultraThinMaterial)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
         )
         .task {
             try? await Task.sleep(nanoseconds: 50_000_000)
@@ -121,10 +140,25 @@ extension HomeView {
     }
     
     private var brewLogSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Recent Brews")
-                .font(.headline)
-                .foregroundStyle(Color.coffeeCream)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Recent Brews")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.coffeeCream)
+                
+                Spacer()
+                
+                Button {
+                    // Placeholder action
+                } label: {
+                    Text("VIEW ALL")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.coffeePeach)
+                }
+            }
+            
             if logs.isEmpty {
                 Text("No logs yet, tap '+' to brew")
                     .foregroundStyle(Color.coffeeCream.opacity(0.6))
@@ -141,22 +175,25 @@ extension HomeView {
     
     private func logRow(for log: BrewLog) -> some View {
         HStack {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(log.timestamp.formatted(date: .omitted, time: .shortened))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.coffeeCream)
-                Text("1:\(Int(log.ratio)) Ratio")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                
+                Text(String(format: "1:%d Ratio • %@", Int(log.ratio), log.timestamp.formatted(Date.FormatStyle().month(.abbreviated).day(.defaultDigits))))
                     .font(.caption)
                     .foregroundStyle(Color.coffeeCream.opacity(0.6))
             }
             
             Spacer()
             
-            VStack(alignment: .trailing) {
-                Text("\(String(format: "%.1f", log.beanWeightGram))g")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.coffeeCream)
-                Text("\(String(format: "%.0f", log.totalWaterWeight))g water")
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(String(format: "%.1fg", log.beanWeightGram))
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.coffeePeach)
+                
+                Text(String(format: "%.0fg water", log.totalWaterWeight))
                     .font(.caption)
                     .foregroundStyle(Color.coffeeCream.opacity(0.6))
             }
@@ -164,13 +201,21 @@ extension HomeView {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.04))
+                .fill(Color.white.opacity(0.03))
                 .background(.ultraThinMaterial)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
+        .contextMenu {
+            Button(role: .destructive) {
+                modelContext.delete(log)
+                try? modelContext.save()
+            } label: {
+                Label("Delete Log", systemImage: "trash")
+            }
+        }
     }
     
     private var fab: some View {
@@ -180,11 +225,11 @@ extension HomeView {
             Image(systemName: "plus")
                 .font(.title2)
                 .fontWeight(.semibold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(red: 0.10, green: 0.08, blue: 0.09))
                 .frame(width: 60, height: 60)
-                .background(Color.primary)
+                .background(Color.coffeePeach)
                 .clipShape(Circle())
-                .shadow(radius: 10, y: 5)
+                .shadow(radius: 50, y: 5)
         }
         .padding(24)
     }
