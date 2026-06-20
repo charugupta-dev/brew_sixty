@@ -66,7 +66,7 @@ extension HomeView {
             Button {
                 // Placeholder action
             } label: {
-                Image(systemName: "coffeeholder")
+                Image(systemName: "cup.and.saucer.fill")
                     .foregroundStyle(Color.coffeeCream)
                     .frame(width: 44, height: 44)
                     .background(Color.white.opacity(0.08))
@@ -178,6 +178,7 @@ extension HomeView {
             VStack(alignment: .leading, spacing: 4) {
                 Text(log.timestamp.formatted(date: .omitted, time: .shortened))
                     .font(.headline)
+                    .bold()
                     .foregroundStyle(.white)
                 
                 Text(String(format: "1:%d Ratio • %@", Int(log.ratio), log.timestamp.formatted(Date.FormatStyle().month(.abbreviated).day(.defaultDigits))))
