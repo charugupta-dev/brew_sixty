@@ -1,242 +1,271 @@
-//
-//  HomeView.swift
-//  brew_sixty
-//
-//  Created by Charu Gupta on 11/05/26.
-//
-
 import SwiftUI
-import Charts
 import SwiftData
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: [SortDescriptor(\BrewLog.timestamp, order: .reverse)]) private var logs: [BrewLog]
-    @State private var showingBrewForm = false
-    @State private var animateChart = false
+    @State private var activeIndex: Int = 0
+    @State private var isZoomedOut = false
+    @State private var selectedDose = "15g"
+    @State private var showingTimer = false
     
-    private var todayLogs: [BrewLog] {
-        logs.filter { Calendar.current.isDateInToday($0.timestamp) }.reversed()
-    }
+    // 2 Dummy Templates (V60 & French Press)
+    private let dummyCards = [
+        DummyTemplate(
+            name: "V60",
+            imageName: "v60_brew_bg",
+            currentPhase: "CURRENT: BLOOM",
+            timeText: "00:45",
+            subtitle: "45G BLOOM",
+            phases: [
+                BrewPhase(title: "Bloom", description: "45g Water • Swirl gently", duration: "45s", icon: "stopwatch"),
+                BrewPhase(title: "First Pour", description: "To 150g • Spiral motion", duration: "60s", icon: "drop"),
+                BrewPhase(title: "Final Drawdown", description: "To 250g • Flat bed", duration: "Ready", icon: "hourglass")
+            ]
+        ),
+        DummyTemplate(
+            name: "French Press",
+            imageName: "french_press_bg",
+            currentPhase: "CURRENT: STEEP",
+            timeText: "04:00",
+            subtitle: "STEEPING...",
+            phases: [
+                BrewPhase(title: "Steep", description: "Pour 320g • Let it sit", duration: "240s", icon: "stopwatch"),
+                BrewPhase(title: "Plunge", description: "Press down slowly", duration: "15s", icon: "hourglass")
+            ]
+        )
+    ]
     
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                RadialGradient.coffeeBackground.ignoresSafeArea()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
-                        headerSection
-                        graphSection
-                        brewLogSection
+        ZStack {
+            // Solid dark charcoal background matching mock
+            Color(red: 0.08, green: 0.08, blue: 0.08)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Serif Hello Charu! title
+                    Text("Hello Charu!")
+                        .font(.system(.largeTitle, design: .serif))
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 24)
+                    
+                    // Main rounded card container containing everything else
+                    VStack(spacing: 20) {
+                        // Wallpaper Carousel Switcher
+                        TabView(selection: $activeIndex) {
+                            ForEach(0..<dummyCards.count, id: \.self) { idx in
+                                let card = dummyCards[idx]
+                                ZStack {
+                                    // Background Image Asset
+                                    Image(card.imageName)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(height: 300)
+                                        .clipped()
+                                        .cornerRadius(16)
+                                        .overlay(Color.black.opacity(0.35)) // Dim overlay for text readability
+                                    
+                                    // Text Overlay exactly like mockup
+                                    VStack(spacing: 12) {
+                                        Text(card.currentPhase)
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundStyle(.white.opacity(0.6))
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.white.opacity(0.08)))
+                                        
+                                        Text(card.timeText)
+                                            .font(.system(size: 64, weight: .medium, design: .rounded))
+                                            .foregroundStyle(.white)
+                                        
+                                        Text(card.name)
+                                            .font(.title3)
+                                            .fontWeight(.semibold)
+                                            .foregroundStyle(.white)
+                                        
+                                        Text(card.subtitle)
+                                            .font(.caption2)
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.white.opacity(0.5))
+                                    }
+                                }
+                                .tag(idx)
+                                .scaleEffect(isZoomedOut ? 0.85 : 1.0)
+                                .onTapGesture {
+                                    if isZoomedOut {
+                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                            isZoomedOut = false
+                                            activeIndex = idx
+                                        }
+                                    }
+                                }
+                                .gesture(
+                                    LongPressGesture(minimumDuration: 0.5)
+                                        .onEnded { _ in
+                                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                                isZoomedOut = true
+                                            }
+                                        }
+                                )
+                            }
+                        }
+                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                        .frame(height: isZoomedOut ? 270 : 310)
+                        
+                        // Dose Selector pills
+                        HStack(spacing: 12) {
+                            doseButton("15g")
+                            doseButton("18g")
+                            doseButton("20g")
+                        }
+                        .padding(.top, 4)
+                        
+                        // Phases title
+                        HStack {
+                            Text("PHASES")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .tracking(1.0)
+                                .foregroundStyle(Color.white.opacity(0.4))
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        // Phases lists
+                        VStack(spacing: 12) {
+                            let activeCard = dummyCards[activeIndex]
+                            ForEach(activeCard.phases, id: \.title) { phase in
+                                HStack(spacing: 16) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white.opacity(0.04))
+                                            .frame(width: 40, height: 40)
+                                        
+                                        Image(systemName: phase.icon)
+                                            .font(.body)
+                                            .foregroundStyle(Color.primaryCopper)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(phase.title)
+                                            .font(.body)
+                                            .fontWeight(.medium)
+                                            .foregroundStyle(.white)
+                                        Text(phase.description)
+                                            .font(.caption)
+                                            .foregroundStyle(Color.white.opacity(0.5))
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text(phase.duration)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(Color.primaryCopper)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.02)))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.04), lineWidth: 1))
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        // Start Brew button
+                        Button {
+                            showingTimer = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "play.fill")
+                                    .font(.subheadline)
+                                Text("START BREW")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                Spacer()
+                            }
+                            .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.primaryCopper, Color.brushedCopper],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .cornerRadius(28)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 24)
-                    .padding(.bottom, 100)
-                }
-                
-                fab
-            }
-            .toolbar(.hidden, for: .navigationBar)
-            .sheet(isPresented: $showingBrewForm) {
-                BrewFormView()
-                    .presentationDetents([.fraction(0.65)])
-                    .presentationDragIndicator(.visible)
-                    .presentationBackground(Color(uiColor: .systemBackground))
-            }
-        }
-    }
-}
-
-
-extension HomeView {
-    private var headerSection: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Hello Charu")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                Text("Your brew lab is ready.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.coffeeCream.opacity(0.6))
-            }
-            
-            Spacer()
-            
-            Button {
-                // Placeholder action
-            } label: {
-                Image(systemName: "cup.and.saucer.fill")
-                    .foregroundStyle(Color.coffeeCream)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.08))
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color.white.opacity(0.01))
+                            .background(Color(red: 0.11, green: 0.10, blue: 0.09).opacity(0.5))
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 100)
             }
+        }
+        .sheet(isPresented: $showingTimer) {
+            Text("Timer running...")
         }
     }
     
-    private var graphSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("BEAN USAGE HISTORY (G)")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundStyle(Color.coffeeCream.opacity(0.5))
-                .tracking(1.0)
-            
-            if todayLogs.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "cup.and.saucer")
-                        .font(.title)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.3))
-                    Text("No brews recorded today yet")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.5))
-                }
-                .frame(maxWidth: .infinity, minHeight: 160)
-            } else {
-                Chart {
-                    ForEach(todayLogs) { log in
-                        BarMark(x: .value("Time", log.timestamp.formatted(date: .omitted, time: .shortened)),
-                                y: .value("Beans (g)", animateChart ? log.beanWeightGram : 0.0))
-                        .foregroundStyle(Color.coffeePeach)
-                        .cornerRadius(4)
-                    }
-                }
-                .frame(height: 200)
-                .chartXAxis {
-                    AxisMarks(values: .automatic) { _ in
-                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.5))
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(position: .trailing, values: .automatic) { _ in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5)).foregroundStyle(Color.white.opacity(0.1))
-                        AxisValueLabel().foregroundStyle(Color.white.opacity(0.5))
-                    }
-                }
-                .animation(.easeOut(duration: 1.5), value: animateChart)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(red: 0.10, green: 0.08, blue: 0.08))
-                .background(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-        )
-        .task {
-            try? await Task.sleep(nanoseconds: 50_000_000)
-            withAnimation {
-                animateChart = true
-            }
-        }
-    }
-    
-    private var brewLogSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Recent Brews")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.coffeeCream)
-                
-                Spacer()
-                
-                Button {
-                    // Placeholder action
-                } label: {
-                    Text("VIEW ALL")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.coffeePeach)
-                }
-            }
-            
-            if logs.isEmpty {
-                Text("No logs yet, tap '+' to brew")
-                    .foregroundStyle(Color.coffeeCream.opacity(0.6))
-                    .padding(.vertical, 20)
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(logs) { log in
-                        logRow(for: log)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func logRow(for log: BrewLog) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(log.timestamp.formatted(date: .omitted, time: .shortened))
-                    .font(.headline)
-                    .bold()
-                    .foregroundStyle(.white)
-                
-                Text(String(format: "1:%d Ratio • %@", Int(log.ratio), log.timestamp.formatted(Date.FormatStyle().month(.abbreviated).day(.defaultDigits))))
-                    .font(.caption)
-                    .foregroundStyle(Color.coffeeCream.opacity(0.6))
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(String(format: "%.1fg", log.beanWeightGram))
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.coffeePeach)
-                
-                Text(String(format: "%.0fg water", log.totalWaterWeight))
-                    .font(.caption)
-                    .foregroundStyle(Color.coffeeCream.opacity(0.6))
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.03))
-                .background(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-        )
-        .contextMenu {
-            Button(role: .destructive) {
-                modelContext.delete(log)
-                try? modelContext.save()
-            } label: {
-                Label("Delete Log", systemImage: "trash")
-            }
-        }
-    }
-    
-    private var fab: some View {
-        Button {
-            showingBrewForm = true
+    private func doseButton(_ label: String) -> some View {
+        let isSelected = selectedDose == label
+        return Button {
+            selectedDose = label
         } label: {
-            Image(systemName: "plus")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundStyle(Color(red: 0.10, green: 0.08, blue: 0.09))
-                .frame(width: 60, height: 60)
-                .background(Color.coffeePeach)
-                .clipShape(Circle())
-                .shadow(radius: 50, y: 5)
-        }
-        .padding(24)
-    }
-}
+            Text(label)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(
+                    Group {
+                        if isSelected {
+                            LinearGradient(colors: [Color.primaryCopper, Color.brushedCopper], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        } else {
+                            Color.clear
+                        }
+                      }
+                  )
+                  .cornerRadius(20)
+                  .overlay(
+                      Group {
+                          if !isSelected {
+                              Capsule()
+                                  .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                          }
+                      }
+                  )
+                  .foregroundStyle(isSelected ? Color(red: 0.12, green: 0.08, blue: 0.08) : Color.white.opacity(0.7))
+          }
+          .buttonStyle(.plain)
+      }
+  }
 
-#Preview {
-    HomeView()
-        .modelContainer(for: BrewLog.self, inMemory: true)
-}
+  struct DummyTemplate {
+      let name: String
+      let imageName: String
+      let currentPhase: String
+      let timeText: String
+      let subtitle: String
+      let phases: [BrewPhase]
+  }
+
+  struct BrewPhase {
+      let title: String
+      let description: String
+      let duration: String
+      let icon: String
+  }
