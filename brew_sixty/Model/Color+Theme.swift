@@ -33,3 +33,33 @@ extension RadialGradient {
     }
 }
 
+struct LiquidGlassBorder: ViewModifier {
+    var cornerRadius: CGFloat
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.18),
+                                Color.white.opacity(0.02),
+                                Color.primaryCopper.opacity(0.12),
+                                Color.white.opacity(0.02)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            )
+    }
+}
+
+extension View {
+    func liquidGlassBorder(cornerRadius: CGFloat = 24) -> some View {
+        self.modifier(LiquidGlassBorder(cornerRadius: cornerRadius))
+    }
+}
+
