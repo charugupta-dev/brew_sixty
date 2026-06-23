@@ -22,7 +22,7 @@ final class HomeBrewViewModel: Identifiable {
     var isFinished = false
     var elapsed: TimeInterval = 0
     
-    nonisolated(unsafe) private var timer: Timer? = nil
+    private var timer: Timer? = nil
     private var startDate: Date? = nil
     
     // MARK: - Configuration Constants
@@ -71,14 +71,6 @@ final class HomeBrewViewModel: Identifiable {
         self.waterVolume = waterVolume
     }
     
-    deinit {
-        // Run invalidation on the main actor since timer is scheduled there
-        let activeTimer = timer
-        DispatchQueue.main.async {
-            activeTimer?.invalidate()
-        }
-    }
-    
     // MARK: - Timer Controls
     func toggleTimer() {
         if isRunning {
@@ -94,11 +86,11 @@ final class HomeBrewViewModel: Identifiable {
         startDate = currentStartDate
         
         timer = Timer.scheduledTimer(withTimeInterval: Config.timerInterval, repeats: true) { [weak self] timer in
-            guard let self = self else {
-                timer.invalidate()
-                return
-            }
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
                 guard self.isRunning, let startDate = self.startDate else { return }
                 let nowElapsed = Date().timeIntervalSince(startDate)
                 
@@ -147,11 +139,17 @@ final class HomeBrewViewModel: Identifiable {
             }
         }
         
-        elapsed = newElapsed
-        
-        // Fix: Update the start date dynamically so the timer calculates the skipped time correctly
-        if isRunning {
-            startDate = Date().addingTimeInterval(-newElapsed)
+        if newElapsed >= totalDuration {
+            elapsed = totalDuration
+            isRunning = false
+            isFinished = true
+            timer?.invalidate()
+            timer = nil
+        } else {
+            elapsed = newElapsed
+            if isRunning {
+                startDate = Date().addingTimeInterval(-newElapsed)
+            }
         }
     }
     
@@ -160,6 +158,10 @@ final class HomeBrewViewModel: Identifiable {
     }
     
     func getPhaseText() -> String {
+        if isFinished || elapsed >= totalDuration {
+            return "Enjoy your coffee!"
+        }
+        
         switch method {
         case .v60:
             if elapsed == 0 {
