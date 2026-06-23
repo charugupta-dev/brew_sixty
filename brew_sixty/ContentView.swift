@@ -3,11 +3,12 @@ import SwiftData
 
 struct ContentView: View {
     @State private var showLaunchScreen = true
-    @State private var selectedTab: Tab = .brews
+    @State private var selectedTab: Tab = .brew
     
     enum Tab {
-        case brews
-        case settings
+        case brew
+        case methods
+        case journal
     }
     
     var body: some View {
@@ -17,25 +18,29 @@ struct ContentView: View {
                     .transition(.opacity)
             } else {
                 ZStack(alignment: .bottom) {
-                    // Active View
                     TabView(selection: $selectedTab) {
                         HomeView()
-                            .tag(Tab.brews)
+                            .tag(Tab.brew)
                             .toolbar(.hidden, for: .tabBar)
                         
-                        SettingsView()
-                            .tag(Tab.settings)
+                        MethodsPlaceholderView()
+                            .tag(Tab.methods)
+                            .toolbar(.hidden, for: .tabBar)
+                        
+                        JournalPlaceholderView()
+                            .tag(Tab.journal)
                             .toolbar(.hidden, for: .tabBar)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     
-                    // Custom Floating Capsule Tab Bar
-                    HStack(spacing: 30) {
-                        tabButton(tab: .brews, label: "Brews", systemImage: "cup.and.saucer.fill")
-                        tabButton(tab: .settings, label: "Settings", systemImage: "gearshape.fill")
+                    // Bottom Tab Bar matching the mock (Brew, Methods, Journal)
+                    HStack(spacing: 40) {
+                        tabButton(tab: .brew, label: "BREW", systemImage: "cup.and.saucer.fill")
+                        tabButton(tab: .methods, label: "METHODS", systemImage: "square.grid.2x2.fill")
+                        tabButton(tab: .journal, label: "JOURNAL", systemImage: "doc.text.fill")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
                     .background(
                         Capsule()
                             .fill(Color.black.opacity(0.4))
@@ -62,19 +67,18 @@ struct ContentView: View {
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: systemImage)
-                    .font(.title3)
+                    .font(.body)
                 Text(label)
-                    .font(.caption2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 8, weight: .bold))
             }
-            .foregroundStyle(isSelected ? Color.coffeeCream : Color.white.opacity(0.4))
-            .padding(.vertical, 8)
-            .padding(.horizontal, 24)
+            .foregroundStyle(isSelected ? Color.primaryCopper : Color.white.opacity(0.4))
+            .padding(.vertical, 6)
+            .padding(.horizontal, 16)
             .background(
                 Group {
                     if isSelected {
                         Capsule()
-                            .fill(Color.coffeeAccent.opacity(0.35))
+                            .fill(Color.primaryCopper.opacity(0.15))
                     }
                 }
             )
@@ -87,3 +91,4 @@ struct ContentView: View {
     ContentView()
         .modelContainer(for: BrewLog.self, inMemory: true)
 }
+

@@ -16,6 +16,10 @@ extension Color {
     
     /// Coffee Peach color token
     static let coffeePeach = Color(red: 0.94, green: 0.67, blue: 0.48)
+    
+    /// Copper color tokens
+    static let primaryCopper = Color(red: 0.85, green: 0.45, blue: 0.25)
+    static let brushedCopper = Color(red: 0.94, green: 0.67, blue: 0.48)
 }
 
 extension RadialGradient {
