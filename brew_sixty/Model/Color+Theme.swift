@@ -40,7 +40,7 @@ struct LiquidGlassBorder: ViewModifier {
         content
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(
+                    .strokeBorder(
                         LinearGradient(
                             colors: [
                                 Color.white.opacity(0.18),
