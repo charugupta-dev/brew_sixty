@@ -29,6 +29,7 @@ final class HomeBrewViewModel: Identifiable {
     private struct Config {
         static let v60BloomDuration: TimeInterval = 45.0
         static let v60TotalDuration: TimeInterval = 150.0 // 2m 30s
+        static let v60FirstPourMultiplier: Double = 0.6
         static let frenchPressSteepDuration: TimeInterval = 240.0 // 4m 00s
         static let frenchPressPlungeDuration: TimeInterval = 15.0 // 15s plunge
         static let bloomWaterMultiplier: Double = 3.0
@@ -53,14 +54,53 @@ final class HomeBrewViewModel: Identifiable {
     }
     
     var targetWater: Double {
-        switch method {
-        case .v60: return beanWeight * ratio
-        case .frenchPress: return waterVolume
-        }
+        beanWeight * ratio
     }
     
     var bloomWater: Double {
         beanWeight * Config.bloomWaterMultiplier
+    }
+
+    var firstPourWater: Double {
+        targetWater * Config.v60FirstPourMultiplier
+    }
+    
+    var activePhaseIndex: Int {
+        if !isRunning && elapsed == 0 { return 0 }
+        if isFinished { return -1 }
+        switch method {
+        case .v60:
+            if elapsed < Config.v60BloomDuration {
+                return 0
+            } else if elapsed < (Config.v60BloomDuration + 60.0) {
+                return 1
+            } else {
+                return 2
+            }
+        case .frenchPress:
+            if elapsed < Config.frenchPressSteepDuration {
+                return 0
+            } else {
+                return 1
+            }
+        }
+    }
+
+    var currentPhaseTitle: String {
+        if isFinished || elapsed >= totalDuration {
+            return "Done"
+        }
+
+        switch method {
+        case .v60:
+            switch activePhaseIndex {
+            case 0: return "Bloom"
+            case 1: return "First Pour"
+            default: return "Final Drawdown"
+            }
+        case .frenchPress:
+            return activePhaseIndex == 0 ? "Steep" : "Plunge"
+        }
     }
     
     // MARK: - Initialization
@@ -165,18 +205,24 @@ final class HomeBrewViewModel: Identifiable {
         switch method {
         case .v60:
             if elapsed == 0 {
-                return "Target: \(Int(targetWater))g"
+                return "Target: \(formattedGrams(targetWater))"
             } else if elapsed < bloomDuration {
-                return "Bloom: Pour \(Int(bloomWater))g"
+                return "Bloom: Pour \(formattedGrams(bloomWater))"
             } else {
-                return "Drawdown: Pour to \(Int(targetWater))g"
+                return "Drawdown: Pour to \(formattedGrams(targetWater))"
             }
         case .frenchPress:
-            if elapsed < Config.frenchPressSteepDuration {
-                return "Steep: Let it sit"
+            if elapsed == 0 {
+                return "Target: \(formattedGrams(targetWater))"
+            } else if elapsed < Config.frenchPressSteepDuration {
+                return "Steep: Pour \(formattedGrams(targetWater))"
             } else {
                 return "Plunge: Press down slowly"
             }
         }
+    }
+
+    private func formattedGrams(_ value: Double) -> String {
+        "\(Int(value.rounded()))g"
     }
 }

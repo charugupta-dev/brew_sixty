@@ -17,9 +17,9 @@ extension Color {
     /// Coffee Peach color token
     static let coffeePeach = Color(red: 0.94, green: 0.67, blue: 0.48)
     
-    /// Copper color tokens
-    static let primaryCopper = Color(red: 0.85, green: 0.45, blue: 0.25)
-    static let brushedCopper = Color(red: 0.94, green: 0.67, blue: 0.48)
+    /// Copper color tokens (warm latte-gold / honey-amber)
+    static let primaryCopper = Color(red: 0.82, green: 0.62, blue: 0.34)
+    static let brushedCopper = Color(red: 0.90, green: 0.75, blue: 0.48)
 }
 
 extension RadialGradient {
@@ -45,7 +45,7 @@ struct LiquidGlassBorder: ViewModifier {
                             colors: [
                                 Color.white.opacity(0.18),
                                 Color.white.opacity(0.02),
-                                Color.primaryCopper.opacity(0.12),
+                                Color.primaryCopper.opacity(0.50),
                                 Color.white.opacity(0.02)
                             ],
                             startPoint: .topLeading,
