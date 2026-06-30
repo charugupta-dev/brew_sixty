@@ -621,16 +621,15 @@ struct TimerCircleView: View {
                         let knobStart = beakerTop - 40
                         let knobEnd = beakerTop - 9
                         let knobY = knobStart + (knobEnd - knobStart) * CGFloat(steepProgress)
-                        
-                        // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
+                                         // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
                         var groundsBgPath = Path()
-                        groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 22, width: beakerW - 5, height: 21))
+                        groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 23, width: beakerW - 5, height: 22))
                         scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(0.85)))
                         
                         // Crisp gold separator line on top of grounds
                         var separatorPath = Path()
-                        separatorPath.move(to: CGPoint(x: beakerLeft + 2.5, y: beakerBottom - 22))
-                        separatorPath.addLine(to: CGPoint(x: beakerRight - 2.5, y: beakerBottom - 22))
+                        separatorPath.move(to: CGPoint(x: beakerLeft + 2.5, y: beakerBottom - 23))
+                        separatorPath.addLine(to: CGPoint(x: beakerRight - 2.5, y: beakerBottom - 23))
                         scaledCtx.stroke(separatorPath, with: goldGradient, lineWidth: 1.0)
                         
                         // Deterministic Gradated Stippling (90 dots)
@@ -648,7 +647,7 @@ struct TimerCircleView: View {
                                 r = 0.8 + Double((i * 11) % 3) * 0.2 // 0.8 to 1.2
                             } else {
                                 // Top layer (sparse)
-                                randomY = (beakerBottom - 21) - CGFloat((i * 19) % 6)
+                                randomY = (beakerBottom - 20) - CGFloat((i * 19) % 3)
                                 r = 0.5 + Double((i * 3) % 3) * 0.15 // 0.5 to 0.8
                             }
                             var dotPath = Path()
