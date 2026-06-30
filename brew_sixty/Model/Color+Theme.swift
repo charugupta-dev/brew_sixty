@@ -61,5 +61,21 @@ extension View {
     func liquidGlassBorder(cornerRadius: CGFloat = 24) -> some View {
         self.modifier(LiquidGlassBorder(cornerRadius: cornerRadius))
     }
+    
+    func premiumCardBackground(cornerRadius: CGFloat = 24) -> some View {
+        self.background(
+            ZStack {
+                Color(red: 0.11, green: 0.10, blue: 0.09).opacity(0.55)
+                
+                Image("timer_card_bg")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .opacity(0.16)
+                    .blendMode(.plusLighter)
+                    .clipped()
+            }
+        )
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
 }
 

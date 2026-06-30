@@ -621,7 +621,7 @@ struct TimerCircleView: View {
                         let knobStart = beakerTop - 40
                         let knobEnd = beakerTop - 9
                         let knobY = knobStart + (knobEnd - knobStart) * CGFloat(steepProgress)
-                                         // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
+                        // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
                         var groundsBgPath = Path()
                         groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 23, width: beakerW - 5, height: 22))
                         scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(0.85)))

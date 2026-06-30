@@ -160,6 +160,7 @@ final class HomeBrewViewModel: Identifiable {
         startDate = nil
         timer?.invalidate()
         timer = nil
+        beanWeight = 8.0
     }
     
     func skipPhase() {

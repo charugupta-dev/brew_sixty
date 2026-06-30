@@ -265,7 +265,7 @@ struct TimerView: View {
     
     private func interpolateColor(from start: Color, to end: Color, fraction: Double) -> Color {
         let f = min(max(fraction, 0), 1)
-        #if canImport(UIKit)
+#if canImport(UIKit)
         let uiStart = UIColor(start)
         let uiEnd = UIColor(end)
         
@@ -296,9 +296,9 @@ struct TimerView: View {
                      green: Double(g1 + (g2 - g1) * CGFloat(f)),
                      blue: Double(b1 + (b2 - b1) * CGFloat(f)),
                      opacity: Double(a1 + (a2 - a1) * CGFloat(f)))
-        #else
+#else
         return end
-        #endif
+#endif
     }
     
     private func formatTime(_ time: TimeInterval) -> String {
