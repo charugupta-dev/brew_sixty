@@ -8,7 +8,6 @@ struct ContentView: View {
     enum Tab {
         case brew
         case methods
-        case journal
     }
     
     var body: some View {
@@ -28,12 +27,6 @@ struct ContentView: View {
                         .tag(Tab.methods)
                         .tabItem {
                             Label("METHODS", systemImage: "square.grid.2x2.fill")
-                        }
-                    
-                    JournalPlaceholderView()
-                        .tag(Tab.journal)
-                        .tabItem {
-                            Label("JOURNAL", systemImage: "doc.text.fill")
                         }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

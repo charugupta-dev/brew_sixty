@@ -25,7 +25,15 @@ struct MethodsView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 0.08, green: 0.08, blue: 0.08).ignoresSafeArea()
+            Color(red: 0.08, green: 0.08, blue: 0.08)
+                .ignoresSafeArea()
+            
+            Image("timer_card_bg")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .opacity(0.12)
+                .blendMode(.plusLighter)
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 20) {
@@ -398,7 +406,6 @@ struct MethodsView: View {
                     .padding(.bottom, 40)
                 }
                 .padding(.top)
-                .premiumCardBackground(cornerRadius: 16)
             }
             .sheet(isPresented: $showTemplatesSheet) {
                 TemplatesListView()

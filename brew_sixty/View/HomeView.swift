@@ -26,6 +26,13 @@ struct HomeView: View {
                 Color(red: 0.08, green: 0.08, blue: 0.08)
                     .ignoresSafeArea()
                 
+                Image("timer_card_bg")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .opacity(0.12)
+                    .blendMode(.plusLighter)
+                    .ignoresSafeArea()
+                
                 VStack(alignment: .leading, spacing: 24) {
                     // Header Section matching the mock large serif title
                     Text("Hello Charu!")
@@ -263,7 +270,10 @@ struct LiveTimerCard: View {
             .padding()
             .padding(.bottom, 12)
         }
-        .premiumCardBackground(cornerRadius: 24)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(red: 0.11, green: 0.10, blue: 0.09).opacity(0.55))
+        )
         .liquidGlassBorder(cornerRadius: 24)
     }
     
