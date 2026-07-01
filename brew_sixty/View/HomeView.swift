@@ -247,27 +247,33 @@ struct LiveTimerCard: View {
     
     private var phases: [BrewPhase] {
         switch viewModel.method {
-        case .v60:
-            [
-                BrewPhase(title: "Bloom", description: "\(formatGrams(viewModel.bloomWater)) Water • Swirl gently", duration: "45s", icon: "stopwatch"),
-                BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
-                BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
-            ]
-        case .chemex:
-            [
-                BrewPhase(title: "Bloom", description: "\(formatGrams(viewModel.bloomWater)) Water • Swirl gently", duration: "45s", icon: "stopwatch"),
-                BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
-                BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
-            ]
+        case .v60, .chemex:
+            let bloom = viewModel.bloomDuration
+            if bloom > 0 {
+                return [
+                    BrewPhase(title: "Bloom", description: "\(formatGrams(viewModel.bloomWater)) Water • Swirl gently", duration: "\(Int(bloom))s", icon: "stopwatch"),
+                    BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
+                    BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
+                ]
+            } else {
+                return [
+                    BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
+                    BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
+                ]
+            }
         case .frenchPress:
-            [
-                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "240s", icon: "stopwatch"),
-                BrewPhase(title: "Plunge", description: "Press down slowly", duration: "15s", icon: "hourglass")
+            let steep = viewModel.customSteepDuration ?? 240.0
+            let plunge = viewModel.customPressDuration ?? 15.0
+            return [
+                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "\(Int(steep))s", icon: "stopwatch"),
+                BrewPhase(title: "Plunge", description: "Press down slowly", duration: "\(Int(plunge))s", icon: "hourglass")
             ]
         case .aeropress:
-            [
-                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "60s", icon: "stopwatch"),
-                BrewPhase(title: "Press", description: "Press down slowly", duration: "30s", icon: "hourglass")
+            let steep = viewModel.customSteepDuration ?? 60.0
+            let press = viewModel.customPressDuration ?? 30.0
+            return [
+                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "\(Int(steep))s", icon: "stopwatch"),
+                BrewPhase(title: "Press", description: "Press down slowly", duration: "\(Int(press))s", icon: "hourglass")
             ]
         }
     }
@@ -324,7 +330,7 @@ struct TimerCircleView: View {
                     let fillColor = Color.brushedCopper.opacity(0.78)
                     let strokeWidth: CGFloat = 3
                     
-                    if viewModel.method == .v60 {
+                    if viewModel.method == .v60 || viewModel.method == .chemex {
                         var scaledCtx = ctx
                         scaledCtx.translateBy(
                             x: (size.width - (baseSize * scale)) / 2,
@@ -615,8 +621,8 @@ struct TimerCircleView: View {
                         
                         let isRunning = viewModel.isRunning
                         
-                        let fpSteepDuration: TimeInterval = 240.0
-                        let fpPlungeDuration: TimeInterval = 15.0
+                        let fpSteepDuration: TimeInterval = viewModel.customSteepDuration ?? (viewModel.method == .frenchPress ? 240.0 : 60.0)
+                        let fpPlungeDuration: TimeInterval = viewModel.customPressDuration ?? (viewModel.method == .frenchPress ? 15.0 : 30.0)
                         let steepProgress: Double = {
                             if viewModel.elapsed < fpSteepDuration {
                                 return 0.0
