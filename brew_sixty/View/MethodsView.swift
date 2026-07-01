@@ -14,6 +14,8 @@ struct MethodsView: View {
     @State private var waterVolume: Double = 270.0
     @State private var preInfusionActive = true
     @State private var preInfusionDuration: Double = 45.0
+    @State private var steepDuration: Double = 240.0
+    @State private var pressDuration: Double = 30.0
     @State private var targetTemperature: Double = 93.5
     @State private var hapticFeedbackEnabled = true
     @State private var autoSyncEnabled = true
@@ -122,12 +124,12 @@ struct MethodsView: View {
                                     .foregroundStyle(.white.opacity(0.4))
                                     .tracking(1.0)
                                 Spacer()
-                                Text(String(format: "1:%.0f", ratio))
+                                Text(String(format: "1:%.1f", ratio))
                                     .font(.headline)
                                     .foregroundStyle(Color.primaryCopper)
                             }
                             
-                            Slider(value: $ratio, in: 12.0...20.0, step: 1.0)
+                            Slider(value: $ratio, in: 12.0...20.0, step: 0.5)
                                 .tint(Color.primaryCopper)
                             
                             HStack {
@@ -220,12 +222,12 @@ struct MethodsView: View {
                                     .foregroundStyle(.white.opacity(0.4))
                                     .tracking(1.0)
                                 Spacer()
-                                Text("\(Int(preInfusionDuration))s")
+                                Text("\(Int(steepDuration))s")
                                     .font(.headline)
                                     .foregroundStyle(Color.primaryCopper)
                             }
                             
-                            Slider(value: $preInfusionDuration, in: 10.0...480.0, step: 5.0)
+                            Slider(value: $steepDuration, in: 10.0...480.0, step: 5.0)
                                 .tint(Color.primaryCopper)
                             
                             HStack {
@@ -235,6 +237,33 @@ struct MethodsView: View {
                             }
                             .font(.caption2)
                             .foregroundStyle(.white.opacity(0.3))
+                            
+                            if selectedMethod == .aeropress {
+                                Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
+                                
+                                HStack {
+                                    Text("PRESS DURATION")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.white.opacity(0.4))
+                                        .tracking(1.0)
+                                    Spacer()
+                                    Text("\(Int(pressDuration))s")
+                                        .font(.headline)
+                                        .foregroundStyle(Color.primaryCopper)
+                                }
+                                
+                                Slider(value: $pressDuration, in: 10.0...60.0, step: 5.0)
+                                    .tint(Color.primaryCopper)
+                                
+                                HStack {
+                                    Text("10s")
+                                    Spacer()
+                                    Text("60s")
+                                }
+                                .font(.caption2)
+                                .foregroundStyle(.white.opacity(0.3))
+                            }
                         }
                     }
                     .padding()
@@ -283,9 +312,11 @@ struct MethodsView: View {
                                 .fontWeight(.bold)
                             Spacer()
                         }
-                        .foregroundStyle(.black)
+                        .foregroundStyle(isSaveDisabled ? Color.white.opacity(0.3) : .black)
                         .padding(.vertical, 16)
                         .background(
+                            isSaveDisabled ?
+                            LinearGradient(colors: [Color.white.opacity(0.08), Color.white.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing) :
                             LinearGradient(
                                 colors: [Color.primaryCopper, Color.brushedCopper],
                                 startPoint: .topLeading,
@@ -294,6 +325,7 @@ struct MethodsView: View {
                         )
                         .cornerRadius(28)
                     }
+                    .disabled(isSaveDisabled)
                     .padding(.horizontal)
                     .padding(.bottom, 40)
                 }
@@ -302,13 +334,17 @@ struct MethodsView: View {
         }
     }
     
+    var isSaveDisabled: Bool {
+        recipeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
     private func saveTemplate() {
         let isV60OrChemex = (selectedMethod == .v60 || selectedMethod == .chemex)
         
         let finalPreInfusionActive = isV60OrChemex ? preInfusionActive : false
         let finalPreInfusionDuration = isV60OrChemex ? preInfusionDuration : 0.0
-        let finalSteepDuration = !isV60OrChemex ? preInfusionDuration : 0.0
-        let finalPressDuration = selectedMethod == .frenchPress ? 15.0 : (selectedMethod == .aeropress ? 30.0 : 0.0)
+        let finalSteepDuration = isV60OrChemex ? 0.0 : steepDuration
+        let finalPressDuration = selectedMethod == .aeropress ? pressDuration : (selectedMethod == .frenchPress ? 15.0 : 0.0)
         
         let template = BrewTemplate(
             name: recipeName,
@@ -326,6 +362,7 @@ struct MethodsView: View {
         )
         
         modelContext.insert(template)
+        try? modelContext.save()
         
         // Navigate back to the Home tab
         withAnimation {
