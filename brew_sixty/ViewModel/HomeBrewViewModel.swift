@@ -50,9 +50,9 @@ final class HomeBrewViewModel: Identifiable {
     var totalDuration: TimeInterval {
         switch method {
         case .v60:
-            return (customBloomDuration ?? Config.v60BloomDuration) + 105.0 // default remaining
+            return bloomDuration + 105.0
         case .chemex:
-            return (customBloomDuration ?? 45.0) + (customSteepDuration ?? 195.0)
+            return bloomDuration + (customSteepDuration ?? 195.0)
         case .frenchPress:
             let steep = customSteepDuration ?? Config.frenchPressSteepDuration
             let plunge = customPressDuration ?? Config.frenchPressPlungeDuration
