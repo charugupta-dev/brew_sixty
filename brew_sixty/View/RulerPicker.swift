@@ -77,8 +77,9 @@ struct RulerPicker: View {
                     .onChanged { gesture in
                         dragOffset = gesture.translation.width
                         
-                        // Calculate active value while dragging
-                        let activeIdx = Int(round(-currentOffset / itemWidth))
+                        // Calculate active value while dragging using live offset
+                        let liveOffset = min(max(baseOffset + gesture.translation.width, minOffset), maxOffset)
+                        let activeIdx = Int(round(-liveOffset / itemWidth))
                         let activeVal = range.lowerBound + Double(activeIdx) * step
                         
                         // Haptic feedback when crossing a tick
