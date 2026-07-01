@@ -6,8 +6,10 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
     
+    @Binding var selectedTab: ContentView.Tab
     @State private var activeIndex: Int = 0
     @State private var isZoomedOut = false
+    @State private var isAnimating = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -34,10 +36,58 @@ struct HomeView: View {
                         .padding(.top, 24)
                     
                     if viewModels.isEmpty {
-                        ContentUnavailableView("Loading recipes...", systemImage: "cup.and.saucer.fill")
-                            .onAppear {
-                                seedDefaultTemplates()
+                        VStack(spacing: 20) {
+                            Spacer()
+                            
+                            Image(systemName: "circle.dashed")
+                                .font(.system(size: 64))
+                                .foregroundStyle(Color.primaryCopper)
+                                .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                                .scaleEffect(isAnimating ? 1.05 : 0.95)
+                                .onAppear {
+                                    withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                                        isAnimating = true
+                                    }
+                                }
+                            
+                            VStack(spacing: 8) {
+                                Text("The Canvas is Clean")
+                                    .font(.system(.title3, design: .serif))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                                
+                                Text("Every great cup begins with a recipe. Let's design a custom method to match your beans.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
                             }
+                            
+                            Button {
+                                withAnimation {
+                                    selectedTab = .methods
+                                }
+                            } label: {
+                                Text("CRAFT FIRST RECIPE")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 14)
+                                    .background(
+                                        LinearGradient(
+                                            colors: [Color.primaryCopper, Color.brushedCopper],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .cornerRadius(28)
+                            }
+                            .padding(.top, 8)
+                            
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         GeometryReader { cardProxy in
                             let cardHeight = max(cardProxy.size.height - cardToTabBarSpacing, 0)
@@ -83,9 +133,6 @@ struct HomeView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
-            .onAppear {
-                seedDefaultTemplates()
             }
         }
     }

@@ -18,7 +18,7 @@ struct ContentView: View {
                     .transition(.opacity)
             } else {
                 TabView(selection: $selectedTab) {
-                    HomeView()
+                    HomeView(selectedTab: $selectedTab)
                         .tag(Tab.brew)
                         .tabItem {
                             Label("BREW", systemImage: "cup.and.saucer.fill")
