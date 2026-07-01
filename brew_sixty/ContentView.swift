@@ -24,7 +24,7 @@ struct ContentView: View {
                             Label("BREW", systemImage: "cup.and.saucer.fill")
                         }
                     
-                    MethodsPlaceholderView()
+                    MethodsView(selectedTab: $selectedTab)
                         .tag(Tab.methods)
                         .tabItem {
                             Label("METHODS", systemImage: "square.grid.2x2.fill")
