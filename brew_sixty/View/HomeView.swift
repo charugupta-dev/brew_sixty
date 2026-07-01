@@ -253,10 +253,21 @@ struct LiveTimerCard: View {
                 BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
                 BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
             ]
+        case .chemex:
+            [
+                BrewPhase(title: "Bloom", description: "\(formatGrams(viewModel.bloomWater)) Water • Swirl gently", duration: "45s", icon: "stopwatch"),
+                BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
+                BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
+            ]
         case .frenchPress:
             [
                 BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "240s", icon: "stopwatch"),
                 BrewPhase(title: "Plunge", description: "Press down slowly", duration: "15s", icon: "hourglass")
+            ]
+        case .aeropress:
+            [
+                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "60s", icon: "stopwatch"),
+                BrewPhase(title: "Press", description: "Press down slowly", duration: "30s", icon: "hourglass")
             ]
         }
     }
