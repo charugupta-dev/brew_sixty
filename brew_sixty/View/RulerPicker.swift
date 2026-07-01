@@ -4,7 +4,6 @@ struct RulerPicker: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     let step: Double
-    let unit: String
     
     @State private var dragOffset: CGFloat = 0
     @State private var baseOffset: CGFloat = 0
@@ -21,8 +20,11 @@ struct RulerPicker: View {
             let maxOffset: CGFloat = 0
             let minOffset: CGFloat = -CGFloat(ticksCount - 1) * itemWidth
             
-            // Calculate current offset based on value
-            let currentOffset = baseOffset + dragOffset
+            // Clamp offset during dragging to prevent sliding beyond boundaries
+            let currentOffset = min(max(baseOffset + dragOffset, minOffset), maxOffset)
+            
+            // Align the first tick (index 0) of the centered HStack directly under the pointer
+            let alignmentOffset = CGFloat(ticksCount - 1) * itemWidth / 2.0
             
             ZStack(alignment: .bottom) {
                 // Background Track for capturing gestures
@@ -60,7 +62,7 @@ struct RulerPicker: View {
                         }
                     }
                 }
-                .offset(x: width / 2 + currentOffset) // Center the active tick
+                .offset(x: alignmentOffset + currentOffset) // Center the active tick
                 
                 // Central gold indicator needle
                 Rectangle()
@@ -76,9 +78,7 @@ struct RulerPicker: View {
                         dragOffset = gesture.translation.width
                         
                         // Calculate active value while dragging
-                        let newOffset = baseOffset + dragOffset
-                        let clampedOffset = min(max(newOffset, minOffset), maxOffset)
-                        let activeIdx = Int(round(-clampedOffset / itemWidth))
+                        let activeIdx = Int(round(-currentOffset / itemWidth))
                         let activeVal = range.lowerBound + Double(activeIdx) * step
                         
                         // Haptic feedback when crossing a tick
@@ -124,12 +124,5 @@ struct RulerPicker: View {
     private func syncOffsetFromValue() {
         let idx = Int(round((value - range.lowerBound) / step))
         baseOffset = -CGFloat(idx) * itemWidth
-    }
-}
-
-private struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
