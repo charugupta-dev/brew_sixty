@@ -64,12 +64,24 @@ struct RulerPicker: View {
                 }
                 .offset(x: alignmentOffset + currentOffset) // Center the active tick
                 
-                // Central gold indicator needle
+                // Central gold indicator needle (bottom-aligned)
                 Rectangle()
                     .fill(Color.primaryCopper)
                     .frame(width: 2, height: 40)
                     .shadow(color: Color.primaryCopper.opacity(0.5), radius: 2)
                     .alignmentGuide(.bottom) { d in d[.bottom] - 8 }
+                
+                // Top indicator needle / triangle pointing down
+                VStack(spacing: 0) {
+                    Image(systemName: "triangle.fill")
+                        .resizable()
+                        .frame(width: 8, height: 6)
+                        .foregroundStyle(Color.primaryCopper)
+                        .rotationEffect(.degrees(180))
+                        .shadow(color: Color.primaryCopper.opacity(0.5), radius: 2)
+                    Spacer()
+                }
+                .frame(width: width, height: 60)
             }
             .contentShape(Rectangle())
             .gesture(
@@ -120,6 +132,7 @@ struct RulerPicker: View {
             }
         }
         .frame(height: 60)
+        .clipped() // Restrict the scale rendering to the card boundaries
     }
     
     private func syncOffsetFromValue() {
