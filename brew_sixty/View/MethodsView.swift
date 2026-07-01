@@ -41,7 +41,12 @@ struct MethodsView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .premiumCardBackground(cornerRadius: 16)
+                    //.premiumCardBackground(cornerRadius: 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
                     
                     // 2. Select Method Buttons
@@ -111,7 +116,12 @@ struct MethodsView: View {
                             .padding(.vertical, 8)
                     }
                     .padding()
-                    .premiumCardBackground(cornerRadius: 16)
+                    //.premiumCardBackground(cornerRadius: 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
                     
                     // 4. Dynamic Water Ratio / Weight Card
@@ -165,7 +175,12 @@ struct MethodsView: View {
                         }
                     }
                     .padding()
-                    .premiumCardBackground(cornerRadius: 16)
+                   // .premiumCardBackground(cornerRadius: 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
                     
                     // 5. Target Temperature (Horizontal scrolling Ruler)
@@ -186,7 +201,12 @@ struct MethodsView: View {
                             .padding(.vertical, 8)
                     }
                     .padding()
-                    .premiumCardBackground(cornerRadius: 16)
+                  //  .premiumCardBackground(cornerRadius: 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
                     
                     // 6. Dynamic Pre-infusion / Steep Options Card
@@ -267,38 +287,48 @@ struct MethodsView: View {
                         }
                     }
                     .padding()
-                    .premiumCardBackground(cornerRadius: 16)
+                //    .premiumCardBackground(cornerRadius: 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
                     
                     // 7. General Settings
-                    VStack(spacing: 16) {
-                        Toggle(isOn: $hapticFeedbackEnabled) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "iphone.radiowaves.left.and.right")
-                                    .foregroundStyle(Color.primaryCopper)
-                                Text("Haptic Feedback")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                        .tint(Color.primaryCopper)
-                        
-                        Divider().background(Color.white.opacity(0.1))
-                        
-                        Toggle(isOn: $autoSyncEnabled) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "icloud.and.arrow.up")
-                                    .foregroundStyle(Color.primaryCopper)
-                                Text("Auto-sync History")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                        .tint(Color.primaryCopper)
-                    }
-                    .padding()
-                    .premiumCardBackground(cornerRadius: 16)
-                    .padding(.horizontal)
+      //              VStack(spacing: 16) {
+//                        Toggle(isOn: $hapticFeedbackEnabled) {
+//                            HStack(spacing: 12) {
+//                                Image(systemName: "iphone.radiowaves.left.and.right")
+//                                    .foregroundStyle(Color.primaryCopper)
+//                                Text("Haptic Feedback")
+//                                    .font(.subheadline)
+//                                    .foregroundStyle(.white)
+//                            }
+//                        }
+//                        .tint(Color.primaryCopper)
+//                        
+//                        Divider().background(Color.white.opacity(0.1))
+//                        
+//                        Toggle(isOn: $autoSyncEnabled) {
+//                            HStack(spacing: 12) {
+//                                Image(systemName: "icloud.and.arrow.up")
+//                                    .foregroundStyle(Color.primaryCopper)
+//                                Text("Auto-sync History")
+//                                    .font(.subheadline)
+//                                    .foregroundStyle(.white)
+//                            }
+//                        }
+//                        .tint(Color.primaryCopper)
+//                    }
+//                    .padding()
+//                //    .premiumCardBackground(cornerRadius: 16)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: 16)
+//                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+//                    )
+//                    .liquidGlassBorder(cornerRadius: 16)
+//                    .padding(.horizontal)
                     
                     // 8. Save Button
                     Button {
@@ -330,6 +360,7 @@ struct MethodsView: View {
                     .padding(.bottom, 40)
                 }
                 .padding(.top)
+                .premiumCardBackground(cornerRadius: 16)
             }
         }
     }
