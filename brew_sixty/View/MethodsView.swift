@@ -5,6 +5,9 @@ struct MethodsView: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedTab: ContentView.Tab
     
+    @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
+    @State private var showTemplatesSheet = false
+    
     @State private var recipeName = "Morning Ritual"
     @State private var selectedMethod: BrewMethod = .v60
     
@@ -26,27 +29,40 @@ struct MethodsView: View {
             
             ScrollView {
                 VStack(spacing: 20) {
-                    // 1. Header Card (Ritual Title and visual mode preview)
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("CRAFTING MODE")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(Color.primaryCopper)
-                            .tracking(1.5)
-                        
-                        TextField("Recipe Name", text: $recipeName)
-                            .font(.system(.title2, design: .serif))
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
-                            .textFieldStyle(.plain)
+                    // 1. Header Card (Saved Templates / Interactive Button Card)
+                    Button {
+                        showTemplatesSheet = true
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("YOUR RECIPES")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Color.primaryCopper)
+                                    .tracking(1.5)
+                                
+                                Text("\(templates.count) Saved Templates")
+                                    .font(.system(.title2, design: .serif))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                                
+                                Text("Tap to view or delete your recipes")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white.opacity(0.4))
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color.primaryCopper)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                        )
+                        .liquidGlassBorder(cornerRadius: 16)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    //.premiumCardBackground(cornerRadius: 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
-                    )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .buttonStyle(.plain)
                     .padding(.horizontal)
                     
                     // 2. Select Method Buttons
@@ -327,8 +343,30 @@ struct MethodsView: View {
 //                        RoundedRectangle(cornerRadius: 16)
 //                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
 //                    )
-//                    .liquidGlassBorder(cornerRadius: 16)
 //                    .padding(.horizontal)
+                    
+                    // Recipe Name Card
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("RECIPE NAME")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white.opacity(0.4))
+                            .tracking(1.0)
+                        
+                        TextField("Recipe Name", text: $recipeName)
+                            .font(.system(.title2, design: .serif))
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                            .textFieldStyle(.plain)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    )
+                    .liquidGlassBorder(cornerRadius: 16)
+                    .padding(.horizontal)
                     
                     // 8. Save Button
                     Button {
@@ -361,6 +399,9 @@ struct MethodsView: View {
                 }
                 .padding(.top)
                 .premiumCardBackground(cornerRadius: 16)
+            }
+            .sheet(isPresented: $showTemplatesSheet) {
+                TemplatesListView()
             }
         }
     }
@@ -398,6 +439,93 @@ struct MethodsView: View {
         // Navigate back to the Home tab
         withAnimation {
             selectedTab = .brew
+        }
+    }
+}
+
+struct TemplatesListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    
+    @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(red: 0.08, green: 0.08, blue: 0.08)
+                    .ignoresSafeArea()
+                
+                if templates.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Saved Recipes", systemImage: "doc.text.magnifyingglass")
+                    } description: {
+                        Text("Your saved recipe templates will appear here.")
+                    }
+                    .foregroundStyle(.white)
+                } else {
+                    List {
+                        ForEach(templates) { template in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(spacing: 8) {
+                                        Text(template.name)
+                                            .font(.headline)
+                                            .foregroundStyle(.white)
+                                        
+                                        Text(template.method.rawValue)
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 4)
+                                                    .fill(Color.primaryCopper)
+                                            )
+                                    }
+                                    
+                                    HStack(spacing: 12) {
+                                        Label(String(format: "%.1fg", template.beanWeight), systemImage: "scalemass.fill")
+                                        
+                                        if template.method == .v60 || template.method == .chemex {
+                                            Label(String(format: "1:%.1f", template.ratio), systemImage: "drop.fill")
+                                        } else {
+                                            Label("\(Int(template.waterVolume))g", systemImage: "drop.fill")
+                                        }
+                                        
+                                        Label(String(format: "%.1f°C", template.targetTemperature), systemImage: "thermometer.medium")
+                                    }
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.6))
+                                }
+                                
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
+                            .listRowBackground(Color.clear)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    modelContext.delete(template)
+                                    try? modelContext.save()
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .navigationTitle("Saved Recipes")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .tint(Color.primaryCopper)
+                }
+            }
         }
     }
 }
