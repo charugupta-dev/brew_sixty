@@ -64,9 +64,7 @@ struct HomeView: View {
                             }
                             
                             Button {
-                                withAnimation {
-                                    selectedTab = .methods
-                                }
+                                selectedTab = .methods
                             } label: {
                                 Text("CRAFT FIRST RECIPE")
                                     .font(.headline)
@@ -137,42 +135,7 @@ struct HomeView: View {
         }
     }
     
-    private func seedDefaultTemplates() {
-        guard templates.isEmpty else { return }
-        
-        let v60 = BrewTemplate(
-            name: "Morning Ritual",
-            method: .v60,
-            beanWeight: 15.0,
-            ratio: 15.0,
-            waterVolume: 225.0,
-            preInfusionActive: true,
-            preInfusionDuration: 45.0,
-            targetTemperature: 93.5,
-            hapticFeedbackEnabled: true,
-            autoSyncEnabled: true,
-            steepDuration: 0.0,
-            pressDuration: 0.0
-        )
-        
-        let frenchPress = BrewTemplate(
-            name: "Classic Press",
-            method: .frenchPress,
-            beanWeight: 18.0,
-            ratio: 15.0,
-            waterVolume: 300.0,
-            preInfusionActive: false,
-            preInfusionDuration: 240.0,
-            targetTemperature: 95.0,
-            hapticFeedbackEnabled: true,
-            autoSyncEnabled: true,
-            steepDuration: 240.0,
-            pressDuration: 15.0
-        )
-        
-        modelContext.insert(v60)
-        modelContext.insert(frenchPress)
-    }
+
 }
 
 @MainActor
