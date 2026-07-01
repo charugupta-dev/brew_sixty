@@ -4,18 +4,20 @@ import SwiftData
 @MainActor
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
+    
     @State private var activeIndex: Int = 0
     @State private var isZoomedOut = false
-    
-    // ViewModels for V60 and French Press recipe cards
-    @State private var v60ViewModel = HomeBrewViewModel(method: .v60, beanWeight: 15.0, ratio: 16.5, waterVolume: 250.0)
-    @State private var pressViewModel = HomeBrewViewModel(method: .frenchPress, beanWeight: 18.0, ratio: 15.0, waterVolume: 300.0)
     
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width - 64
-            let viewModels = [v60ViewModel, pressViewModel]
             let cardToTabBarSpacing: CGFloat = 30
+            
+            // Map SwiftData templates dynamically to HomeBrewViewModel instances
+            let viewModels: [HomeBrewViewModel] = templates.map { template in
+                HomeBrewViewModel(template: template)
+            }
             
             ZStack {
                 // Solid dark charcoal background matching mock
@@ -31,51 +33,98 @@ struct HomeView: View {
                         .padding(.horizontal, 24)
                         .padding(.top, 24)
                     
-                    GeometryReader { cardProxy in
-                        let cardHeight = max(cardProxy.size.height - cardToTabBarSpacing, 0)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: isZoomedOut ? 16 : 20) {
-                                ForEach(0..<viewModels.count, id: \.self) { idx in
-                                    let vm = viewModels[idx]
-                                    LiveTimerCard(viewModel: vm, isZoomedOut: isZoomedOut, activeIndex: $activeIndex, myIndex: idx)
-                                        .frame(width: cardWidth, height: cardHeight)
-                                        .scaleEffect(isZoomedOut ? 0.85 : (activeIndex == idx ? 1.0 : 0.92))
-                                        .id(idx)
-                                        .onTapGesture {
-                                            if isZoomedOut {
-                                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                                    isZoomedOut = false
-                                                    activeIndex = idx
-                                                }
-                                            }
-                                        }
-                                        .gesture(
-                                            LongPressGesture(minimumDuration: 0.5)
-                                                .onEnded { _ in
-                                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    if viewModels.isEmpty {
+                        ContentUnavailableView("Loading recipes...", systemImage: "cup.and.saucer.fill")
+                            .onAppear {
+                                seedDefaultTemplates()
+                            }
+                    } else {
+                        GeometryReader { cardProxy in
+                            let cardHeight = max(cardProxy.size.height - cardToTabBarSpacing, 0)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: isZoomedOut ? 16 : 20) {
+                                    ForEach(0..<viewModels.count, id: \.self) { idx in
+                                        let vm = viewModels[idx]
+                                        LiveTimerCard(viewModel: vm, isZoomedOut: isZoomedOut, activeIndex: $activeIndex, myIndex: idx)
+                                            .frame(width: cardWidth, height: cardHeight)
+                                            .scaleEffect(isZoomedOut ? 0.85 : (activeIndex == idx ? 1.0 : 0.92))
+                                            .id(idx)
+                                            .onTapGesture {
+                                                if isZoomedOut {
                                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                                        isZoomedOut = true
+                                                        isZoomedOut = false
+                                                        activeIndex = idx
                                                     }
                                                 }
-                                        )
+                                            }
+                                            .gesture(
+                                                LongPressGesture(minimumDuration: 0.5)
+                                                    .onEnded { _ in
+                                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                                            isZoomedOut = true
+                                                        }
+                                                    }
+                                            )
+                                    }
                                 }
+                                .scrollTargetLayout()
                             }
-                            .scrollTargetLayout()
+                            .frame(height: cardHeight, alignment: .top)
+                            .scrollTargetBehavior(.viewAligned)
+                            .scrollPosition(id: Binding(
+                                get: { activeIndex },
+                                set: { if let val = $0 { activeIndex = val } }
+                            ))
+                            .safeAreaPadding(.horizontal, isZoomedOut ? 48 : 32)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         }
-                        .frame(height: cardHeight, alignment: .top)
-                        .scrollTargetBehavior(.viewAligned)
-                        .scrollPosition(id: Binding(
-                            get: { activeIndex },
-                            set: { if let val = $0 { activeIndex = val } }
-                        ))
-                        .safeAreaPadding(.horizontal, isZoomedOut ? 48 : 32)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
+            .onAppear {
+                seedDefaultTemplates()
+            }
         }
+    }
+    
+    private func seedDefaultTemplates() {
+        guard templates.isEmpty else { return }
+        
+        let v60 = BrewTemplate(
+            name: "Morning Ritual",
+            method: .v60,
+            beanWeight: 15.0,
+            ratio: 15.0,
+            waterVolume: 225.0,
+            preInfusionActive: true,
+            preInfusionDuration: 45.0,
+            targetTemperature: 93.5,
+            hapticFeedbackEnabled: true,
+            autoSyncEnabled: true,
+            steepDuration: 0.0,
+            pressDuration: 0.0
+        )
+        
+        let frenchPress = BrewTemplate(
+            name: "Classic Press",
+            method: .frenchPress,
+            beanWeight: 18.0,
+            ratio: 15.0,
+            waterVolume: 300.0,
+            preInfusionActive: false,
+            preInfusionDuration: 240.0,
+            targetTemperature: 95.0,
+            hapticFeedbackEnabled: true,
+            autoSyncEnabled: true,
+            steepDuration: 240.0,
+            pressDuration: 15.0
+        )
+        
+        modelContext.insert(v60)
+        modelContext.insert(frenchPress)
     }
 }
 
@@ -427,86 +476,109 @@ struct TimerCircleView: View {
                         kettleCtx.stroke(handlePath, with: goldGradient, lineWidth: 1.5)
                         kettleCtx.stroke(handleInnerPath, with: goldGradient, lineWidth: 1.5)
                         
-                        // 2. DRAW CUP (bottom center)
-                        var cupCtx = scaledCtx
-                        cupCtx.translateBy(x: 100, y: 155)
-                        cupCtx.scaleBy(x: 0.9, y: 0.9)
-                        
-                        // Cup Rim (ellipse showing perspective)
-                        let rimRect = CGRect(x: -30, y: -20, width: 60, height: 10)
-                        var rimPath = Path()
-                        rimPath.addEllipse(in: rimRect)
-                        cupCtx.stroke(rimPath, with: goldGradient, lineWidth: 1.5)
-                        
-                        // Cup Body Path
-                        var cupBody = Path()
-                        cupBody.move(to: CGPoint(x: -30, y: -15))
-                        cupBody.addCurve(
-                            to: CGPoint(x: -16, y: 20),
-                            control1: CGPoint(x: -28, y: 5),
-                            control2: CGPoint(x: -22, y: 18)
-                        )
-                        cupBody.addLine(to: CGPoint(x: 16, y: 20))
-                        cupBody.addCurve(
-                            to: CGPoint(x: 30, y: -15),
-                            control1: CGPoint(x: 22, y: 18),
-                            control2: CGPoint(x: 28, y: 5)
-                        )
-                        cupBody.closeSubpath()
-                        cupCtx.stroke(cupBody, with: goldGradient, lineWidth: 2)
-                        
-                        // Cup Base Ring
-                        var cupBase = Path()
-                        cupBase.addEllipse(in: CGRect(x: -16, y: 17, width: 32, height: 6))
-                        cupCtx.stroke(cupBase, with: goldGradient, lineWidth: 1.5)
-                        
-                        // Handle on the right
-                        var cupHandle = Path()
-                        cupHandle.move(to: CGPoint(x: 28, y: -10))
-                        cupHandle.addCurve(
-                            to: CGPoint(x: 20, y: 15),
-                            control1: CGPoint(x: 44, y: -8),
-                            control2: CGPoint(x: 42, y: 12)
-                        )
-                        var cupHandleInner = Path()
-                        cupHandleInner.move(to: CGPoint(x: 28, y: -5))
-                        cupHandleInner.addCurve(
-                            to: CGPoint(x: 21, y: 10),
-                            control1: CGPoint(x: 38, y: -4),
-                            control2: CGPoint(x: 36, y: 8)
-                        )
-                        cupCtx.stroke(cupHandle, with: goldGradient, lineWidth: 1.5)
-                        cupCtx.stroke(cupHandleInner, with: goldGradient, lineWidth: 1.5)
-                        
-                        // Coffee Fill inside the cup (clipping to the cup body walls to look completely full)
-                        if progress > 0 {
-                            var clippedCtx = cupCtx
-                            clippedCtx.clip(to: cupBody)
+                        // 2. DRAW VESSEL (Cup for V60, Chemex for Chemex)
+                        if viewModel.method == .chemex {
+                            let centerX = baseSize / 2
+                            let beakerTop: CGFloat = 85
                             
-                            // Total height is 35 points (from Y=20 base to Y=-15 rim)
-                            let fillHeight = 35.0 * progress
-                            let fillY = 20.0 - fillHeight
+                            // Draw Chemex Outline Silhouette
+                            var chemexPath = Path()
+                            chemexPath.move(to: CGPoint(x: centerX - 20, y: beakerTop + 10))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 20, y: beakerTop + 10))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 8, y: beakerTop + 40))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 25, y: beakerTop + 75))
+                            chemexPath.addLine(to: CGPoint(x: centerX - 25, y: beakerTop + 75))
+                            chemexPath.addLine(to: CGPoint(x: centerX - 8, y: beakerTop + 40))
+                            chemexPath.closeSubpath()
                             
-                            var fillPath = Path()
-                            fillPath.move(to: CGPoint(x: -35.0, y: 25.0)) // bottom-left (beyond walls)
-                            fillPath.addLine(to: CGPoint(x: -35.0, y: fillY))
+                            // Wooden collar band
+                            var collarPath = Path()
+                            collarPath.addRect(CGRect(x: centerX - 12, y: beakerTop + 35, width: 24, height: 10))
                             
-                            // Wave top surface
-                            for x in -35...35 {
-                                let wave = sin(Double(x) * 0.25 + time * 8.0) * 1.5
-                                fillPath.addLine(to: CGPoint(x: CGFloat(x), y: fillY + CGFloat(wave)))
-                            }
+                            scaledCtx.stroke(chemexPath, with: goldGradient, lineWidth: 1.5)
+                            scaledCtx.stroke(collarPath, with: goldGradient, lineWidth: 1.0)
+                        } else {
+                            // DRAW CUP (bottom center)
+                            var cupCtx = scaledCtx
+                            cupCtx.translateBy(x: 100, y: 155)
+                            cupCtx.scaleBy(x: 0.9, y: 0.9)
                             
-                            fillPath.addLine(to: CGPoint(x: 35.0, y: fillY))
-                            fillPath.addLine(to: CGPoint(x: 35.0, y: 25.0)) // bottom-right
-                            fillPath.closeSubpath()
+                            // Cup Rim (ellipse showing perspective)
+                            let rimRect = CGRect(x: -30, y: -20, width: 60, height: 10)
+                            var rimPath = Path()
+                            rimPath.addEllipse(in: rimRect)
+                            cupCtx.stroke(rimPath, with: goldGradient, lineWidth: 1.5)
                             
-                            let fillGradient = GraphicsContext.Shading.linearGradient(
-                                Gradient(colors: [Color.primaryCopper.opacity(0.45), Color.brushedCopper.opacity(0.15)]),
-                                startPoint: CGPoint(x: 0, y: fillY),
-                                endPoint: CGPoint(x: 0, y: 20)
+                            // Cup Body Path
+                            var cupBody = Path()
+                            cupBody.move(to: CGPoint(x: -30, y: -15))
+                            cupBody.addCurve(
+                                to: CGPoint(x: -16, y: 20),
+                                control1: CGPoint(x: -28, y: 5),
+                                control2: CGPoint(x: -22, y: 18)
                             )
-                            clippedCtx.fill(fillPath, with: fillGradient)
+                            cupBody.addLine(to: CGPoint(x: 16, y: 20))
+                            cupBody.addCurve(
+                                to: CGPoint(x: 30, y: -15),
+                                control1: CGPoint(x: 22, y: 18),
+                                control2: CGPoint(x: 28, y: 5)
+                            )
+                            cupBody.closeSubpath()
+                            cupCtx.stroke(cupBody, with: goldGradient, lineWidth: 2)
+                            
+                            // Cup Base Ring
+                            var cupBase = Path()
+                            cupBase.addEllipse(in: CGRect(x: -16, y: 17, width: 32, height: 6))
+                            cupCtx.stroke(cupBase, with: goldGradient, lineWidth: 1.5)
+                            
+                            // Handle on the right
+                            var cupHandle = Path()
+                            cupHandle.move(to: CGPoint(x: 28, y: -10))
+                            cupHandle.addCurve(
+                                to: CGPoint(x: 20, y: 15),
+                                control1: CGPoint(x: 44, y: -8),
+                                control2: CGPoint(x: 42, y: 12)
+                            )
+                            var cupHandleInner = Path()
+                            cupHandleInner.move(to: CGPoint(x: 28, y: -5))
+                            cupHandleInner.addCurve(
+                                to: CGPoint(x: 21, y: 10),
+                                control1: CGPoint(x: 38, y: -4),
+                                control2: CGPoint(x: 36, y: 8)
+                            )
+                            cupCtx.stroke(cupHandle, with: goldGradient, lineWidth: 1.5)
+                            cupCtx.stroke(cupHandleInner, with: goldGradient, lineWidth: 1.5)
+                            
+                            // Coffee Fill inside the cup (clipping to the cup body walls to look completely full)
+                            if progress > 0 {
+                                var clippedCtx = cupCtx
+                                clippedCtx.clip(to: cupBody)
+                                
+                                // Total height is 35 points (from Y=20 base to Y=-15 rim)
+                                let fillHeight = 35.0 * progress
+                                let fillY = 20.0 - fillHeight
+                                
+                                var fillPath = Path()
+                                fillPath.move(to: CGPoint(x: -35.0, y: 25.0)) // bottom-left (beyond walls)
+                                fillPath.addLine(to: CGPoint(x: -35.0, y: fillY))
+                                
+                                // Wave top surface
+                                for x in -35...35 {
+                                    let wave = sin(Double(x) * 0.25 + time * 8.0) * 1.5
+                                    fillPath.addLine(to: CGPoint(x: CGFloat(x), y: fillY + CGFloat(wave)))
+                                }
+                                
+                                fillPath.addLine(to: CGPoint(x: 35.0, y: fillY))
+                                fillPath.addLine(to: CGPoint(x: 35.0, y: 25.0)) // bottom-right
+                                fillPath.closeSubpath()
+                                
+                                let fillGradient = GraphicsContext.Shading.linearGradient(
+                                    Gradient(colors: [Color.primaryCopper.opacity(0.45), Color.brushedCopper.opacity(0.15)]),
+                                    startPoint: CGPoint(x: 0, y: fillY),
+                                    endPoint: CGPoint(x: 0, y: 20)
+                                )
+                                clippedCtx.fill(fillPath, with: fillGradient)
+                            }
                         }
                         
                         // 3. DRAW CONSTELLATION FLOW (Only when running)
@@ -514,7 +586,12 @@ struct TimerCircleView: View {
                             let p0 = CGPoint(x: 94.0 + kettleOffsetX, y: 61.0 + kettleOffsetY)  // spout tip moves with kettle
                             let p1 = CGPoint(x: 45.0 + kettleOffsetX * 0.5, y: 85.0 + kettleOffsetY * 0.5) // waves trail
                             let p2 = CGPoint(x: 155.0, y: 115.0)
-                            let p3 = CGPoint(x: 100.0, y: 137.0) // cup center rim
+                            let p3: CGPoint
+                            if viewModel.method == .chemex {
+                                p3 = CGPoint(x: 100.0, y: 95.0)
+                            } else {
+                                p3 = CGPoint(x: 100.0, y: 137.0)
+                            }
                             
                             func bezierPoint(t: Double, p0: CGPoint, p1: CGPoint, p2: CGPoint, p3: CGPoint) -> CGPoint {
                                 let mt = 1.0 - t
@@ -594,7 +671,7 @@ struct TimerCircleView: View {
                             }
                         }
                     } else {
-                        // French Press Plunger Animation
+                        // French Press or Aeropress Plunger Animation
                         var scaledCtx = ctx
                         scaledCtx.translateBy(
                             x: (size.width - (baseSize * scale)) / 2,
@@ -619,175 +696,191 @@ struct TimerCircleView: View {
                             endPoint: CGPoint(x: 200, y: 200)
                         )
                         
-                        let isRunning = viewModel.isRunning
-                        
-                        let fpSteepDuration: TimeInterval = viewModel.customSteepDuration ?? (viewModel.method == .frenchPress ? 240.0 : 60.0)
-                        let fpPlungeDuration: TimeInterval = viewModel.customPressDuration ?? (viewModel.method == .frenchPress ? 15.0 : 30.0)
-                        let steepProgress: Double = {
-                            if viewModel.elapsed < fpSteepDuration {
-                                return 0.0
-                            } else {
-                                return min((viewModel.elapsed - fpSteepDuration) / fpPlungeDuration, 1.0)
-                            }
-                        }()
-                        
-                        let filterStart = beakerTop + 15
-                        let filterEnd = beakerBottom - 23
-                        let filterY = filterStart + (filterEnd - filterStart) * CGFloat(steepProgress)
-                        
-                        let knobStart = beakerTop - 40
-                        let knobEnd = beakerTop - 9
-                        let knobY = knobStart + (knobEnd - knobStart) * CGFloat(steepProgress)
-                        // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
-                        var groundsBgPath = Path()
-                        groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 23, width: beakerW - 5, height: 22))
-                        scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(0.85)))
-                        
-                        // Crisp gold separator line on top of grounds
-                        var separatorPath = Path()
-                        separatorPath.move(to: CGPoint(x: beakerLeft + 2.5, y: beakerBottom - 23))
-                        separatorPath.addLine(to: CGPoint(x: beakerRight - 2.5, y: beakerBottom - 23))
-                        scaledCtx.stroke(separatorPath, with: goldGradient, lineWidth: 1.0)
-                        
-                        // Deterministic Gradated Stippling (90 dots)
-                        for i in 0..<90 {
-                            let randomX = beakerLeft + 3.5 + CGFloat((i * 29) % Int(beakerW - 7))
-                            let randomY: CGFloat
-                            let r: CGFloat
-                            if i < 45 {
-                                // Bottom layer (dense)
-                                randomY = (beakerBottom - 7) - CGFloat((i * 13) % 7)
-                                r = 1.0 + Double((i * 7) % 3) * 0.3 // 1.0 to 1.6
-                            } else if i < 75 {
-                                // Middle layer
-                                randomY = (beakerBottom - 14) - CGFloat((i * 17) % 6)
-                                r = 0.8 + Double((i * 11) % 3) * 0.2 // 0.8 to 1.2
-                            } else {
-                                // Top layer (sparse)
-                                randomY = (beakerBottom - 20) - CGFloat((i * 19) % 3)
-                                r = 0.5 + Double((i * 3) % 3) * 0.15 // 0.5 to 0.8
-                            }
-                            var dotPath = Path()
-                            dotPath.addArc(center: CGPoint(x: randomX, y: randomY), radius: r, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
-                            scaledCtx.fill(dotPath, with: goldGradient)
-                        }
-                        
-                        // 2. WATER FLOW VORTEX (3D helix swirl during steep phase, only when timer running)
-                        if isRunning && viewModel.elapsed < fpSteepDuration {
-                            let swirlTime = time * 4.0
-                            for offset in [0.0, .pi] {
-                                var swirlPath = Path()
-                                for y in stride(from: CGFloat(beakerTop + 18), to: CGFloat(beakerBottom - 24), by: 1) {
-                                    let t = (y - (beakerTop + 18)) / (beakerBottom - 24 - (beakerTop + 18))
-                                    let amp = sin(t * .pi) * 8.0 // max amplitude in the middle is 8 points
-                                    let angle = t * 3.0 * .pi - swirlTime + offset
-                                    let x = centerX + sin(angle) * amp
-                                    
-                                    if y == beakerTop + 18 {
-                                        swirlPath.move(to: CGPoint(x: x, y: y))
-                                    } else {
-                                        swirlPath.addLine(to: CGPoint(x: x, y: y))
-                                    }
+                        if viewModel.method == .aeropress {
+                            // Draw Aeropress Outline Silhouette
+                            var aeroPath = Path()
+                            // Outer Chamber
+                            aeroPath.addRect(CGRect(x: centerX - 18, y: beakerTop + 10, width: 36, height: 60))
+                            // Inner Plunger
+                            aeroPath.addRect(CGRect(x: centerX - 15, y: beakerTop - 10, width: 30, height: 40))
+                            // Plunger Cap
+                            aeroPath.addRect(CGRect(x: centerX - 20, y: beakerTop - 15, width: 40, height: 5))
+                            // Filter Cap at bottom
+                            aeroPath.addRect(CGRect(x: centerX - 20, y: beakerTop + 70, width: 40, height: 8))
+                            scaledCtx.stroke(aeroPath, with: goldGradient, lineWidth: 1.5)
+                        } else {
+                            // French Press Plunger Animation
+                            let isRunning = viewModel.isRunning
+                            
+                            let fpSteepDuration: TimeInterval = viewModel.customSteepDuration ?? (viewModel.method == .frenchPress ? 240.0 : 60.0)
+                            let fpPlungeDuration: TimeInterval = viewModel.customPressDuration ?? (viewModel.method == .frenchPress ? 15.0 : 30.0)
+                            let steepProgress: Double = {
+                                if viewModel.elapsed < fpSteepDuration {
+                                    return 0.0
+                                } else {
+                                    return min((viewModel.elapsed - fpSteepDuration) / fpPlungeDuration, 1.0)
                                 }
-                                scaledCtx.stroke(swirlPath, with: .color(Color.primaryCopper.opacity(0.65)), lineWidth: 1.0)
+                            }()
+                            
+                            let filterStart = beakerTop + 15
+                            let filterEnd = beakerBottom - 23
+                            let filterY = filterStart + (filterEnd - filterStart) * CGFloat(steepProgress)
+                            
+                            let knobStart = beakerTop - 40
+                            let knobEnd = beakerTop - 9
+                            let knobY = knobStart + (knobEnd - knobStart) * CGFloat(steepProgress)
+                            
+                            // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
+                            var groundsBgPath = Path()
+                            groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 23, width: beakerW - 5, height: 22))
+                            scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(0.85)))
+                            
+                            // Crisp gold separator line on top of grounds
+                            var separatorPath = Path()
+                            separatorPath.move(to: CGPoint(x: beakerLeft + 2.5, y: beakerBottom - 23))
+                            separatorPath.addLine(to: CGPoint(x: beakerRight - 2.5, y: beakerBottom - 23))
+                            scaledCtx.stroke(separatorPath, with: goldGradient, lineWidth: 1.0)
+                            
+                            // Deterministic Gradated Stippling (90 dots)
+                            for i in 0..<90 {
+                                let randomX = beakerLeft + 3.5 + CGFloat((i * 29) % Int(beakerW - 7))
+                                let randomY: CGFloat
+                                let r: CGFloat
+                                if i < 45 {
+                                    // Bottom layer (dense)
+                                    randomY = (beakerBottom - 7) - CGFloat((i * 13) % 7)
+                                    r = 1.0 + Double((i * 7) % 3) * 0.3 // 1.0 to 1.6
+                                } else if i < 75 {
+                                    // Middle layer
+                                    randomY = (beakerBottom - 14) - CGFloat((i * 17) % 6)
+                                    r = 0.8 + Double((i * 11) % 3) * 0.2 // 0.8 to 1.2
+                                } else {
+                                    // Top layer (sparse)
+                                    randomY = (beakerBottom - 20) - CGFloat((i * 19) % 3)
+                                    r = 0.5 + Double((i * 3) % 3) * 0.15 // 0.5 to 0.8
+                                }
+                                var dotPath = Path()
+                                dotPath.addArc(center: CGPoint(x: randomX, y: randomY), radius: r, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+                                scaledCtx.fill(dotPath, with: goldGradient)
                             }
+                            
+                            // 2. WATER FLOW VORTEX (3D helix swirl during steep phase, only when timer running)
+                            if isRunning && viewModel.elapsed < fpSteepDuration {
+                                let swirlTime = time * 4.0
+                                for offset in [0.0, .pi] {
+                                    var swirlPath = Path()
+                                    for y in stride(from: CGFloat(beakerTop + 18), to: CGFloat(beakerBottom - 24), by: 1) {
+                                        let t = (y - (beakerTop + 18)) / (beakerBottom - 24 - (beakerTop + 18))
+                                        let amp = sin(t * .pi) * 8.0 // max amplitude in the middle is 8 points
+                                        let angle = t * 3.0 * .pi - swirlTime + offset
+                                        let x = centerX + sin(angle) * amp
+                                        
+                                        if y == beakerTop + 18 {
+                                            swirlPath.move(to: CGPoint(x: x, y: y))
+                                        } else {
+                                            swirlPath.addLine(to: CGPoint(x: x, y: y))
+                                        }
+                                    }
+                                    scaledCtx.stroke(swirlPath, with: .color(Color.primaryCopper.opacity(0.65)), lineWidth: 1.0)
+                                }
+                            }
+                            
+                            // 3. BOROSILICATE GLASS BEAKER
+                            var beakerPath = Path()
+                            beakerPath.move(to: CGPoint(x: beakerLeft - 5, y: beakerTop - 2)) // Spout lip
+                            beakerPath.addQuadCurve(to: CGPoint(x: beakerLeft, y: beakerTop + 2), control: CGPoint(x: beakerLeft - 2, y: beakerTop + 2))
+                            beakerPath.addLine(to: CGPoint(x: beakerLeft, y: beakerBottom)) // Left wall
+                            beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerBottom)) // Bottom wall
+                            beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerTop)) // Right wall
+                            scaledCtx.stroke(beakerPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.8)
+                            
+                            // 4. METAL SUPPORT FRAME & ERGONOMIC HANDLE
+                            var baseFrame = Path()
+                            baseFrame.move(to: CGPoint(x: beakerLeft - 2, y: beakerBottom))
+                            baseFrame.addLine(to: CGPoint(x: beakerLeft - 2, y: beakerBottom + 3))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight + 2, y: beakerBottom + 3))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight + 2, y: beakerBottom))
+                            
+                            // Left Foot
+                            baseFrame.move(to: CGPoint(x: beakerLeft + 4, y: beakerBottom + 3))
+                            baseFrame.addLine(to: CGPoint(x: beakerLeft + 2, y: beakerBottom + 7))
+                            baseFrame.addLine(to: CGPoint(x: beakerLeft + 12, y: beakerBottom + 7))
+                            baseFrame.addLine(to: CGPoint(x: beakerLeft + 14, y: beakerBottom + 3))
+                            
+                            // Right Foot
+                            baseFrame.move(to: CGPoint(x: beakerRight - 14, y: beakerBottom + 3))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight - 12, y: beakerBottom + 7))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight - 2, y: beakerBottom + 7))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight - 4, y: beakerBottom + 3))
+                            
+                            // Horizontal Bands
+                            baseFrame.move(to: CGPoint(x: beakerLeft - 1, y: beakerTop + 15))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight + 1, y: beakerTop + 15))
+                            baseFrame.move(to: CGPoint(x: beakerLeft - 1, y: beakerBottom - 35))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight + 1, y: beakerBottom - 35))
+                            
+                            // Vertical Bands
+                            baseFrame.move(to: CGPoint(x: beakerLeft + 8, y: beakerTop + 2))
+                            baseFrame.addLine(to: CGPoint(x: beakerLeft + 8, y: beakerBottom))
+                            baseFrame.move(to: CGPoint(x: beakerRight - 8, y: beakerTop + 2))
+                            baseFrame.addLine(to: CGPoint(x: beakerRight - 8, y: beakerBottom))
+                            
+                            scaledCtx.stroke(baseFrame, with: goldGradient, lineWidth: 1.5)
+                            
+                            // Curved Handle
+                            var handlePath = Path()
+                            handlePath.move(to: CGPoint(x: beakerRight - 1, y: beakerTop + 15))
+                            handlePath.addCurve(to: CGPoint(x: beakerRight - 1, y: beakerBottom - 35),
+                                                control1: CGPoint(x: beakerRight + 24, y: beakerTop + 10),
+                                                control2: CGPoint(x: beakerRight + 24, y: beakerBottom - 30))
+                            scaledCtx.stroke(handlePath, with: goldGradient, lineWidth: 2.0)
+                            
+                            // 5. LID DOME
+                            var lidPath = Path()
+                            lidPath.move(to: CGPoint(x: beakerLeft - 2, y: beakerTop))
+                            lidPath.addLine(to: CGPoint(x: beakerRight + 2, y: beakerTop))
+                            lidPath.addLine(to: CGPoint(x: beakerRight + 2, y: beakerTop - 4))
+                            lidPath.addQuadCurve(to: CGPoint(x: beakerLeft - 2, y: beakerTop - 4), control: CGPoint(x: centerX, y: beakerTop - 15))
+                            lidPath.closeSubpath()
+                            
+                            scaledCtx.fill(lidPath, with: .color(Color.primaryCopper.opacity(0.12)))
+                            scaledCtx.stroke(lidPath, with: goldGradient, lineWidth: 1.5)
+                            
+                            // Silicone seal band
+                            var sealPath = Path()
+                            sealPath.move(to: CGPoint(x: beakerLeft - 1, y: beakerTop))
+                            sealPath.addLine(to: CGPoint(x: beakerRight + 1, y: beakerTop))
+                            scaledCtx.stroke(sealPath, with: .color(strokeColor.opacity(0.65)), lineWidth: 1.8)
+                            
+                            // 6. DYNAMIC PLUNGER SHAFT, KNOB & FILTER PLATE
+                            // Plunger Shaft
+                            var shaftPath = Path()
+                            shaftPath.move(to: CGPoint(x: centerX, y: knobY + 5))
+                            shaftPath.addLine(to: CGPoint(x: centerX, y: filterY))
+                            scaledCtx.stroke(shaftPath, with: goldGradient, lineWidth: 1.8)
+                            
+                            // Plunger Knob (sphere)
+                            var knobPath = Path()
+                            knobPath.addArc(center: CGPoint(x: centerX, y: knobY), radius: 5.0, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+                            scaledCtx.fill(knobPath, with: goldGradient)
+                            
+                            // Knob specular highlights
+                            var knobHighlight = Path()
+                            knobHighlight.addArc(center: CGPoint(x: centerX - 1.5, y: knobY - 1.5), radius: 1.5, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+                            scaledCtx.fill(knobHighlight, with: .color(.white.opacity(0.8)))
+                            
+                            // Filter Plate (mesh)
+                            var filterPlate = Path()
+                            filterPlate.move(to: CGPoint(x: beakerLeft + 2.5, y: filterY))
+                            filterPlate.addLine(to: CGPoint(x: beakerRight - 2.5, y: filterY))
+                            scaledCtx.stroke(filterPlate, with: goldGradient, lineWidth: 2.2)
+                            
+                            // Coarse mesh layers
+                            var filterMesh = Path()
+                            filterMesh.move(to: CGPoint(x: beakerLeft + 4.5, y: filterY + 2.5))
+                            filterMesh.addLine(to: CGPoint(x: beakerRight - 4.5, y: filterY + 2.5))
+                            scaledCtx.stroke(filterMesh, with: goldGradient, lineWidth: 1.0)
                         }
-                        
-                        // 3. BOROSILICATE GLASS BEAKER
-                        var beakerPath = Path()
-                        beakerPath.move(to: CGPoint(x: beakerLeft - 5, y: beakerTop - 2)) // Spout lip
-                        beakerPath.addQuadCurve(to: CGPoint(x: beakerLeft, y: beakerTop + 2), control: CGPoint(x: beakerLeft - 2, y: beakerTop + 2))
-                        beakerPath.addLine(to: CGPoint(x: beakerLeft, y: beakerBottom)) // Left wall
-                        beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerBottom)) // Bottom wall
-                        beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerTop)) // Right wall
-                        scaledCtx.stroke(beakerPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.8)
-                        
-                        // 4. METAL SUPPORT FRAME & ERGONOMIC HANDLE
-                        var baseFrame = Path()
-                        baseFrame.move(to: CGPoint(x: beakerLeft - 2, y: beakerBottom))
-                        baseFrame.addLine(to: CGPoint(x: beakerLeft - 2, y: beakerBottom + 3))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight + 2, y: beakerBottom + 3))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight + 2, y: beakerBottom))
-                        
-                        // Left Foot
-                        baseFrame.move(to: CGPoint(x: beakerLeft + 4, y: beakerBottom + 3))
-                        baseFrame.addLine(to: CGPoint(x: beakerLeft + 2, y: beakerBottom + 7))
-                        baseFrame.addLine(to: CGPoint(x: beakerLeft + 12, y: beakerBottom + 7))
-                        baseFrame.addLine(to: CGPoint(x: beakerLeft + 14, y: beakerBottom + 3))
-                        
-                        // Right Foot
-                        baseFrame.move(to: CGPoint(x: beakerRight - 14, y: beakerBottom + 3))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight - 12, y: beakerBottom + 7))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight - 2, y: beakerBottom + 7))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight - 4, y: beakerBottom + 3))
-                        
-                        // Horizontal Bands
-                        baseFrame.move(to: CGPoint(x: beakerLeft - 1, y: beakerTop + 15))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight + 1, y: beakerTop + 15))
-                        baseFrame.move(to: CGPoint(x: beakerLeft - 1, y: beakerBottom - 35))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight + 1, y: beakerBottom - 35))
-                        
-                        // Vertical Bands
-                        baseFrame.move(to: CGPoint(x: beakerLeft + 8, y: beakerTop + 2))
-                        baseFrame.addLine(to: CGPoint(x: beakerLeft + 8, y: beakerBottom))
-                        baseFrame.move(to: CGPoint(x: beakerRight - 8, y: beakerTop + 2))
-                        baseFrame.addLine(to: CGPoint(x: beakerRight - 8, y: beakerBottom))
-                        
-                        scaledCtx.stroke(baseFrame, with: goldGradient, lineWidth: 1.5)
-                        
-                        // Curved Handle
-                        var handlePath = Path()
-                        handlePath.move(to: CGPoint(x: beakerRight - 1, y: beakerTop + 15))
-                        handlePath.addCurve(to: CGPoint(x: beakerRight - 1, y: beakerBottom - 35),
-                                            control1: CGPoint(x: beakerRight + 24, y: beakerTop + 10),
-                                            control2: CGPoint(x: beakerRight + 24, y: beakerBottom - 30))
-                        scaledCtx.stroke(handlePath, with: goldGradient, lineWidth: 2.0)
-                        
-                        // 5. LID DOME
-                        var lidPath = Path()
-                        lidPath.move(to: CGPoint(x: beakerLeft - 2, y: beakerTop))
-                        lidPath.addLine(to: CGPoint(x: beakerRight + 2, y: beakerTop))
-                        lidPath.addLine(to: CGPoint(x: beakerRight + 2, y: beakerTop - 4))
-                        lidPath.addQuadCurve(to: CGPoint(x: beakerLeft - 2, y: beakerTop - 4), control: CGPoint(x: centerX, y: beakerTop - 15))
-                        lidPath.closeSubpath()
-                        
-                        scaledCtx.fill(lidPath, with: .color(Color.primaryCopper.opacity(0.12)))
-                        scaledCtx.stroke(lidPath, with: goldGradient, lineWidth: 1.5)
-                        
-                        // Silicone seal band
-                        var sealPath = Path()
-                        sealPath.move(to: CGPoint(x: beakerLeft - 1, y: beakerTop))
-                        sealPath.addLine(to: CGPoint(x: beakerRight + 1, y: beakerTop))
-                        scaledCtx.stroke(sealPath, with: .color(strokeColor.opacity(0.65)), lineWidth: 1.8)
-                        
-                        // 6. DYNAMIC PLUNGER SHAFT, KNOB & FILTER PLATE
-                        // Plunger Shaft
-                        var shaftPath = Path()
-                        shaftPath.move(to: CGPoint(x: centerX, y: knobY + 5))
-                        shaftPath.addLine(to: CGPoint(x: centerX, y: filterY))
-                        scaledCtx.stroke(shaftPath, with: goldGradient, lineWidth: 1.8)
-                        
-                        // Plunger Knob (sphere)
-                        var knobPath = Path()
-                        knobPath.addArc(center: CGPoint(x: centerX, y: knobY), radius: 5.0, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
-                        scaledCtx.fill(knobPath, with: goldGradient)
-                        
-                        // Knob specular highlights
-                        var knobHighlight = Path()
-                        knobHighlight.addArc(center: CGPoint(x: centerX - 1.5, y: knobY - 1.5), radius: 1.5, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
-                        scaledCtx.fill(knobHighlight, with: .color(.white.opacity(0.8)))
-                        
-                        // Filter Plate (mesh)
-                        var filterPlate = Path()
-                        filterPlate.move(to: CGPoint(x: beakerLeft + 2.5, y: filterY))
-                        filterPlate.addLine(to: CGPoint(x: beakerRight - 2.5, y: filterY))
-                        scaledCtx.stroke(filterPlate, with: goldGradient, lineWidth: 2.2)
-                        
-                        // Coarse mesh layers
-                        var filterMesh = Path()
-                        filterMesh.move(to: CGPoint(x: beakerLeft + 4.5, y: filterY + 2.5))
-                        filterMesh.addLine(to: CGPoint(x: beakerRight - 4.5, y: filterY + 2.5))
-                        scaledCtx.stroke(filterMesh, with: goldGradient, lineWidth: 1.0)
                     }
                 }
                 .frame(width: 196, height: 196)
