@@ -1,13 +1,6 @@
 import Foundation
 import SwiftUI
-
-/// Represents the supported brewing methods in the app.
-enum BrewMethod: String, CaseIterable, Codable {
-    case v60 = "V60"
-    case frenchPress = "FrenchPress"
-    case aeropress = "Aeropress"
-    case chemex = "Chemex"
-}
+import SwiftData
 
 @Observable
 @MainActor
@@ -17,6 +10,7 @@ final class HomeBrewViewModel: Identifiable {
     // MARK: - Properties
     var method: BrewMethod
     var beanWeight: Double
+    let initialBeanWeight: Double
     var ratio: Double
     var waterVolume: Double
     
@@ -58,7 +52,7 @@ final class HomeBrewViewModel: Identifiable {
         case .v60:
             return (customBloomDuration ?? Config.v60BloomDuration) + 105.0 // default remaining
         case .chemex:
-            return 240.0
+            return (customBloomDuration ?? 45.0) + (customSteepDuration ?? 195.0)
         case .frenchPress:
             let steep = customSteepDuration ?? Config.frenchPressSteepDuration
             let plunge = customPressDuration ?? Config.frenchPressPlungeDuration
@@ -137,6 +131,7 @@ final class HomeBrewViewModel: Identifiable {
     init(method: BrewMethod, beanWeight: Double, ratio: Double, waterVolume: Double) {
         self.method = method
         self.beanWeight = beanWeight
+        self.initialBeanWeight = beanWeight
         self.ratio = ratio
         self.waterVolume = waterVolume
     }
@@ -147,6 +142,19 @@ final class HomeBrewViewModel: Identifiable {
         self.customSteepDuration = steepDuration
         self.customPressDuration = pressDuration
         self.customPreInfusionActive = preInfusionActive
+    }
+
+    convenience init(template: BrewTemplate) {
+        self.init(
+            method: template.method,
+            beanWeight: template.beanWeight,
+            ratio: template.ratio,
+            waterVolume: template.waterVolume,
+            bloomDuration: template.preInfusionActive ? template.preInfusionDuration : 0.0,
+            steepDuration: template.steepDuration,
+            pressDuration: template.pressDuration,
+            preInfusionActive: template.preInfusionActive
+        )
     }
     
     // MARK: - Timer Controls
@@ -198,7 +206,7 @@ final class HomeBrewViewModel: Identifiable {
         startDate = nil
         timer?.invalidate()
         timer = nil
-        beanWeight = 8.0
+        beanWeight = initialBeanWeight
     }
     
     func skipPhase() {
@@ -255,6 +263,8 @@ final class HomeBrewViewModel: Identifiable {
                 return "Target: \(formattedGrams(targetWater))"
             } else if bloom > 0 && elapsed < bloom {
                 return "Bloom: Pour \(formattedGrams(bloomWater))"
+            } else if elapsed < (bloom > 0 ? bloom : 0.0) + 60.0 {
+                return "First Pour: Pour to \(formattedGrams(firstPourWater))"
             } else {
                 return "Drawdown: Pour to \(formattedGrams(targetWater))"
             }

@@ -14,6 +14,8 @@ final class BrewTemplate {
     var targetTemperature: Double
     var hapticFeedbackEnabled: Bool
     var autoSyncEnabled: Bool
+    var steepDuration: Double
+    var pressDuration: Double
     var createdAt: Date
 
     init(
@@ -27,7 +29,9 @@ final class BrewTemplate {
         preInfusionDuration: Double,
         targetTemperature: Double,
         hapticFeedbackEnabled: Bool,
-        autoSyncEnabled: Bool
+        autoSyncEnabled: Bool,
+        steepDuration: Double,
+        pressDuration: Double
     ) {
         self.id = id
         self.name = name
@@ -40,6 +44,8 @@ final class BrewTemplate {
         self.targetTemperature = targetTemperature
         self.hapticFeedbackEnabled = hapticFeedbackEnabled
         self.autoSyncEnabled = autoSyncEnabled
+        self.steepDuration = steepDuration
+        self.pressDuration = pressDuration
         self.createdAt = Date()
     }
 
