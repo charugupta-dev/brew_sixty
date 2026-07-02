@@ -49,19 +49,21 @@ struct RulerPicker: View {
                         let tickValue = range.lowerBound + Double(idx) * step
                         let isMajor = isMajorTick(tickValue)
                         
+                        let isActive = abs(value - tickValue) < 0.01
+                        
                         VStack(spacing: 4) {
                             if isMajor {
-                                Text(String(format: "%.1f", tickValue))
-                                    .font(.system(size: 8, design: .monospaced))
-                                    .foregroundStyle(Color.white.opacity(0.4))
+                                Text(String(format: "%.0f", tickValue))
+                                    .font(.system(size: isActive ? 11 : 9, weight: isActive ? .bold : .medium, design: .monospaced))
+                                    .foregroundStyle(isActive ? Color.primaryCopper : Color.coffeeCream.opacity(0.45))
                             } else {
                                 Text(" ")
                                     .font(.system(size: 8))
                             }
                             
                             Rectangle()
-                                .fill(isMajor ? Color.white.opacity(0.8) : Color.white.opacity(0.3))
-                                .frame(width: isMajor ? 1.5 : 1.0, height: isMajor ? 24 : 12)
+                                .fill(isActive ? Color.primaryCopper : (isMajor ? Color.coffeeCream.opacity(0.7) : Color.coffeeCream.opacity(0.24)))
+                                .frame(width: isMajor ? 1.5 : 1.0, height: isMajor ? (isActive ? 28 : 24) : 12)
                         }
                         .frame(width: itemWidth)
                         .contentShape(Rectangle())

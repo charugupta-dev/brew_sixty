@@ -180,15 +180,14 @@ struct MethodsView: View {
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
-                                Slider(value: $ratio, in: 12.0...20.0, step: 0.5)
-                                    .tint(Color.primaryCopper)
+                                PrecisionSlider(value: $ratio, range: 12.0...20.0, step: 0.5)
                                 
                                 HStack {
                                     Text("1:12")
                                     Spacer()
                                     Text("1:20")
                                 }
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             }
                         } else {
@@ -205,15 +204,14 @@ struct MethodsView: View {
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
-                                Slider(value: $waterVolume, in: 100.0...600.0, step: 10.0)
-                                    .tint(Color.primaryCopper)
+                                PrecisionSlider(value: $waterVolume, range: 100.0...600.0, step: 10.0)
                                 
                                 HStack {
                                     Text("100g")
                                     Spacer()
                                     Text("600g")
                                 }
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             }
                         }
@@ -243,8 +241,7 @@ struct MethodsView: View {
                                                 .foregroundStyle(Color.primaryCopper)
                                         }
                                         
-                                        Slider(value: $preInfusionDuration, in: 30.0...60.0, step: 5.0)
-                                            .tint(Color.primaryCopper)
+                                        PrecisionSlider(value: $preInfusionDuration, range: 30.0...60.0, step: 5.0)
                                     }
                                     .padding(.top, 4)
                                 }
@@ -263,15 +260,14 @@ struct MethodsView: View {
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
-                                Slider(value: $steepDuration, in: 10.0...480.0, step: 5.0)
-                                    .tint(Color.primaryCopper)
+                                PrecisionSlider(value: $steepDuration, range: 10.0...480.0, step: 5.0)
                                 
                                 HStack {
                                     Text("10s")
                                     Spacer()
                                     Text("8m")
                                 }
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
                                 
                                 if selectedMethod == .aeropress {
@@ -290,15 +286,14 @@ struct MethodsView: View {
                                                 .foregroundStyle(Color.primaryCopper)
                                         }
                                         
-                                        Slider(value: $pressDuration, in: 10.0...60.0, step: 5.0)
-                                            .tint(Color.primaryCopper)
+                                        PrecisionSlider(value: $pressDuration, range: 10.0...60.0, step: 5.0)
                                         
                                         HStack {
                                             Text("10s")
                                             Spacer()
                                             Text("60s")
                                         }
-                                        .font(.caption2)
+                                        .font(.system(.caption2, design: .monospaced))
                                         .foregroundStyle(Color.coffeeCream.opacity(0.3))
                                     }
                                 }
