@@ -390,8 +390,6 @@ struct TimerCircleView: View {
                     let scale = min(size.width, size.height) / baseSize * 1.15
                     let strokeColor = Color.coffeeCream.opacity(0.92)
                     let accentColor = Color.primaryCopper.opacity(0.95)
-                    let fillColor = Color.brushedCopper.opacity(0.78)
-                    let strokeWidth: CGFloat = 3
                     
                     if viewModel.method == .v60 || viewModel.method == .chemex {
                         var scaledCtx = ctx
@@ -694,10 +692,8 @@ struct TimerCircleView: View {
                         scaledCtx.scaleBy(x: scale, y: scale)
                         
                         let w: CGFloat = 200
-                        let h: CGFloat = 200
                         
                         let beakerW: CGFloat = 68
-                        let beakerH: CGFloat = 100
                         let centerX = w / 2
                         let beakerLeft = centerX - beakerW / 2
                         let beakerRight = centerX + beakerW / 2

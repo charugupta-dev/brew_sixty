@@ -74,44 +74,44 @@ struct MethodsView: View {
                             .tracking(1.0)
                             .padding(.horizontal)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(BrewMethod.allCases, id: \.self) { method in
-                                    Button {
-                                        withAnimation {
-                                            selectedMethod = method
-                                            if method == .v60 || method == .chemex {
-                                                preInfusionDuration = 45.0
-                                                preInfusionActive = true
-                                            } else if method == .frenchPress {
-                                                preInfusionDuration = 240.0
-                                                preInfusionActive = false
-                                            } else if method == .aeropress {
-                                                preInfusionDuration = 60.0
-                                                preInfusionActive = false
-                                            }
+                        HStack(spacing: 6) {
+                            ForEach(BrewMethod.allCases, id: \.self) { method in
+                                Button {
+                                    withAnimation {
+                                        selectedMethod = method
+                                        if method == .v60 || method == .chemex {
+                                            preInfusionDuration = 45.0
+                                            preInfusionActive = true
+                                        } else if method == .frenchPress {
+                                            preInfusionDuration = 240.0
+                                            preInfusionActive = false
+                                        } else if method == .aeropress {
+                                            preInfusionDuration = 60.0
+                                            preInfusionActive = false
                                         }
-                                    } label: {
-                                        Text(method.rawValue)
-                                            .font(.subheadline)
-                                            .fontWeight(.bold)
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 10)
-                                            .background(
-                                                Capsule()
-                                                    .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.55))
-                                            )
-                                            .foregroundStyle(selectedMethod == method ? Color.black : Color.white.opacity(0.8))
-                                            .overlay(
-                                                Capsule()
-                                                    .stroke(Color.white.opacity(selectedMethod == method ? 0.0 : 0.08), lineWidth: 1)
-                                            )
                                     }
-                                    .buttonStyle(.plain)
+                                } label: {
+                                    Text(method.rawValue)
+                                        .font(.system(size: 11, weight: .bold))
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.8)
+                                        .foregroundStyle(selectedMethod == method ? Color.black : Color.coffeeCream.opacity(0.8))
+                                        .padding(.horizontal, 4)
+                                        .padding(.vertical, 10)
+                                        .frame(maxWidth: .infinity)
+                                        .background(
+                                            Capsule()
+                                                .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.08))
+                                        )
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(Color.white.opacity(selectedMethod == method ? 0.0 : 0.08), lineWidth: 1)
+                                        )
                                 }
+                                .buttonStyle(.plain)
                             }
-                            .padding(.horizontal)
                         }
+                        .padding(.horizontal)
                     }
                     
                     // 3. Bean Weight (Stepped Scale Picker with presets)
@@ -138,65 +138,7 @@ struct MethodsView: View {
                     .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
-                    // 4. Dynamic Water Ratio / Weight Card
-                    VStack(alignment: .leading, spacing: 14) {
-                        if selectedMethod == .v60 || selectedMethod == .chemex {
-                            HStack {
-                                Text(AppConstants.Text.waterRatio)
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(Color.coffeeCream)
-                                    .tracking(1.0)
-                                Spacer()
-                                Text(String(format: "1:%.1f", ratio))
-                                    .font(.system(.headline, design: .monospaced))
-                                    .foregroundStyle(Color.primaryCopper)
-                            }
-                            
-                            Slider(value: $ratio, in: 12.0...20.0, step: 0.5)
-                                .tint(Color.primaryCopper)
-                            
-                            HStack {
-                                Text("1:12")
-                                Spacer()
-                                Text("1:20")
-                            }
-                            .font(.caption2)
-                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
-                        } else {
-                            HStack {
-                                Text(AppConstants.Text.targetWaterVolume)
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(Color.coffeeCream)
-                                    .tracking(1.0)
-                                Spacer()
-                                Text("\(Int(waterVolume))g")
-                                    .font(.system(.headline, design: .monospaced))
-                                    .foregroundStyle(Color.primaryCopper)
-                            }
-                            
-                            Slider(value: $waterVolume, in: 100.0...600.0, step: 10.0)
-                                .tint(Color.primaryCopper)
-                            
-                            HStack {
-                                Text("100g")
-                                Spacer()
-                                Text("600g")
-                            }
-                            .font(.caption2)
-                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
-                    )
-                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
-                    .padding(.horizontal)
-                    
-                    // 5. Target Temperature (Horizontal scrolling Ruler)
+                    // 4. Target Temperature (Horizontal scrolling Ruler)
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(AppConstants.Text.targetTemperature)
@@ -214,7 +156,6 @@ struct MethodsView: View {
                             .padding(.vertical, 8)
                     }
                     .padding()
-                  //  .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
                             .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
@@ -222,85 +163,149 @@ struct MethodsView: View {
                     .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
-                    // 6. Dynamic Pre-infusion / Steep Options Card
-                    VStack(alignment: .leading, spacing: 14) {
+                    // 5. Dynamic Brew Parameters Card (Combined Water Volume/Ratio and Pre-infusion/Steep Options)
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Section A: Water Ratio (V60/Chemex) or Target Water Volume (French Press/Aeropress)
                         if selectedMethod == .v60 || selectedMethod == .chemex {
-                            Toggle(isOn: $preInfusionActive) {
-                                Text("Pre-infusion Timer")
-                                    .font(.subheadline)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(Color.coffeeCream)
-                            }
-                            .tint(Color.primaryCopper)
-                            
-                            if preInfusionActive {
+                            VStack(alignment: .leading, spacing: 8) {
                                 HStack {
-                                    Text("BLOOM DURATION")
-                                        .font(.caption2)
-                                        .foregroundStyle(Color.coffeeCream)
-                                    Spacer()
-                                     Text("\(Int(preInfusionDuration))s")
-                                         .font(.system(.subheadline, design: .monospaced))
-                                        .foregroundStyle(Color.primaryCopper)
-                                }
-                                
-                                Slider(value: $preInfusionDuration, in: 30.0...60.0, step: 5.0)
-                                    .tint(Color.primaryCopper)
-                            }
-                        } else {
-                            HStack {
-                                Text("STEEP DURATION")
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(Color.coffeeCream)
-                                    .tracking(1.0)
-                                Spacer()
-                                 Text("\(Int(steepDuration))s")
-                                     .font(.system(.headline, design: .monospaced))
-                                    .foregroundStyle(Color.primaryCopper)
-                            }
-                            
-                            Slider(value: $steepDuration, in: 10.0...480.0, step: 5.0)
-                                .tint(Color.primaryCopper)
-                            
-                            HStack {
-                                Text("10s")
-                                Spacer()
-                                Text("8m")
-                            }
-                            .font(.caption2)
-                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
-                            
-                            if selectedMethod == .aeropress {
-                                Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
-                                
-                                HStack {
-                                    Text("PRESS DURATION")
+                                    Text(AppConstants.Text.waterRatio)
                                         .font(.caption2)
                                         .fontWeight(.bold)
                                         .foregroundStyle(Color.coffeeCream)
                                         .tracking(1.0)
                                     Spacer()
-                                     Text("\(Int(pressDuration))s")
-                                         .font(.system(.headline, design: .monospaced))
+                                    Text(String(format: "1:%.1f", ratio))
+                                        .font(.system(.headline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
-                                Slider(value: $pressDuration, in: 10.0...60.0, step: 5.0)
+                                Slider(value: $ratio, in: 12.0...20.0, step: 0.5)
                                     .tint(Color.primaryCopper)
                                 
                                 HStack {
-                                    Text("10s")
+                                    Text("1:12")
                                     Spacer()
-                                    Text("60s")
+                                    Text("1:20")
+                                }
+                                .font(.caption2)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text(AppConstants.Text.targetWaterVolume)
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(Color.coffeeCream)
+                                        .tracking(1.0)
+                                    Spacer()
+                                    Text("\(Int(waterVolume))g")
+                                        .font(.system(.headline, design: .monospaced))
+                                        .foregroundStyle(Color.primaryCopper)
+                                }
+                                
+                                Slider(value: $waterVolume, in: 100.0...600.0, step: 10.0)
+                                    .tint(Color.primaryCopper)
+                                
+                                HStack {
+                                    Text("100g")
+                                    Spacer()
+                                    Text("600g")
                                 }
                                 .font(.caption2)
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             }
                         }
+                        
+                        Divider().background(Color.white.opacity(0.1))
+                        
+                        // Section B: Bloom toggle or Steep slider
+                        if selectedMethod == .v60 || selectedMethod == .chemex {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Toggle(isOn: $preInfusionActive) {
+                                    Text("Pre-infusion Timer")
+                                        .font(.subheadline)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(Color.coffeeCream)
+                                }
+                                .tint(Color.primaryCopper)
+                                
+                                if preInfusionActive {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text("BLOOM DURATION")
+                                                .font(.caption2)
+                                                .foregroundStyle(Color.coffeeCream)
+                                            Spacer()
+                                            Text("\(Int(preInfusionDuration))s")
+                                                .font(.system(.subheadline, design: .monospaced))
+                                                .foregroundStyle(Color.primaryCopper)
+                                        }
+                                        
+                                        Slider(value: $preInfusionDuration, in: 30.0...60.0, step: 5.0)
+                                            .tint(Color.primaryCopper)
+                                    }
+                                    .padding(.top, 4)
+                                }
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("STEEP DURATION")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(Color.coffeeCream)
+                                        .tracking(1.0)
+                                    Spacer()
+                                    Text("\(Int(steepDuration))s")
+                                        .font(.system(.headline, design: .monospaced))
+                                        .foregroundStyle(Color.primaryCopper)
+                                }
+                                
+                                Slider(value: $steepDuration, in: 10.0...480.0, step: 5.0)
+                                    .tint(Color.primaryCopper)
+                                
+                                HStack {
+                                    Text("10s")
+                                    Spacer()
+                                    Text("8m")
+                                }
+                                .font(.caption2)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
+                                
+                                if selectedMethod == .aeropress {
+                                    Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
+                                    
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text("PRESS DURATION")
+                                                .font(.caption2)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(Color.coffeeCream)
+                                                .tracking(1.0)
+                                            Spacer()
+                                            Text("\(Int(pressDuration))s")
+                                                .font(.system(.headline, design: .monospaced))
+                                                .foregroundStyle(Color.primaryCopper)
+                                        }
+                                        
+                                        Slider(value: $pressDuration, in: 10.0...60.0, step: 5.0)
+                                            .tint(Color.primaryCopper)
+                                        
+                                        HStack {
+                                            Text("10s")
+                                            Spacer()
+                                            Text("60s")
+                                        }
+                                        .font(.caption2)
+                                        .foregroundStyle(Color.coffeeCream.opacity(0.3))
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding()
-                //    .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
                             .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
