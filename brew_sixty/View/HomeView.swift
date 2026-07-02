@@ -14,7 +14,7 @@ struct HomeView: View {
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width - 64
-            let cardToTabBarSpacing: CGFloat = -15
+            let cardToTabBarSpacing: CGFloat = 30
             
             // Map SwiftData templates dynamically to HomeBrewViewModel instances
             let viewModels: [HomeBrewViewModel] = templates.map { template in
@@ -27,11 +27,11 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     // Header Section matching the mock large serif title
                     Text(AppConstants.Text.helloCharu)
-                        .font(.system(.largeTitle, design: .serif))
+                        .font(.system(.title3, design: .serif))
                         .fontWeight(.medium)
-                        .foregroundStyle(Color.coffeeCream)
+                        .foregroundStyle(Color.coffeeCream.opacity(0.60))
                         .padding(.horizontal, 24)
-                        .padding(.top, 14)
+                        .padding(.top, 6)
                     
                     if viewModels.isEmpty {
                         VStack(spacing: 20) {
@@ -223,34 +223,39 @@ struct LiveTimerCard: View {
                 
                 // Reset & Skip buttons shown only when timer is running or has elapsed
                 if viewModel.isRunning || viewModel.elapsed > 0 {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 16) {
+                        Spacer()
+                        
                         Button {
                             viewModel.resetTimer()
                         } label: {
                             Text(AppConstants.Text.reset)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Color.coffeeCream)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(Color.white.opacity(0.05), in: Capsule())
-                                .liquidGlassBorder(cornerRadius: 20)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    Capsule()
+                                        .stroke(Color.coffeeCream.opacity(0.18), lineWidth: 1)
+                                )
                         }
                         
                         Button {
                             viewModel.skipPhase()
                         } label: {
                             Text(AppConstants.Text.skipPhase)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Color.coffeeCream)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(Color.white.opacity(0.05), in: Capsule())
-                                .liquidGlassBorder(cornerRadius: 20)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    Capsule()
+                                        .stroke(Color.coffeeCream.opacity(0.18), lineWidth: 1)
+                                )
                         }
+                        
+                        Spacer()
                     }
-                    .padding(.horizontal, 16)
                     .padding(.top, 4)
                     .transition(.opacity)
                 }
