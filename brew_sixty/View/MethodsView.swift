@@ -57,17 +57,17 @@ struct MethodsView: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                            RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                         )
-                        .liquidGlassBorder(cornerRadius: 16)
+                        .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal)
                     
                     // 2. Select Method Buttons
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("SELECT METHOD")
+                        Text(AppConstants.Text.selectMethod)
                             .font(.caption2)
                             .fontWeight(.bold)
                             .foregroundStyle(.white)
@@ -117,7 +117,7 @@ struct MethodsView: View {
                     // 3. Bean Weight (Stepped Scale Picker with presets)
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Text("BEAN WEIGHT")
+                            Text(AppConstants.Text.beanWeight)
                                 .font(.caption2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
@@ -128,96 +128,21 @@ struct MethodsView: View {
                                 .foregroundStyle(Color.primaryCopper)
                         }
                         
-                        // Tactile Steppers + Digital Scale Display
-                        HStack(spacing: 16) {
-                            Button {
-                                if beanWeight > 1.0 {
-                                    beanWeight = max(1.0, beanWeight - 0.5)
-                                    UISelectionFeedbackGenerator().selectionChanged()
-                                }
-                            } label: {
-                                Image(systemName: "minus")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 40, height: 40)
-                                    .background(Color.white.opacity(0.06))
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
-                            }
-                            
-                            Spacer()
-                            
-                            VStack(spacing: 2) {
-                                Text(String(format: "%.1f", beanWeight))
-                                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                                    .foregroundStyle(.white)
-                                Text("GRAMS")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .foregroundStyle(Color.primaryCopper)
-                                    .tracking(1.5)
-                            }
-                            
-                            Spacer()
-                            
-                            Button {
-                                if beanWeight < 40.0 {
-                                    beanWeight = min(40.0, beanWeight + 0.5)
-                                    UISelectionFeedbackGenerator().selectionChanged()
-                                }
-                            } label: {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 40, height: 40)
-                                    .background(Color.white.opacity(0.06))
-                                    .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
-                            }
-                        }
-                        .padding(.vertical, 4)
-                        
-                        // Standard Coffee Dose Capsules
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach([12.0, 15.0, 18.0, 20.0, 30.0], id: \.self) { preset in
-                                    let isSelected = abs(beanWeight - preset) < 0.01
-                                    Button {
-                                        withAnimation(.easeOut(duration: 0.15)) {
-                                            beanWeight = preset
-                                            UISelectionFeedbackGenerator().selectionChanged()
-                                        }
-                                    } label: {
-                                        Text(String(format: "%.0fg", preset))
-                                            .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .monospaced))
-                                            .foregroundStyle(isSelected ? .black : .white.opacity(0.65))
-                                            .padding(.horizontal, 14)
-                                            .padding(.vertical, 6)
-                                            .background(
-                                                Capsule()
-                                                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.04))
-                                            )
-                                            .overlay(
-                                                Capsule()
-                                                    .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
-                                            )
-                                    }
-                                }
-                            }
-                        }
+                        SteppedWeightPicker(value: $beanWeight)
                     }
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
                     // 4. Dynamic Water Ratio / Weight Card
                     VStack(alignment: .leading, spacing: 14) {
                         if selectedMethod == .v60 || selectedMethod == .chemex {
                             HStack {
-                                Text("WATER RATIO")
+                                Text(AppConstants.Text.waterRatio)
                                     .font(.caption2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(.white)
@@ -240,7 +165,7 @@ struct MethodsView: View {
                             .foregroundStyle(.white.opacity(0.3))
                         } else {
                             HStack {
-                                Text("TARGET WATER VOLUME")
+                                Text(AppConstants.Text.targetWaterVolume)
                                     .font(.caption2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(.white)
@@ -265,16 +190,16 @@ struct MethodsView: View {
                     }
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
                     // 5. Target Temperature (Horizontal scrolling Ruler)
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
-                            Text("TARGET TEMPERATURE")
+                            Text(AppConstants.Text.targetTemperature)
                                 .font(.caption2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
@@ -291,10 +216,10 @@ struct MethodsView: View {
                     .padding()
                   //  .premiumCardBackground(cornerRadius: 16)
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
                     // 6. Dynamic Pre-infusion / Steep Options Card
@@ -377,15 +302,15 @@ struct MethodsView: View {
                     .padding()
                 //    .premiumCardBackground(cornerRadius: 16)
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
                     // Recipe Name Card
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("RECIPE NAME")
+                        Text(AppConstants.Text.recipeName)
                             .font(.caption2)
                             .fontWeight(.bold)
                             .foregroundStyle(.white)
@@ -400,10 +325,10 @@ struct MethodsView: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: 16)
+                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
                     
                     // 8. Save Button
@@ -413,7 +338,7 @@ struct MethodsView: View {
                         HStack {
                             Spacer()
                             Image(systemName: "square.and.arrow.down.fill")
-                            Text("SAVE TEMPLATE")
+                            Text(AppConstants.Text.saveTemplate)
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Spacer()
