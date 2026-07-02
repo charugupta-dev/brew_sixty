@@ -372,7 +372,7 @@ struct TimerCircleView: View {
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(
-                        LinearGradient(colors: [Color.primaryCopper, Color.brushedCopper], startPoint: .top, endPoint: .bottom),
+                        LinearGradient(colors: [Color.appTertiary, Color.appSecondary.opacity(0.8)], startPoint: .top, endPoint: .bottom),
                         style: StrokeStyle(lineWidth: 8, lineCap: .round)
                     )
                     .frame(width: 228, height: 228)

@@ -9,17 +9,23 @@ import SwiftUI
 
 extension Color {
     /// Warm Coffee Accent Color
-    static let coffeeAccent = Color(red: 0.62, green: 0.44, blue: 0.32)
+    static let coffeeAccent = Color(red: 0.65, green: 0.41, blue: 0.20)      // #A56933: Coffee Caramel
     
-    /// Coffee Cream color for text and highlights
-    static let coffeeCream = Color(red: 0.92, green: 0.85, blue: 0.78)
+    /// Coffee Cream color for text and highlights (Warm ivory/cream #ECE5DD)
+    static let coffeeCream = Color(red: 0.93, green: 0.90, blue: 0.87)
     
     /// Coffee Peach color token
     static let coffeePeach = Color(red: 0.94, green: 0.67, blue: 0.48)
     
-    /// Copper color tokens (warm latte-gold / honey-amber)
-    static let primaryCopper = Color(red: 0.82, green: 0.62, blue: 0.34)
-    static let brushedCopper = Color(red: 0.90, green: 0.75, blue: 0.48)
+    /// Custom palette from user upload
+    static let appPrimary = Color(red: 0.65, green: 0.41, blue: 0.20)      // #A56933: Coffee Caramel
+    static let appSecondary = Color(red: 0.43, green: 0.47, blue: 0.54)    // #6D788A: Slate Steel
+    static let appTertiary = Color(red: 0.20, green: 0.48, blue: 0.75)     // #337ABE: Sky Blue
+    static let appNeutral = Color(red: 0.54, green: 0.45, blue: 0.36)      // #89735C: Clay Brown
+    
+    /// Copper color tokens (Option 1 Warm Amber & Gold)
+    static let primaryCopper = Color.appPrimary
+    static let brushedCopper = Color.appNeutral
 }
 
 extension RadialGradient {
@@ -76,6 +82,68 @@ extension View {
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+}
+
+#Preview {
+    ZStack {
+        // Static background representing the slate-blue theme
+        LinearGradient(
+            colors: [Color(red: 0.05, green: 0.05, blue: 0.05), Color(red: 0.08, green: 0.09, blue: 0.12)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        
+        VStack(spacing: 28) {
+            Text("Custom Coffee Theme")
+                .font(.system(.title2, design: .serif))
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+            
+            HStack(spacing: 12) {
+                colorSwatch(name: "Primary", color: .appPrimary)
+                colorSwatch(name: "Secondary", color: .appSecondary)
+                colorSwatch(name: "Tertiary", color: .appTertiary)
+                colorSwatch(name: "Neutral", color: .appNeutral)
+            }
+            
+            VStack(spacing: 8) {
+                Text("Liquid Glass Border")
+                    .font(.system(.subheadline, design: .serif))
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                Text("Translucent Overlay (15% Opacity)")
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding()
+            .frame(width: 240, height: 110)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.15))
+            )
+            .liquidGlassBorder(cornerRadius: 16)
+        }
+        .padding()
+    }
+}
+
+@ViewBuilder
+private func colorSwatch(name: String, color: Color) -> some View {
+    VStack(spacing: 6) {
+        RoundedRectangle(cornerRadius: 10)
+            .fill(color)
+            .frame(width: 65, height: 65)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white.opacity(0.15), lineWidth: 1)
+            )
+        
+        Text(name)
+            .font(.system(size: 9, weight: .medium))
+            .foregroundStyle(.white.opacity(0.7))
+            .multilineTextAlignment(.center)
     }
 }
 
