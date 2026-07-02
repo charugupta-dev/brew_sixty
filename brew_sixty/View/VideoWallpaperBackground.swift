@@ -22,14 +22,15 @@ struct VideoWallpaperBackground: View {
     var body: some View {
         ZStack {
             LoopingVideoPlayerView()
+                .blur(radius: 18)
 
-            Color.black.opacity(0.34)
+            Color.black.opacity(0.68)
 
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.38),
+                    Color.black.opacity(0.65),
                     Color.clear,
-                    Color.black.opacity(0.48)
+                    Color.black.opacity(0.8)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -115,7 +116,7 @@ private final class SeamlessVideoLoopController {
     
     func play() {
         observeActivePlayer()
-        activePlayer.playImmediately(atRate: 1.0)
+        activePlayer.playImmediately(atRate: 0.45)
     }
     
     func stop() {
@@ -172,7 +173,7 @@ private final class SeamlessVideoLoopController {
         isCrossfading = true
         
         standbyPlayer.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
-        standbyPlayer.playImmediately(atRate: 1.0)
+        standbyPlayer.playImmediately(atRate: 0.45)
         
         standbyView.alpha = 0
         UIView.animate(withDuration: overlapDuration, delay: 0, options: [.curveLinear]) {
@@ -194,7 +195,7 @@ private final class SeamlessVideoLoopController {
         isCrossfading = false
         
         observeActivePlayer()
-        activePlayer.playImmediately(atRate: 1.0)
+        activePlayer.playImmediately(atRate: 0.45)
     }
     
     private func removeObserverIfNeeded() {
