@@ -594,9 +594,14 @@ struct TimerCircleView: View {
                         }
                         
                         // 3. DRAW CONSTELLATION FLOW (Only when running)
-                        if isRunning {
-                            let p0 = CGPoint(x: 94.0 + kettleOffsetX, y: 61.0 + kettleOffsetY)  // spout tip moves with kettle
-                            let p1 = CGPoint(x: 45.0 + kettleOffsetX * 0.5, y: 85.0 + kettleOffsetY * 0.5) // waves trail
+                        let showStream = isRunning || (viewModel.elapsed > 0 && viewModel.elapsed < viewModel.totalDuration)
+                        
+                        if showStream {
+                            let animTime = isRunning ? time : (time * 0.05) // slow crawl on pause
+                            let overallOpacity = isRunning ? 1.0 : 0.20 // softened dim stream on pause
+                            
+                            let p0 = CGPoint(x: 94.0 + kettleOffsetX, y: 61.0 + kettleOffsetY)
+                            let p1 = CGPoint(x: 45.0 + kettleOffsetX * 0.5, y: 85.0 + kettleOffsetY * 0.5)
                             let p2 = CGPoint(x: 155.0, y: 115.0)
                             let p3: CGPoint
                             if viewModel.method == .chemex {
@@ -617,25 +622,27 @@ struct TimerCircleView: View {
                                 )
                             }
                             
-                            let particleCount = 28
+                            // 1. Tighter stream: lower particle count (28 -> 18) for elegancy
+                            let particleCount = 18
                             var points: [CGPoint] = []
                             let flowSpeed = 0.22
+                            let isBloom = viewModel.getPhaseText().localizedCaseInsensitiveContains("bloom")
                             
                             for i in 0..<particleCount {
                                 let offset = Double(i) / Double(particleCount)
-                                let p = (offset + time * flowSpeed).truncatingRemainder(dividingBy: 1.0)
+                                let p = (offset + animTime * flowSpeed).truncatingRemainder(dividingBy: 1.0)
                                 let basePt = bezierPoint(t: p, p0: p0, p1: p1, p2: p2, p3: p3)
                                 
-                                // Spiral rotation and squashed y-axis for 3D illusion
-                                let angle = p * 14.0 * .pi + time * 5.0 + Double(i) * 0.9
-                                let radius = sin(p * .pi) * 15.0 + 1.0
+                                // 2. Tighter stream: smaller spiral radius (15.0 -> 4.0)
+                                let angle = p * 14.0 * .pi + animTime * 5.0 + Double(i) * 0.9
+                                let radius = sin(p * .pi) * 4.0 + 0.5
                                 let dx = cos(angle) * radius
                                 let dy = sin(angle) * radius * 0.35
                                 
                                 points.append(CGPoint(x: basePt.x + dx, y: basePt.y + dy))
                             }
                             
-                            // Draw thin connecting wireframe lines
+                            // Draw thin connecting wireframe lines with soft fade near the bottom
                             for i in 0..<particleCount {
                                 for j in (i + 1)..<particleCount {
                                     let pi = points[i]
@@ -644,42 +651,59 @@ struct TimerCircleView: View {
                                     let dy = pi.y - pj.y
                                     let dist = sqrt(dx*dx + dy*dy)
                                     
-                                    if dist < 17.0 {
-                                        var linePath = Path()
-                                        linePath.move(to: pi)
-                                        linePath.addLine(to: pj)
+                                    if dist < 18.0 {
+                                        // Calculate progress p for the line
+                                        let p = Double(i) / Double(particleCount)
+                                        let bloomScale = isBloom ? max(0.0, 1.0 - p * 2.2) : 1.0
+                                        let lineOpacity = (17.0 - dist) / 17.0 * 0.45 * (1.0 - pow(p, 3.0)) * bloomScale * overallOpacity
                                         
-                                        let alpha = (17.0 - dist) / 17.0 * 0.45
-                                        scaledCtx.stroke(linePath, with: .color(Color.primaryCopper.opacity(alpha)), lineWidth: 0.8)
+                                        if lineOpacity > 0.01 {
+                                            var linePath = Path()
+                                            linePath.move(to: pi)
+                                            linePath.addLine(to: pj)
+                                            scaledCtx.stroke(linePath, with: .color(Color.primaryCopper.opacity(lineOpacity)), lineWidth: 0.8)
+                                        }
                                     }
                                 }
                             }
                             
-                            // Draw spheres with metallic specular highlight
+                            // Draw spheres with metallic specular highlight and tapering sizes + fades
                             for i in 0..<particleCount {
                                 let pt = points[i]
-                                let p = (Double(i) / Double(particleCount) + time * flowSpeed).truncatingRemainder(dividingBy: 1.0)
-                                let r: CGFloat = 2.0 + CGFloat(sin(p * .pi) * 1.5)
+                                let p = (Double(i) / Double(particleCount) + animTime * flowSpeed).truncatingRemainder(dividingBy: 1.0)
                                 
-                                var spherePath = Path()
-                                spherePath.addArc(
-                                    center: pt,
-                                    radius: r,
-                                    startAngle: .degrees(0),
-                                    endAngle: .degrees(360),
-                                    clockwise: false
-                                )
-                                scaledCtx.fill(spherePath, with: goldGradient)
+                                // 3. Tapering size: droplets get smaller down the stream
+                                let scaleFactor = 1.0 - (p * 0.6) // tapers from 100% to 40% at bottom
+                                let r: CGFloat = (1.6 + CGFloat(sin(p * .pi) * 1.0)) * CGFloat(scaleFactor)
                                 
-                                var highlightPath = Path()
-                                highlightPath.addArc(
-                                    center: CGPoint(x: pt.x - r * 0.3, y: pt.y - r * 0.3),
-                                    radius: r * 0.3,
-                                    startAngle: .degrees(0),
-                                    endAngle: .degrees(360),
-                                    clockwise: false
-                                )
-                                scaledCtx.fill(highlightPath, with: .color(.white.opacity(0.8)))
+                                // Bloom & Pause opacity fades
+                                let bloomScale = isBloom ? max(0.0, 1.0 - p * 2.2) : 1.0
+                                let opacity = (1.0 - pow(p, 3.0)) * bloomScale * overallOpacity
+                                
+                                if opacity > 0.01 {
+                                    var spherePath = Path()
+                                    spherePath.addArc(
+                                        center: pt,
+                                        radius: r,
+                                        startAngle: .degrees(0),
+                                        endAngle: .degrees(360),
+                                        clockwise: false
+                                    )
+                                    
+                                    var particleCtx = scaledCtx
+                                    particleCtx.opacity = opacity
+                                    particleCtx.fill(spherePath, with: goldGradient)
+                                    
+                                    var highlightPath = Path()
+                                    highlightPath.addArc(
+                                        center: CGPoint(x: pt.x - r * 0.3, y: pt.y - r * 0.3),
+                                        radius: r * 0.3,
+                                        startAngle: .degrees(0),
+                                        endAngle: .degrees(360),
+                                        clockwise: false
+                                    )
+                                    particleCtx.fill(highlightPath, with: .color(.white.opacity(0.8)))
+                                }
                             }
                         }
                     } else {
