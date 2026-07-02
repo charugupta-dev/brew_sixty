@@ -747,6 +747,7 @@ struct TimerCircleView: View {
                     } else {
                         // French Press or Aeropress Plunger Animation
                         var scaledCtx = ctx
+                        let isRunning = viewModel.isRunning
                         scaledCtx.translateBy(
                             x: (size.width - (baseSize * scale)) / 2,
                             y: (size.height - (baseSize * scale)) / 2
@@ -769,20 +770,123 @@ struct TimerCircleView: View {
                         )
                         
                         if viewModel.method == .aeropress {
-                            // Draw Aeropress Outline Silhouette
-                            var aeroPath = Path()
-                            // Outer Chamber
-                            aeroPath.addRect(CGRect(x: centerX - 18, y: beakerTop + 10, width: 36, height: 60))
-                            // Inner Plunger
-                            aeroPath.addRect(CGRect(x: centerX - 15, y: beakerTop - 10, width: 30, height: 40))
-                            // Plunger Cap
-                            aeroPath.addRect(CGRect(x: centerX - 20, y: beakerTop - 15, width: 40, height: 5))
-                            // Filter Cap at bottom
-                            aeroPath.addRect(CGRect(x: centerX - 20, y: beakerTop + 70, width: 40, height: 8))
-                            scaledCtx.stroke(aeroPath, with: goldGradient, lineWidth: 1.5)
+                            // 1. ANIMATION PROGRESS
+                            let fpSteepDuration: TimeInterval = viewModel.customSteepDuration ?? (viewModel.method == .aeropress ? 60.0 : 240.0)
+                            let fpPlungeDuration: TimeInterval = viewModel.customPressDuration ?? (viewModel.method == .aeropress ? 30.0 : 15.0)
+                            
+                            let pressProgress: Double = {
+                                if viewModel.elapsed < fpSteepDuration {
+                                    return 0.0
+                                } else {
+                                    return min((viewModel.elapsed - fpSteepDuration) / fpPlungeDuration, 1.0)
+                                }
+                            }()
+                            
+                            let chamberTop: CGFloat = 80
+                            let chamberBottom: CGFloat = 145
+                            let chamberW: CGFloat = 40
+                            let chamberLeft = centerX - chamberW / 2
+                            let chamberRight = centerX + chamberW / 2
+                            
+                            // Plunger seal position descends from chamberTop + 5 to chamberBottom - 6
+                            let plungerY = chamberTop + 5.0 + (chamberBottom - 6.0 - (chamberTop + 5.0)) * CGFloat(pressProgress)
+                            
+                            // 2. LIQUID FILLS
+                            // Coffee inside the chamber (shrinks as plunger descends)
+                            if plungerY < chamberBottom {
+                                var chamberCoffeePath = Path()
+                                chamberCoffeePath.addRect(CGRect(x: chamberLeft + 1.5, y: plungerY, width: chamberW - 3.0, height: chamberBottom - plungerY))
+                                
+                                // Subtle wave animation during steep phase
+                                let coffeeFillColor = Color(red: 0.18, green: 0.12, blue: 0.08).opacity(0.68)
+                                scaledCtx.fill(chamberCoffeePath, with: .color(coffeeFillColor))
+                            }
+                            
+                            // Coffee rising inside the receiving cup below
+                            let cupRimY: CGFloat = 168
+                            let cupBottomY: CGFloat = 193
+                            let cupW: CGFloat = 44
+                            let cupLeft = centerX - cupW / 2
+                            let cupRight = centerX + cupW / 2
+                            
+                            if pressProgress > 0 {
+                                let cupFillHeight = (cupBottomY - cupRimY - 4.0) * CGFloat(pressProgress)
+                                let cupFillY = cupBottomY - cupFillHeight
+                                var cupCoffeePath = Path()
+                                cupCoffeePath.addRect(CGRect(x: cupLeft + 2.0, y: cupFillY, width: cupW - 4.0, height: cupFillHeight))
+                                scaledCtx.fill(cupCoffeePath, with: .color(Color(red: 0.28, green: 0.18, blue: 0.12).opacity(0.55)))
+                            }
+                            
+                            // 3. MECHANICAL PLUNGER DESCENT
+                            // Plunger Inner Body (hollow core)
+                            var plungerBody = Path()
+                            plungerBody.addRect(CGRect(x: centerX - 16, y: plungerY - 50, width: 32, height: 50))
+                            scaledCtx.stroke(plungerBody, with: goldGradient, lineWidth: 1.2)
+                            
+                            // Plunger Top Flange / Button
+                            var plungerFlange = Path()
+                            plungerFlange.addRect(CGRect(x: centerX - 22, y: plungerY - 55, width: 44, height: 5))
+                            scaledCtx.fill(plungerFlange, with: goldGradient)
+                            
+                            // Plunger Rubber Seal (black/dark copper line at the bottom of the plunger)
+                            var plungerSeal = Path()
+                            plungerSeal.addRect(CGRect(x: chamberLeft + 1.0, y: plungerY - 3.0, width: chamberW - 2.0, height: 6.0))
+                            scaledCtx.fill(plungerSeal, with: .color(Color.primaryCopper))
+                            
+                            // 4. OUTER CHAMBER SILHOUETTE
+                            var chamberPath = Path()
+                            // Left and Right walls
+                            chamberPath.move(to: CGPoint(x: chamberLeft, y: chamberTop))
+                            chamberPath.addLine(to: CGPoint(x: chamberLeft, y: chamberBottom))
+                            chamberPath.move(to: CGPoint(x: chamberRight, y: chamberTop))
+                            chamberPath.addLine(to: CGPoint(x: chamberRight, y: chamberBottom))
+                            // Top lip flange
+                            chamberPath.move(to: CGPoint(x: chamberLeft - 6, y: chamberTop))
+                            chamberPath.addLine(to: CGPoint(x: chamberRight + 6, y: chamberTop))
+                            
+                            scaledCtx.stroke(chamberPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.8)
+                            
+                            // Filter Cap at bottom (black grid attachment)
+                            var filterCap = Path()
+                            filterCap.addRect(CGRect(x: centerX - 22, y: chamberBottom, width: 44, height: 8))
+                            scaledCtx.fill(filterCap, with: .color(Color.primaryCopper.opacity(0.35)))
+                            scaledCtx.stroke(filterCap, with: goldGradient, lineWidth: 1.2)
+                            
+                            // 5. HIGH-PRESSURE OUTPUT STREAM (During Press)
+                            let isPressing = viewModel.elapsed >= fpSteepDuration && viewModel.elapsed < (fpSteepDuration + fpPlungeDuration)
+                            if isPressing && isRunning {
+                                // Dynamic thin drop lines from filter cap to cup
+                                var streamPath = Path()
+                                for offset in [-6.0, 0.0, 6.0] {
+                                    // Add minor noise oscillation
+                                    let drift = sin(time * 25.0 + offset) * 0.8
+                                    streamPath.move(to: CGPoint(x: centerX + offset + drift, y: chamberBottom + 8))
+                                    streamPath.addLine(to: CGPoint(x: centerX + offset + drift, y: cupRimY))
+                                }
+                                scaledCtx.stroke(streamPath, with: .color(Color.primaryCopper.opacity(0.75)), lineWidth: 1.2)
+                            }
+                            
+                            // 6. RECEIVING MUG/CUP BELOW
+                            var cupPath = Path()
+                            // Cup rim ellipse
+                            cupPath.addEllipse(in: CGRect(x: cupLeft, y: cupRimY - 4.0, width: cupW, height: 8.0))
+                            // Cup body walls
+                            cupPath.move(to: CGPoint(x: cupLeft, y: cupRimY))
+                            cupPath.addLine(to: CGPoint(x: cupLeft, y: cupBottomY))
+                            cupPath.addLine(to: CGPoint(x: cupRight, y: cupBottomY))
+                            cupPath.addLine(to: CGPoint(x: cupRight, y: cupRimY))
+                            
+                            scaledCtx.stroke(cupPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.5)
+                            
+                            // Mug handle on the right
+                            var cupHandle = Path()
+                            cupHandle.move(to: CGPoint(x: cupRight, y: cupRimY + 5.0))
+                            cupHandle.addCurve(to: CGPoint(x: cupRight, y: cupBottomY - 5.0),
+                                               control1: CGPoint(x: cupRight + 12, y: cupRimY + 3.0),
+                                               control2: CGPoint(x: cupRight + 12, y: cupBottomY - 3.0))
+                            scaledCtx.stroke(cupHandle, with: goldGradient, lineWidth: 1.5)
                         } else {
                             // French Press Plunger Animation
-                            let isRunning = viewModel.isRunning
                             
                             let fpSteepDuration: TimeInterval = viewModel.customSteepDuration ?? (viewModel.method == .frenchPress ? 240.0 : 60.0)
                             let fpPlungeDuration: TimeInterval = viewModel.customPressDuration ?? (viewModel.method == .frenchPress ? 15.0 : 30.0)
@@ -956,5 +1060,3 @@ struct TimerCircleView: View {
         }
     }
 }
-
-
