@@ -11,22 +11,26 @@ struct PrecisionSlider: View {
             let rangeSpan = range.upperBound - range.lowerBound
             let progress = CGFloat((value - range.lowerBound) / rangeSpan)
             let clampedProgress = min(max(progress, 0), 1)
-            let thumbSize: CGFloat = 20
+            let thumbSize: CGFloat = 22
             
             ZStack(alignment: .leading) {
-                // Track Background with subtle tick marks
+                // Recessed slot track background
                 ZStack {
                     Capsule()
-                        .fill(Color.white.opacity(0.06))
-                        .frame(height: 6)
+                        .fill(Color.black.opacity(0.35))
+                        .frame(height: 8)
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
                     
                     // Subtle tick lines along the track to add technical precision
                     HStack(spacing: 0) {
-                        let ticks = 7
+                        let ticks = 9 // Increased tick count for more detailed ruler divisions
                         ForEach(0..<ticks, id: \.self) { idx in
                             Rectangle()
-                                .fill(Color.coffeeCream.opacity(0.14))
-                                .frame(width: 1.5, height: 6)
+                                .fill(Color.coffeeCream.opacity(0.18))
+                                .frame(width: 1.5, height: 8)
                             if idx < ticks - 1 {
                                 Spacer()
                             }
@@ -43,9 +47,9 @@ struct PrecisionSlider: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: clampedProgress * width, height: 6)
+                    .frame(width: clampedProgress * width, height: 8)
                 
-                // Glowing Thumb Handle
+                // Technical Precision Knurled Thumb Handle
                 Circle()
                     .fill(Color.coffeeCream)
                     .frame(width: thumbSize, height: thumbSize)
@@ -53,7 +57,12 @@ struct PrecisionSlider: View {
                         Circle()
                             .stroke(Color.primaryCopper, lineWidth: 2)
                     )
-                    .shadow(color: Color.primaryCopper.opacity(0.4), radius: 3)
+                    .overlay(
+                        Circle()
+                            .fill(Color.primaryCopper)
+                            .frame(width: 6, height: 6) // Center precision point alignment dot
+                    )
+                    .shadow(color: Color.black.opacity(0.4), radius: 3, x: 0, y: 2)
                     .offset(x: clampedProgress * (width - thumbSize))
                     .gesture(
                         DragGesture(minimumDistance: 0)
