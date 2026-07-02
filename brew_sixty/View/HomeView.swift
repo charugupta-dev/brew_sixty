@@ -151,7 +151,7 @@ struct LiveTimerCard: View {
                     // Recipe info overlays
                     VStack(spacing: 6) {
                         Text(formatTime(viewModel.elapsed > 0 ? viewModel.elapsed : viewModel.totalDuration))
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(.system(size: 28, weight: .bold, design: .monospaced))
                             .foregroundStyle(.white)
                         
                         HStack(spacing: 8) {
@@ -177,7 +177,7 @@ struct LiveTimerCard: View {
                 .padding(.top, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 24)
-                        .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                        .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                 )
                 .liquidGlassBorder(cornerRadius: 16)
                 
@@ -261,7 +261,7 @@ struct LiveTimerCard: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
         )
         .liquidGlassBorder(cornerRadius: 24)
     }
@@ -276,8 +276,8 @@ struct LiveTimerCard: View {
             }
         } label: {
             Text(label)
-                .font(.subheadline)
-                .fontWeight(.medium)
+                .font(.system(.subheadline, design: .monospaced))
+                .fontWeight(.bold)
                 .padding(.horizontal, 15)
                 .padding(.vertical, 5)
                 .background(
@@ -309,29 +309,29 @@ struct LiveTimerCard: View {
             let bloom = viewModel.bloomDuration
             if bloom > 0 {
                 return [
-                    BrewPhase(title: "Bloom", description: "\(formatGrams(viewModel.bloomWater)) Water • Swirl gently", duration: "\(Int(bloom))s", icon: "stopwatch"),
-                    BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
-                    BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
+                    BrewPhase(title: "Bloom", description: "Swirl gently to saturate grounds", duration: "\(Int(bloom))s", icon: "stopwatch", waterAmount: "to \(formatGrams(viewModel.bloomWater))"),
+                    BrewPhase(title: "First Pour", description: "Pour in circular spiral motion", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
+                    BrewPhase(title: "Final Drawdown", description: "Let the water draw down completely", duration: "Ready", icon: "hourglass", waterAmount: "to \(formatGrams(viewModel.targetWater))")
                 ]
             } else {
                 return [
-                    BrewPhase(title: "First Pour", description: "To \(formatGrams(viewModel.firstPourWater)) • Spiral motion", duration: "60s", icon: "drop"),
-                    BrewPhase(title: "Final Drawdown", description: "To \(formatGrams(viewModel.targetWater)) • Flat bed", duration: "Ready", icon: "hourglass")
+                    BrewPhase(title: "First Pour", description: "Pour in circular spiral motion", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
+                    BrewPhase(title: "Final Drawdown", description: "Let the water draw down completely", duration: "Ready", icon: "hourglass", waterAmount: "to \(formatGrams(viewModel.targetWater))")
                 ]
             }
         case .frenchPress:
             let steep = viewModel.customSteepDuration ?? 240.0
             let plunge = viewModel.customPressDuration ?? 15.0
             return [
-                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "\(Int(steep))s", icon: "stopwatch"),
-                BrewPhase(title: "Plunge", description: "Press down slowly", duration: "\(Int(plunge))s", icon: "hourglass")
+                BrewPhase(title: "Steep", description: "Let it sit to extract flavors", duration: "\(Int(steep))s", icon: "stopwatch", waterAmount: "to \(formatGrams(viewModel.targetWater))"),
+                BrewPhase(title: "Plunge", description: "Press down slowly and steadily", duration: "\(Int(plunge))s", icon: "hourglass", waterAmount: nil)
             ]
         case .aeropress:
             let steep = viewModel.customSteepDuration ?? 60.0
             let press = viewModel.customPressDuration ?? 30.0
             return [
-                BrewPhase(title: "Steep", description: "Pour \(formatGrams(viewModel.targetWater)) • Let it sit", duration: "\(Int(steep))s", icon: "stopwatch"),
-                BrewPhase(title: "Press", description: "Press down slowly", duration: "\(Int(press))s", icon: "hourglass")
+                BrewPhase(title: "Steep", description: "Let it sit to extract flavors", duration: "\(Int(steep))s", icon: "stopwatch", waterAmount: "to \(formatGrams(viewModel.targetWater))"),
+                BrewPhase(title: "Press", description: "Press down slowly and steadily", duration: "\(Int(press))s", icon: "hourglass", waterAmount: nil)
             ]
         }
     }
@@ -912,6 +912,7 @@ struct BrewPhase {
     let description: String
     let duration: String
     let icon: String
+    var waterAmount: String? = nil
 }
 
 struct PhaseStackPickerView: View {
@@ -962,36 +963,31 @@ struct PhaseStackCard: View {
     let isActive: Bool
     
     var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(isActive ? 0.08 : 0.04))
-                    .frame(width: 34, height: 34)
-                
-                Image(systemName: phase.icon)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(isActive ? Color.primaryCopper : Color.white.opacity(0.45))
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 12) {
+            HStack(spacing: 4) {
                 Text(phase.title)
-                    .font(.system(size: 15, weight: isActive ? .bold : .medium))
+                    .font(.system(size: 15, weight: isActive ? .bold : .semibold))
                     .foregroundStyle(isActive ? .white : .white.opacity(0.78))
                 
-                Text(phase.description)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(isActive ? Color.white.opacity(0.62) : Color.white.opacity(0.38))
-                    .lineLimit(1)
+                if let water = phase.waterAmount {
+                    Text("— \(water)")
+                        .font(.system(size: 15, weight: isActive ? .bold : .semibold))
+                        .foregroundStyle(isActive ? Color.primaryCopper : Color.primaryCopper.opacity(0.7))
+                }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
             
             Spacer(minLength: 10)
             
-            Text(phase.duration)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(isActive ? Color.primaryCopper : Color.white.opacity(0.45))
+            if phase.duration != "Ready" {
+                Text(phase.duration)
+                    .font(.system(size: 15, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(isActive ? Color.primaryCopper : Color.white.opacity(0.45))
+            }
         }
-        .padding(.horizontal, 16)
-        .frame(maxWidth: .infinity, minHeight: 86)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity, minHeight: 64)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(Color.white.opacity(isActive ? 0.10 : 0.06))

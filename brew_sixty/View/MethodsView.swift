@@ -58,7 +58,7 @@ struct MethodsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                         )
                         .liquidGlassBorder(cornerRadius: 16)
                     }
@@ -70,7 +70,7 @@ struct MethodsView: View {
                         Text("SELECT METHOD")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundStyle(.white.opacity(0.4))
+                            .foregroundStyle(.white)
                             .tracking(1.0)
                             .padding(.horizontal)
                         
@@ -99,7 +99,7 @@ struct MethodsView: View {
                                             .padding(.vertical, 10)
                                             .background(
                                                 Capsule()
-                                                    .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.45))
+                                                    .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.55))
                                             )
                                             .foregroundStyle(selectedMethod == method ? Color.black : Color.white.opacity(0.8))
                                             .overlay(
@@ -114,28 +114,101 @@ struct MethodsView: View {
                         }
                     }
                     
-                    // 3. Bean Weight (Horizontal scrolling Ruler Dialer)
-                    VStack(alignment: .leading, spacing: 10) {
+                    // 3. Bean Weight (Stepped Scale Picker with presets)
+                    VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Text("BEAN WEIGHT (GRAMS)")
+                            Text("BEAN WEIGHT")
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white.opacity(0.4))
+                                .foregroundStyle(.white)
                                 .tracking(1.0)
                             Spacer()
                             Text(String(format: "%.1fg", beanWeight))
-                                .font(.headline)
+                                .font(.system(.headline, design: .monospaced))
                                 .foregroundStyle(Color.primaryCopper)
                         }
                         
-                        RulerPicker(value: $beanWeight, range: 1.0...40.0, step: 0.5, majorStep: 1.0)
-                            .padding(.vertical, 8)
+                        // Tactile Steppers + Digital Scale Display
+                        HStack(spacing: 16) {
+                            Button {
+                                if beanWeight > 1.0 {
+                                    beanWeight = max(1.0, beanWeight - 0.5)
+                                    UISelectionFeedbackGenerator().selectionChanged()
+                                }
+                            } label: {
+                                Image(systemName: "minus")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color.white.opacity(0.06))
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            }
+                            
+                            Spacer()
+                            
+                            VStack(spacing: 2) {
+                                Text(String(format: "%.1f", beanWeight))
+                                    .font(.system(size: 32, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(.white)
+                                Text("GRAMS")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundStyle(Color.primaryCopper)
+                                    .tracking(1.5)
+                            }
+                            
+                            Spacer()
+                            
+                            Button {
+                                if beanWeight < 40.0 {
+                                    beanWeight = min(40.0, beanWeight + 0.5)
+                                    UISelectionFeedbackGenerator().selectionChanged()
+                                }
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color.white.opacity(0.06))
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        
+                        // Standard Coffee Dose Capsules
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach([12.0, 15.0, 18.0, 20.0, 30.0], id: \.self) { preset in
+                                    let isSelected = abs(beanWeight - preset) < 0.01
+                                    Button {
+                                        withAnimation(.easeOut(duration: 0.15)) {
+                                            beanWeight = preset
+                                            UISelectionFeedbackGenerator().selectionChanged()
+                                        }
+                                    } label: {
+                                        Text(String(format: "%.0fg", preset))
+                                            .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .monospaced))
+                                            .foregroundStyle(isSelected ? .black : .white.opacity(0.65))
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Capsule()
+                                                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.04))
+                                            )
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
+                                            )
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding()
-                    //.premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -147,11 +220,11 @@ struct MethodsView: View {
                                 Text("WATER RATIO")
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white.opacity(0.4))
+                                    .foregroundStyle(.white)
                                     .tracking(1.0)
                                 Spacer()
                                 Text(String(format: "1:%.1f", ratio))
-                                    .font(.headline)
+                                    .font(.system(.headline, design: .monospaced))
                                     .foregroundStyle(Color.primaryCopper)
                             }
                             
@@ -170,11 +243,11 @@ struct MethodsView: View {
                                 Text("TARGET WATER VOLUME")
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white.opacity(0.4))
+                                    .foregroundStyle(.white)
                                     .tracking(1.0)
                                 Spacer()
                                 Text("\(Int(waterVolume))g")
-                                    .font(.headline)
+                                    .font(.system(.headline, design: .monospaced))
                                     .foregroundStyle(Color.primaryCopper)
                             }
                             
@@ -193,7 +266,7 @@ struct MethodsView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -204,11 +277,11 @@ struct MethodsView: View {
                             Text("TARGET TEMPERATURE")
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white.opacity(0.4))
+                                .foregroundStyle(.white)
                                 .tracking(1.0)
                             Spacer()
                             Text(String(format: "%.1f°C", targetTemperature))
-                                .font(.headline)
+                                .font(.system(.headline, design: .monospaced))
                                 .foregroundStyle(Color.primaryCopper)
                         }
                         
@@ -219,7 +292,7 @@ struct MethodsView: View {
                   //  .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -239,10 +312,10 @@ struct MethodsView: View {
                                 HStack {
                                     Text("BLOOM DURATION")
                                         .font(.caption2)
-                                        .foregroundStyle(.white.opacity(0.4))
+                                        .foregroundStyle(.white)
                                     Spacer()
-                                    Text("\(Int(preInfusionDuration))s")
-                                        .font(.subheadline)
+                                     Text("\(Int(preInfusionDuration))s")
+                                         .font(.system(.subheadline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
@@ -254,11 +327,11 @@ struct MethodsView: View {
                                 Text("STEEP DURATION")
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white.opacity(0.4))
+                                    .foregroundStyle(.white)
                                     .tracking(1.0)
                                 Spacer()
-                                Text("\(Int(steepDuration))s")
-                                    .font(.headline)
+                                 Text("\(Int(steepDuration))s")
+                                     .font(.system(.headline, design: .monospaced))
                                     .foregroundStyle(Color.primaryCopper)
                             }
                             
@@ -280,11 +353,11 @@ struct MethodsView: View {
                                     Text("PRESS DURATION")
                                         .font(.caption2)
                                         .fontWeight(.bold)
-                                        .foregroundStyle(.white.opacity(0.4))
+                                        .foregroundStyle(.white)
                                         .tracking(1.0)
                                     Spacer()
-                                    Text("\(Int(pressDuration))s")
-                                        .font(.headline)
+                                     Text("\(Int(pressDuration))s")
+                                         .font(.system(.headline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
                                 
@@ -305,7 +378,7 @@ struct MethodsView: View {
                 //    .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -315,7 +388,7 @@ struct MethodsView: View {
                         Text("RECIPE NAME")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundStyle(.white.opacity(0.4))
+                            .foregroundStyle(.white)
                             .tracking(1.0)
                         
                         TextField("Recipe Name", text: $recipeName)
@@ -328,7 +401,7 @@ struct MethodsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.55))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)

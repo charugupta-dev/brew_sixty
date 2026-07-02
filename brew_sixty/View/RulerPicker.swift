@@ -52,7 +52,7 @@ struct RulerPicker: View {
                         VStack(spacing: 4) {
                             if isMajor {
                                 Text(String(format: "%.1f", tickValue))
-                                    .font(.system(size: 8))
+                                    .font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(Color.white.opacity(0.4))
                             } else {
                                 Text(" ")
