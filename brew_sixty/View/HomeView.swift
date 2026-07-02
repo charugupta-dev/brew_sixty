@@ -175,11 +175,11 @@ struct LiveTimerCard: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius)
-                        .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
-                )
-                .liquidGlassBorder(cornerRadius: 16)
+                // .background(
+                //     RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius)
+                //         .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
+                // )
+                // .liquidGlassBorder(cornerRadius: 16)
                 
                 if !viewModel.isRunning && viewModel.elapsed == 0 {
                     HStack(spacing: 10) {
