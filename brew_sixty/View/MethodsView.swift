@@ -25,6 +25,8 @@ struct MethodsView: View {
     
     var body: some View {
         ZStack {
+            VideoWallpaperBackground()
+
             ScrollView {
                 VStack(spacing: 20) {
                     // 1. Header Card (Saved Templates / Interactive Button Card)
@@ -126,7 +128,7 @@ struct MethodsView: View {
                                 .foregroundStyle(Color.primaryCopper)
                         }
                         
-                        RulerPicker(value: $beanWeight, range: 5.0...40.0, step: 0.5)
+                        RulerPicker(value: $beanWeight, range: 1.0...40.0, step: 0.5, majorStep: 1.0)
                             .padding(.vertical, 8)
                     }
                     .padding()
@@ -366,12 +368,6 @@ struct MethodsView: View {
                 TemplatesListView()
             }
         }
-        .background(
-            SmokeStaticBackground()
-        )
-        .overlay(
-            SmokeParticleOverlay()
-        )
     }
     
     var isSaveDisabled: Bool {
@@ -420,6 +416,7 @@ struct TemplatesListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                VideoWallpaperBackground()
                 
                 if templates.isEmpty {
                     ContentUnavailableView {
@@ -492,12 +489,6 @@ struct TemplatesListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .background(
-                SmokeStaticBackground()
-            )
-            .overlay(
-                SmokeParticleOverlay()
-            )
             .navigationTitle("Saved Recipes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -4,6 +4,7 @@ struct RulerPicker: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     let step: Double
+    let majorStep: Double?
     
     @State private var dragOffset: CGFloat = 0
     @State private var baseOffset: CGFloat = 0
@@ -13,6 +14,18 @@ struct RulerPicker: View {
     }
     
     private let itemWidth: CGFloat = 16 // tick width + spacing
+
+    init(
+        value: Binding<Double>,
+        range: ClosedRange<Double>,
+        step: Double,
+        majorStep: Double? = nil
+    ) {
+        _value = value
+        self.range = range
+        self.step = step
+        self.majorStep = majorStep
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -34,7 +47,7 @@ struct RulerPicker: View {
                 HStack(alignment: .bottom, spacing: 0) {
                     ForEach(0..<ticksCount, id: \.self) { idx in
                         let tickValue = range.lowerBound + Double(idx) * step
-                        let isMajor = idx % 5 == 0
+                        let isMajor = isMajorTick(tickValue)
                         
                         VStack(spacing: 4) {
                             if isMajor {
@@ -138,5 +151,13 @@ struct RulerPicker: View {
     private func syncOffsetFromValue() {
         let idx = Int(round((value - range.lowerBound) / step))
         baseOffset = -CGFloat(idx) * itemWidth
+    }
+
+    private func isMajorTick(_ tickValue: Double) -> Bool {
+        let spacing = majorStep ?? (step * 5)
+        guard spacing > 0 else { return false }
+
+        let normalized = (tickValue - range.lowerBound) / spacing
+        return abs(normalized.rounded() - normalized) < 0.0001
     }
 }

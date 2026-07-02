@@ -17,8 +17,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                RadialGradient.coffeeBackground
-                    .ignoresSafeArea()
+                VideoWallpaperBackground()
                 
                 Form {
                     Section(header: Text("Brew Recipe Defaults")) {

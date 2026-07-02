@@ -10,8 +10,7 @@ struct TimerView: View {
     
     var body: some View {
         ZStack {
-            // Ambient Radial Gradient Background
-            RadialGradient.coffeeBackground.ignoresSafeArea()
+            VideoWallpaperBackground()
             
             VStack(spacing: 40) {
                 Text(viewModel.isRunning ? "Brewing..." : "Ready to Brew")

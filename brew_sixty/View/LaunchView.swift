@@ -7,15 +7,8 @@ struct LaunchView: View {
     
     var body: some View {
         ZStack {
-            // Espresso Radial Gradient Background
-            RadialGradient(
-                colors: [Color(red: 0.23, green: 0.16, blue: 0.12), Color(red: 0.08, green: 0.06, blue: 0.05)],
-                center: .center,
-                startRadius: 10,
-                endRadius: 400
-            )
-            .ignoresSafeArea()
-            
+            VideoWallpaperBackground()
+
             VStack(spacing: 16) {
                 Text("☕️")
                     .font(.system(size: 64))

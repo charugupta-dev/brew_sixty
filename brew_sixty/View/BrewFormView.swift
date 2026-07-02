@@ -25,8 +25,7 @@ struct BrewFormView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                RadialGradient.coffeeBackground
-                    .ignoresSafeArea()
+                VideoWallpaperBackground()
                 
                 VStack(spacing: 32) {
                     VStack(spacing: 16) {

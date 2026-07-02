@@ -22,6 +22,8 @@ struct HomeView: View {
             }
             
             ZStack {
+                VideoWallpaperBackground()
+
                 VStack(alignment: .leading, spacing: 24) {
                     // Header Section matching the mock large serif title
                     Text("Hello Charu!")
@@ -128,12 +130,6 @@ struct HomeView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .background(
-                SmokeStaticBackground()
-            )
-            .overlay(
-                SmokeParticleOverlay()
-            )
         }
     }
 }
