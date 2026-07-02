@@ -31,9 +31,7 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tint(Color.primaryCopper)
-                .toolbarBackground(Color.black.opacity(0.92), for: .tabBar)
-                .toolbarBackground(.visible, for: .tabBar)
-                .toolbarColorScheme(.dark, for: .tabBar)
+                .toolbarBackground(.hidden, for: .tabBar)
                 .transition(.opacity)
             }
         }

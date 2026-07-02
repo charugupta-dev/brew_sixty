@@ -22,17 +22,6 @@ struct HomeView: View {
             }
             
             ZStack {
-                // Solid dark charcoal background matching mock
-                Color(red: 0.08, green: 0.08, blue: 0.08)
-                    .ignoresSafeArea()
-                
-                Image("timer_card_bg")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .opacity(0.12)
-                    .blendMode(.plusLighter)
-                    .ignoresSafeArea()
-                
                 VStack(alignment: .leading, spacing: 24) {
                     // Header Section matching the mock large serif title
                     Text("Hello Charu!")
@@ -139,10 +128,14 @@ struct HomeView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
+            .background(
+                SmokeStaticBackground()
+            )
+            .overlay(
+                SmokeParticleOverlay()
+            )
         }
     }
-    
-
 }
 
 @MainActor
@@ -187,8 +180,8 @@ struct LiveTimerCard: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
                 .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                 )
                 .liquidGlassBorder(cornerRadius: 16)
                 
@@ -272,7 +265,7 @@ struct LiveTimerCard: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0.11, green: 0.10, blue: 0.09).opacity(0.55))
+                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
         )
         .liquidGlassBorder(cornerRadius: 24)
     }
@@ -393,7 +386,7 @@ struct TimerCircleView: View {
                 Canvas { ctx, size in
                     let time = context.date.timeIntervalSince1970
                     let baseSize: CGFloat = 200
-                    let scale = min(size.width, size.height) / baseSize * 0.96
+                    let scale = min(size.width, size.height) / baseSize * 1.15
                     let strokeColor = Color.coffeeCream.opacity(0.92)
                     let accentColor = Color.primaryCopper.opacity(0.95)
                     let fillColor = Color.brushedCopper.opacity(0.78)

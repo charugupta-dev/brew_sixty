@@ -25,16 +25,6 @@ struct MethodsView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 0.08, green: 0.08, blue: 0.08)
-                .ignoresSafeArea()
-            
-            Image("timer_card_bg")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .opacity(0.12)
-                .blendMode(.plusLighter)
-                .ignoresSafeArea()
-            
             ScrollView {
                 VStack(spacing: 20) {
                     // 1. Header Card (Saved Templates / Interactive Button Card)
@@ -66,7 +56,7 @@ struct MethodsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                         )
                         .liquidGlassBorder(cornerRadius: 16)
                     }
@@ -107,7 +97,7 @@ struct MethodsView: View {
                                             .padding(.vertical, 10)
                                             .background(
                                                 Capsule()
-                                                    .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.04))
+                                                    .fill(selectedMethod == method ? Color.primaryCopper : Color.white.opacity(0.45))
                                             )
                                             .foregroundStyle(selectedMethod == method ? Color.black : Color.white.opacity(0.8))
                                             .overlay(
@@ -143,7 +133,7 @@ struct MethodsView: View {
                     //.premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -199,10 +189,9 @@ struct MethodsView: View {
                         }
                     }
                     .padding()
-                   // .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -228,7 +217,7 @@ struct MethodsView: View {
                   //  .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -314,44 +303,10 @@ struct MethodsView: View {
                 //    .premiumCardBackground(cornerRadius: 16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
-                    
-                    // 7. General Settings
-      //              VStack(spacing: 16) {
-//                        Toggle(isOn: $hapticFeedbackEnabled) {
-//                            HStack(spacing: 12) {
-//                                Image(systemName: "iphone.radiowaves.left.and.right")
-//                                    .foregroundStyle(Color.primaryCopper)
-//                                Text("Haptic Feedback")
-//                                    .font(.subheadline)
-//                                    .foregroundStyle(.white)
-//                            }
-//                        }
-//                        .tint(Color.primaryCopper)
-//                        
-//                        Divider().background(Color.white.opacity(0.1))
-//                        
-//                        Toggle(isOn: $autoSyncEnabled) {
-//                            HStack(spacing: 12) {
-//                                Image(systemName: "icloud.and.arrow.up")
-//                                    .foregroundStyle(Color.primaryCopper)
-//                                Text("Auto-sync History")
-//                                    .font(.subheadline)
-//                                    .foregroundStyle(.white)
-//                            }
-//                        }
-//                        .tint(Color.primaryCopper)
-//                    }
-//                    .padding()
-//                //    .premiumCardBackground(cornerRadius: 16)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 16)
-//                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
-//                    )
-//                    .padding(.horizontal)
                     
                     // Recipe Name Card
                     VStack(alignment: .leading, spacing: 6) {
@@ -371,7 +326,7 @@ struct MethodsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09))
+                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(0.45))
                     )
                     .liquidGlassBorder(cornerRadius: 16)
                     .padding(.horizontal)
@@ -411,6 +366,12 @@ struct MethodsView: View {
                 TemplatesListView()
             }
         }
+        .background(
+            SmokeStaticBackground()
+        )
+        .overlay(
+            SmokeParticleOverlay()
+        )
     }
     
     var isSaveDisabled: Bool {
@@ -459,8 +420,6 @@ struct TemplatesListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.08, green: 0.08, blue: 0.08)
-                    .ignoresSafeArea()
                 
                 if templates.isEmpty {
                     ContentUnavailableView {
@@ -533,6 +492,12 @@ struct TemplatesListView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
+            .background(
+                SmokeStaticBackground()
+            )
+            .overlay(
+                SmokeParticleOverlay()
+            )
             .navigationTitle("Saved Recipes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
