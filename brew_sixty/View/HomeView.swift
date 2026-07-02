@@ -371,16 +371,16 @@ struct TimerCircleView: View {
             
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.04), lineWidth: 8)
-                    .frame(width: 228, height: 228)
+                    .stroke(Color.white.opacity(0.04), lineWidth: 10)
+                    .frame(width: 260, height: 260)
                 
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(
                         LinearGradient(colors: [Color.appTertiary, Color.appSecondary.opacity(0.8)], startPoint: .top, endPoint: .bottom),
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
                     )
-                    .frame(width: 228, height: 228)
+                    .frame(width: 260, height: 260)
                     .rotationEffect(.degrees(-90))
                 
                 // Canvas Animation for Kettle pouring or French Press Plunging
@@ -897,9 +897,9 @@ struct TimerCircleView: View {
                         }
                     }
                 }
-                .frame(width: 196, height: 196)
+                .frame(width: 228, height: 228)
             }
-            .frame(width: 252, height: 252)
+            .frame(width: 288, height: 288)
         }
     }
 }
