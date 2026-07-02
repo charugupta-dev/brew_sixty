@@ -155,20 +155,14 @@ struct LiveTimerCard: View {
                             .foregroundStyle(Color.coffeeCream)
                         
                         HStack(spacing: 8) {
-                            Text(viewModel.method.rawValue)
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.primaryCopper)
+                            let targetWaterStr = "\(Int(viewModel.targetWater))g"
+                            let doseStr = viewModel.beanWeight.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(viewModel.beanWeight))g" : String(format: "%.1fg", viewModel.beanWeight)
                             
-                            Circle()
-                                .fill(Color.white.opacity(0.22))
-                                .frame(width: 4, height: 4)
-                            
-                            Text(viewModel.getPhaseText())
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(Color.white.opacity(0.4))
+                            Text("\(viewModel.method.rawValue.lowercased()) - Target water: \(targetWaterStr) - \(doseStr)")
+                                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.85)
+                                .minimumScaleFactor(0.8)
                         }
                     }
                     .padding(.bottom, 12)
@@ -181,15 +175,7 @@ struct LiveTimerCard: View {
                 // )
                 // .liquidGlassBorder(cornerRadius: 16)
                 
-                if !viewModel.isRunning && viewModel.elapsed == 0 {
-                    HStack(spacing: 10) {
-                        doseButton("8g")
-                        doseButton("16g")
-                        doseButton("24g")
-                    }
-                    .padding(.top, 2)
-                    .transition(.opacity)
-                }
+
                 
                 PhaseStackPickerView(phases: phases, selectedIndex: pickerPhaseIndex)
                     .padding(.horizontal, 16)
@@ -271,42 +257,7 @@ struct LiveTimerCard: View {
         .liquidGlassBorder(cornerRadius: 24)
     }
     
-    private func doseButton(_ label: String) -> some View {
-        let doseNum = Double(label.replacingOccurrences(of: "g", with: "")) ?? 15.0
-        let isSelected = abs(viewModel.beanWeight - doseNum) < 0.1
-        
-        return Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                viewModel.beanWeight = doseNum
-            }
-        } label: {
-            Text(label)
-                .font(.system(.subheadline, design: .monospaced))
-                .fontWeight(.bold)
-                .padding(.horizontal, 15)
-                .padding(.vertical, 5)
-                .background(
-                    Group {
-                        if isSelected {
-                            LinearGradient(colors: [Color.primaryCopper, Color.brushedCopper], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        } else {
-                            Color.clear
-                        }
-                    }
-                )
-                .cornerRadius(20)
-                .overlay(
-                    Group {
-                        if !isSelected {
-                            Capsule()
-                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                        }
-                    }
-                )
-                .foregroundStyle(isSelected ? Color(red: 0.12, green: 0.08, blue: 0.08) : Color.white.opacity(0.7))
-        }
-        .buttonStyle(.plain)
-    }
+    
     
     private var phases: [BrewPhase] {
         switch viewModel.method {
