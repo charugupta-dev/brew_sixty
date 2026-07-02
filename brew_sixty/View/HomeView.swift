@@ -389,7 +389,7 @@ struct TimerCircleView: View {
                     let baseSize: CGFloat = 200
                     let scale = min(size.width, size.height) / baseSize * 1.15
                     let strokeColor = Color.coffeeCream.opacity(0.92)
-                    let accentColor = Color.primaryCopper.opacity(0.95)
+        
                     
                     if viewModel.method == .v60 || viewModel.method == .chemex {
                         var scaledCtx = ctx
@@ -408,10 +408,16 @@ struct TimerCircleView: View {
                         
                         let isRunning = viewModel.isRunning
                         
+                        let isChemex = viewModel.method == .chemex
+                        let speedMult = isChemex ? 1.4 : 3.5
+                        let ampX = isChemex ? 3.0 : 8.0
+                        let ampY = isChemex ? 1.5 : 4.0
+                        let rotAmp = isChemex ? 1.0 : 3.0
+                        
                         // Circular hand pour motion translation offsets
-                        let kettleOffsetX = isRunning ? cos(time * 3.5) * 8.0 : 0.0
-                        let kettleOffsetY = isRunning ? sin(time * 3.5) * 4.0 : 0.0
-                        let kettleRotation = isRunning ? -22.0 + sin(time * 3.5) * 3.0 : -22.0
+                        let kettleOffsetX = isRunning ? cos(time * speedMult) * ampX : 0.0
+                        let kettleOffsetY = isRunning ? sin(time * speedMult) * ampY : 0.0
+                        let kettleRotation = isRunning ? -22.0 + sin(time * speedMult) * rotAmp : -22.0
                         
                         // 1. DRAW KETTLE (tilted & moving in circular motion if running)
                         var kettleCtx = scaledCtx
@@ -493,19 +499,51 @@ struct TimerCircleView: View {
                             let centerX = baseSize / 2
                             let beakerTop: CGFloat = 85
                             
-                            // Draw Chemex Outline Silhouette
+                            // Draw Chemex Outline Silhouette (Wider & more elegant)
                             var chemexPath = Path()
-                            chemexPath.move(to: CGPoint(x: centerX - 20, y: beakerTop + 10))
-                            chemexPath.addLine(to: CGPoint(x: centerX + 20, y: beakerTop + 10))
-                            chemexPath.addLine(to: CGPoint(x: centerX + 8, y: beakerTop + 40))
-                            chemexPath.addLine(to: CGPoint(x: centerX + 25, y: beakerTop + 75))
-                            chemexPath.addLine(to: CGPoint(x: centerX - 25, y: beakerTop + 75))
-                            chemexPath.addLine(to: CGPoint(x: centerX - 8, y: beakerTop + 40))
+                            chemexPath.move(to: CGPoint(x: centerX - 32, y: beakerTop + 8))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 32, y: beakerTop + 8))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 12, y: beakerTop + 38))
+                            chemexPath.addLine(to: CGPoint(x: centerX + 38, y: beakerTop + 75))
+                            chemexPath.addLine(to: CGPoint(x: centerX - 38, y: beakerTop + 75))
+                            chemexPath.addLine(to: CGPoint(x: centerX - 12, y: beakerTop + 38))
                             chemexPath.closeSubpath()
                             
                             // Wooden collar band
                             var collarPath = Path()
-                            collarPath.addRect(CGRect(x: centerX - 12, y: beakerTop + 35, width: 24, height: 10))
+                            collarPath.addRect(CGRect(x: centerX - 15, y: beakerTop + 33, width: 30, height: 10))
+                            
+                            // Draw Coffee Fill rising in Chemex bottom chamber based on progress
+                            if progress > 0 {
+                                var clippedCtx = scaledCtx
+                                clippedCtx.clip(to: chemexPath)
+                                
+                                // Bottom chamber Y is from (beakerTop + 38) to (beakerTop + 75)
+                                let bottomBeakerHeight = 37.0
+                                let fillHeight = bottomBeakerHeight * progress
+                                let fillY = (beakerTop + 75.0) - fillHeight
+                                
+                                var fillPath = Path()
+                                fillPath.move(to: CGPoint(x: centerX - 45, y: beakerTop + 80))
+                                fillPath.addLine(to: CGPoint(x: centerX - 45, y: fillY))
+                                
+                                // Wave top surface
+                                for x in Int(centerX - 45)...Int(centerX + 45) {
+                                    let wave = sin(Double(x) * 0.25 + time * 6.0) * 1.0
+                                    fillPath.addLine(to: CGPoint(x: CGFloat(x), y: fillY + CGFloat(wave)))
+                                }
+                                
+                                fillPath.addLine(to: CGPoint(x: centerX + 45, y: fillY))
+                                fillPath.addLine(to: CGPoint(x: centerX + 45, y: beakerTop + 80))
+                                fillPath.closeSubpath()
+                                
+                                let fillGradient = GraphicsContext.Shading.linearGradient(
+                                    Gradient(colors: [Color.primaryCopper.opacity(0.45), Color.brushedCopper.opacity(0.15)]),
+                                    startPoint: CGPoint(x: centerX, y: fillY),
+                                    endPoint: CGPoint(x: centerX, y: beakerTop + 75)
+                                )
+                                clippedCtx.fill(fillPath, with: fillGradient)
+                            }
                             
                             scaledCtx.stroke(chemexPath, with: goldGradient, lineWidth: 1.5)
                             scaledCtx.stroke(collarPath, with: goldGradient, lineWidth: 1.0)
@@ -625,7 +663,7 @@ struct TimerCircleView: View {
                             // 1. Tighter stream: lower particle count (28 -> 18) for elegancy
                             let particleCount = 18
                             var points: [CGPoint] = []
-                            let flowSpeed = 0.22
+                            let flowSpeed = viewModel.method == .chemex ? 0.12 : 0.22
                             let isBloom = viewModel.getPhaseText().localizedCaseInsensitiveContains("bloom")
                             
                             for i in 0..<particleCount {
@@ -764,59 +802,54 @@ struct TimerCircleView: View {
                             let knobEnd = beakerTop - 9
                             let knobY = knobStart + (knobEnd - knobStart) * CGFloat(steepProgress)
                             
-                            // 1. COARSE GROUND COFFEE (Layer at the bottom - Option B Stippled Sediment)
-                            var groundsBgPath = Path()
-                            groundsBgPath.addRect(CGRect(x: beakerLeft + 2.5, y: beakerBottom - 23, width: beakerW - 5, height: 22))
-                            scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(0.85)))
-                            
-                            // Crisp gold separator line on top of grounds
-                            var separatorPath = Path()
-                            separatorPath.move(to: CGPoint(x: beakerLeft + 2.5, y: beakerBottom - 23))
-                            separatorPath.addLine(to: CGPoint(x: beakerRight - 2.5, y: beakerBottom - 23))
-                            scaledCtx.stroke(separatorPath, with: goldGradient, lineWidth: 1.0)
-                            
-                            // Deterministic Gradated Stippling (90 dots)
-                            for i in 0..<90 {
-                                let randomX = beakerLeft + 3.5 + CGFloat((i * 29) % Int(beakerW - 7))
-                                let randomY: CGFloat
-                                let r: CGFloat
-                                if i < 45 {
-                                    // Bottom layer (dense)
-                                    randomY = (beakerBottom - 7) - CGFloat((i * 13) % 7)
-                                    r = 1.0 + Double((i * 7) % 3) * 0.3 // 1.0 to 1.6
-                                } else if i < 75 {
-                                    // Middle layer
-                                    randomY = (beakerBottom - 14) - CGFloat((i * 17) % 6)
-                                    r = 0.8 + Double((i * 11) % 3) * 0.2 // 0.8 to 1.2
-                                } else {
-                                    // Top layer (sparse)
-                                    randomY = (beakerBottom - 20) - CGFloat((i * 19) % 3)
-                                    r = 0.5 + Double((i * 3) % 3) * 0.15 // 0.5 to 0.8
-                                }
-                                var dotPath = Path()
-                                dotPath.addArc(center: CGPoint(x: randomX, y: randomY), radius: r, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
-                                scaledCtx.fill(dotPath, with: goldGradient)
+                            // 1. BEAKER LIQUID FILLS (Immersion and Filtration)
+                            // Clean amber coffee above the plunging filter
+                            if filterY > beakerTop + 15 {
+                                var cleanCoffeePath = Path()
+                                cleanCoffeePath.addRect(CGRect(x: beakerLeft + 2, y: beakerTop + 15, width: beakerW - 4, height: filterY - (beakerTop + 15)))
+                                scaledCtx.fill(cleanCoffeePath, with: .color(Color(red: 0.28, green: 0.18, blue: 0.12).opacity(0.35)))
                             }
                             
-                            // 2. WATER FLOW VORTEX (3D helix swirl during steep phase, only when timer running)
-                            if isRunning && viewModel.elapsed < fpSteepDuration {
-                                let swirlTime = time * 4.0
-                                for offset in [0.0, .pi] {
-                                    var swirlPath = Path()
-                                    for y in stride(from: CGFloat(beakerTop + 18), to: CGFloat(beakerBottom - 24), by: 1) {
-                                        let t = (y - (beakerTop + 18)) / (beakerBottom - 24 - (beakerTop + 18))
-                                        let amp = sin(t * .pi) * 8.0 // max amplitude in the middle is 8 points
-                                        let angle = t * 3.0 * .pi - swirlTime + offset
-                                        let x = centerX + sin(angle) * amp
-                                        
-                                        if y == beakerTop + 18 {
-                                            swirlPath.move(to: CGPoint(x: x, y: y))
-                                        } else {
-                                            swirlPath.addLine(to: CGPoint(x: x, y: y))
-                                        }
-                                    }
-                                    scaledCtx.stroke(swirlPath, with: .color(Color.primaryCopper.opacity(0.65)), lineWidth: 1.0)
-                                }
+                            // Dark immersion coffee below the filter
+                            if filterY < beakerBottom - 2 {
+                                var darkCoffeePath = Path()
+                                darkCoffeePath.addRect(CGRect(x: beakerLeft + 2, y: filterY, width: beakerW - 4, height: beakerBottom - 2 - filterY))
+                                scaledCtx.fill(darkCoffeePath, with: .color(Color(red: 0.18, green: 0.12, blue: 0.08).opacity(0.68)))
+                            }
+                            
+                            // Sediment layer at the bottom: grows taller/denser as plunge completes
+                            let sedimentOpacity = 0.4 + (steepProgress * 0.5) // from 0.4 to 0.9
+                            let sedimentHeight = 6.0 + (steepProgress * 16.0) // grows from 6pt to 22pt as grounds compress
+                            var groundsBgPath = Path()
+                            groundsBgPath.addRect(CGRect(x: beakerLeft + 2, y: beakerBottom - sedimentHeight, width: beakerW - 4, height: sedimentHeight))
+                            scaledCtx.fill(groundsBgPath, with: .color(Color(red: 0.16, green: 0.11, blue: 0.08).opacity(sedimentOpacity)))
+                            
+                            // 2. DETAILED IMMERSION COFFEE GROUNDS (Stippling)
+                            // During steep, grounds float throughout. During plunge, they are pushed down below filterY.
+                            let dotsCount = 90
+                            for i in 0..<dotsCount {
+                                // Deterministic natural floating height (spread across beakerTop + 18 to beakerBottom - 25)
+                                let floatRatio = Double((i * 17) % 100) / 100.0
+                                let floatY = (beakerTop + 18) + CGFloat(floatRatio) * (beakerBottom - 25 - (beakerTop + 18))
+                                
+                                // Drift oscillation during steep to look like suspended immersion grounds
+                                let driftSpeed = isRunning ? 1.0 : 0.05
+                                let driftX = sin(time * driftSpeed * 0.8 + Double(i)) * 1.5
+                                let driftY = cos(time * driftSpeed * 0.6 + Double(i)) * 1.0
+                                
+                                let dotX = beakerLeft + 3.5 + CGFloat((i * 29) % Int(beakerW - 7)) + driftX
+                                
+                                // Plunger pushes grounds down: clamp ground Y to sit under filterY
+                                let activeY = max(floatY + driftY, filterY + 3.0)
+                                let clampedY = min(activeY, beakerBottom - 5.0)
+                                
+                                // Grounds diameter (larger at the very bottom, smaller floating)
+                                let isNearBottom = clampedY > beakerBottom - 25
+                                let r: CGFloat = isNearBottom ? (1.0 + Double((i * 7) % 3) * 0.3) : (0.5 + Double((i * 3) % 3) * 0.15)
+                                
+                                var dotPath = Path()
+                                dotPath.addArc(center: CGPoint(x: dotX, y: clampedY), radius: r, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+                                scaledCtx.fill(dotPath, with: goldGradient)
                             }
                             
                             // 3. BOROSILICATE GLASS BEAKER
