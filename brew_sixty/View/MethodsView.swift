@@ -43,7 +43,7 @@ struct MethodsView: View {
                                 Text("\(templates.count) Saved Templates")
                                     .font(.system(.title2, design: .serif))
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                                 
                                 Text("Tap to view or delete your recipes")
                                     .font(.caption2)
@@ -70,7 +70,7 @@ struct MethodsView: View {
                         Text(AppConstants.Text.selectMethod)
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.coffeeCream)
                             .tracking(1.0)
                             .padding(.horizontal)
                         
@@ -120,7 +120,7 @@ struct MethodsView: View {
                             Text(AppConstants.Text.beanWeight)
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.coffeeCream)
                                 .tracking(1.0)
                             Spacer()
                             Text(String(format: "%.1fg", beanWeight))
@@ -145,7 +145,7 @@ struct MethodsView: View {
                                 Text(AppConstants.Text.waterRatio)
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                                     .tracking(1.0)
                                 Spacer()
                                 Text(String(format: "1:%.1f", ratio))
@@ -162,13 +162,13 @@ struct MethodsView: View {
                                 Text("1:20")
                             }
                             .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.3))
+                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
                         } else {
                             HStack {
                                 Text(AppConstants.Text.targetWaterVolume)
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                                     .tracking(1.0)
                                 Spacer()
                                 Text("\(Int(waterVolume))g")
@@ -185,7 +185,7 @@ struct MethodsView: View {
                                 Text("600g")
                             }
                             .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.3))
+                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
                         }
                     }
                     .padding()
@@ -202,7 +202,7 @@ struct MethodsView: View {
                             Text(AppConstants.Text.targetTemperature)
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.coffeeCream)
                                 .tracking(1.0)
                             Spacer()
                             Text(String(format: "%.1f°C", targetTemperature))
@@ -229,7 +229,7 @@ struct MethodsView: View {
                                 Text("Pre-infusion Timer")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                             }
                             .tint(Color.primaryCopper)
                             
@@ -237,7 +237,7 @@ struct MethodsView: View {
                                 HStack {
                                     Text("BLOOM DURATION")
                                         .font(.caption2)
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(Color.coffeeCream)
                                     Spacer()
                                      Text("\(Int(preInfusionDuration))s")
                                          .font(.system(.subheadline, design: .monospaced))
@@ -252,7 +252,7 @@ struct MethodsView: View {
                                 Text("STEEP DURATION")
                                     .font(.caption2)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                                     .tracking(1.0)
                                 Spacer()
                                  Text("\(Int(steepDuration))s")
@@ -269,7 +269,7 @@ struct MethodsView: View {
                                 Text("8m")
                             }
                             .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.3))
+                            .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             
                             if selectedMethod == .aeropress {
                                 Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
@@ -278,7 +278,7 @@ struct MethodsView: View {
                                     Text("PRESS DURATION")
                                         .font(.caption2)
                                         .fontWeight(.bold)
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(Color.coffeeCream)
                                         .tracking(1.0)
                                     Spacer()
                                      Text("\(Int(pressDuration))s")
@@ -295,7 +295,7 @@ struct MethodsView: View {
                                     Text("60s")
                                 }
                                 .font(.caption2)
-                                .foregroundStyle(.white.opacity(0.3))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             }
                         }
                     }
@@ -313,13 +313,13 @@ struct MethodsView: View {
                         Text(AppConstants.Text.recipeName)
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.coffeeCream)
                             .tracking(1.0)
                         
                         TextField("Recipe Name", text: $recipeName)
                             .font(.system(.title2, design: .serif))
                             .fontWeight(.bold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.coffeeCream)
                             .textFieldStyle(.plain)
                     }
                     .padding()
@@ -422,7 +422,7 @@ struct TemplatesListView: View {
                     } description: {
                         Text("Your saved recipe templates will appear here.")
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.coffeeCream)
                 } else {
                     List {
                         ForEach(templates) { template in
@@ -431,7 +431,7 @@ struct TemplatesListView: View {
                                     HStack(spacing: 8) {
                                         Text(template.name)
                                             .font(.headline)
-                                            .foregroundStyle(.white)
+                                            .foregroundStyle(Color.coffeeCream)
                                         
                                         Text(template.method.rawValue)
                                             .font(.system(size: 10, weight: .bold))

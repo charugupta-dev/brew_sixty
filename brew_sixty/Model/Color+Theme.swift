@@ -60,6 +60,7 @@ struct LiquidGlassBorder: ViewModifier {
                         lineWidth: 1.5
                     )
             )
+            .shadow(color: Color.black.opacity(0.45), radius: 14, x: 0, y: 8)
     }
 }
 

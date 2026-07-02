@@ -27,8 +27,9 @@ struct PhaseStackPickerView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 110)
-        .animation(.easeInOut(duration: 0.75), value: selectedIndex)
+        .frame(height: 64)
+        .clipped()
+        .animation(.easeInOut(duration: 0.6), value: selectedIndex)
     }
     
     private func cardLayout(for index: Int) -> PhaseStackLayout {
@@ -38,15 +39,11 @@ struct PhaseStackPickerView: View {
         case 0:
             return PhaseStackLayout(scale: 1.0, offsetY: 0, opacity: 1.0, blur: 0, zIndex: 3, isVisible: true)
         case -1:
-            return PhaseStackLayout(scale: 0.90, offsetY: -32, opacity: 0.34, blur: 0, zIndex: 2, isVisible: true)
+            return PhaseStackLayout(scale: 0.95, offsetY: -40, opacity: 0.0, blur: 0, zIndex: 2, isVisible: true)
         case 1:
-            return PhaseStackLayout(scale: 0.94, offsetY: 32, opacity: 0.44, blur: 0, zIndex: 1, isVisible: true)
-        case -2:
-            return PhaseStackLayout(scale: 0.84, offsetY: -48, opacity: 0.12, blur: 0.5, zIndex: 0, isVisible: true)
-        case 2:
-            return PhaseStackLayout(scale: 0.88, offsetY: 48, opacity: 0.16, blur: 0.5, zIndex: 0, isVisible: true)
+            return PhaseStackLayout(scale: 0.95, offsetY: 40, opacity: 0.0, blur: 0, zIndex: 1, isVisible: true)
         default:
-            return PhaseStackLayout(scale: 0.82, offsetY: delta < 0 ? -64 : 64, opacity: 0, blur: 1, zIndex: -1, isVisible: false)
+            return PhaseStackLayout(scale: 0.9, offsetY: delta < 0 ? -60 : 60, opacity: 0, blur: 0, zIndex: -1, isVisible: false)
         }
     }
 }
@@ -60,7 +57,7 @@ struct PhaseStackCard: View {
             HStack(spacing: 4) {
                 Text(phase.title)
                     .font(.system(size: 15, weight: isActive ? .bold : .semibold))
-                    .foregroundStyle(isActive ? .white : .white.opacity(0.78))
+                    .foregroundStyle(isActive ? Color.coffeeCream : Color.coffeeCream.opacity(0.78))
                 
                 if let water = phase.waterAmount {
                     Text("— \(water)")
@@ -76,14 +73,14 @@ struct PhaseStackCard: View {
             if phase.duration != "Ready" {
                 Text(phase.duration)
                     .font(.system(size: 15, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(isActive ? Color.primaryCopper : Color.white.opacity(0.45))
+                    .foregroundStyle(isActive ? Color.primaryCopper : Color.coffeeCream.opacity(0.45))
             }
         }
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, minHeight: 64)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.white.opacity(isActive ? 0.10 : 0.06))
+                .fill(Color.coffeeCream.opacity(isActive ? 0.10 : 0.06))
                 .background(
                     LinearGradient(
                         colors: [
@@ -98,7 +95,7 @@ struct PhaseStackCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(isActive ? Color.primaryCopper.opacity(0.4) : Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(isActive ? Color.primaryCopper.opacity(0.4) : Color.coffeeCream.opacity(0.08), lineWidth: 1)
         )
         .shadow(color: isActive ? Color.primaryCopper.opacity(0.12) : .clear, radius: 16, y: 8)
     }

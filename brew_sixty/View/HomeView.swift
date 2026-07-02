@@ -14,7 +14,7 @@ struct HomeView: View {
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width - 64
-            let cardToTabBarSpacing: CGFloat = 30
+            let cardToTabBarSpacing: CGFloat = -15
             
             // Map SwiftData templates dynamically to HomeBrewViewModel instances
             let viewModels: [HomeBrewViewModel] = templates.map { template in
@@ -24,14 +24,14 @@ struct HomeView: View {
             ZStack {
                 VideoWallpaperBackground()
 
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 14) {
                     // Header Section matching the mock large serif title
                     Text(AppConstants.Text.helloCharu)
                         .font(.system(.largeTitle, design: .serif))
                         .fontWeight(.medium)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.coffeeCream)
                         .padding(.horizontal, 24)
-                        .padding(.top, 24)
+                        .padding(.top, 14)
                     
                     if viewModels.isEmpty {
                         VStack(spacing: 20) {
@@ -52,7 +52,7 @@ struct HomeView: View {
                                 Text(AppConstants.Text.emptyCanvasTitle)
                                     .font(.system(.title3, design: .serif))
                                     .fontWeight(.bold)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.coffeeCream)
                                 
                                 Text(AppConstants.Text.emptyCanvasDescription)
                                     .font(.subheadline)
@@ -152,7 +152,7 @@ struct LiveTimerCard: View {
                     VStack(spacing: 6) {
                         Text(formatTime(viewModel.elapsed > 0 ? viewModel.elapsed : viewModel.totalDuration))
                             .font(.system(size: 28, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.coffeeCream)
                         
                         HStack(spacing: 8) {
                             Text(viewModel.method.rawValue)
@@ -230,7 +230,7 @@ struct LiveTimerCard: View {
                             Text(AppConstants.Text.reset)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.coffeeCream)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.white.opacity(0.05), in: Capsule())
@@ -243,7 +243,7 @@ struct LiveTimerCard: View {
                             Text(AppConstants.Text.skipPhase)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.coffeeCream)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(Color.white.opacity(0.05), in: Capsule())

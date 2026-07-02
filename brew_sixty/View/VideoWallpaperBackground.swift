@@ -22,15 +22,15 @@ struct VideoWallpaperBackground: View {
     var body: some View {
         ZStack {
             LoopingVideoPlayerView()
-                .blur(radius: 18)
+                .blur(radius: 2)
 
-            Color.black.opacity(0.68)
+            Color.black.opacity(0.48)
 
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.65),
+                    Color.black.opacity(0.45),
                     Color.clear,
-                    Color.black.opacity(0.8)
+                    Color.black.opacity(0.38)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
