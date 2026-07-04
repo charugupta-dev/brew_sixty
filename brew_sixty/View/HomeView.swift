@@ -5,11 +5,14 @@ import SwiftData
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
+    @AppStorage(ProfilePreferences.Keys.name) private var profileName = ""
+    @AppStorage(ProfilePreferences.Keys.experienceLevel) private var experienceLevelRaw = ProfileExperienceLevel.justStarting.rawValue
+    @AppStorage(ProfilePreferences.Keys.guidanceMode) private var guidanceModeRaw = GuidanceMode.guided.rawValue
     
     @Binding var selectedTab: ContentView.Tab
     @State private var activeIndex: Int = 0
-    @State private var isZoomedOut = false
     @State private var isAnimating = false
+    @State private var showProfileSheet = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -22,16 +25,32 @@ struct HomeView: View {
             }
             
             ZStack {
-                VideoWallpaperBackground()
+                VideoWallpaperBackground(style: .hero)
 
                 VStack(alignment: .leading, spacing: 14) {
-                    // Header Section matching the mock large serif title
-                    Text(AppConstants.Text.helloCharu)
-                        .font(.system(.title3, design: .serif))
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.60))
-                        .padding(.horizontal, 24)
-                        .padding(.top, 6)
+                    HStack(alignment: .center, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(greetingText)
+                                .font(.system(.title3, design: .serif))
+                                .fontWeight(.medium)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.72))
+
+                            Text(profileSummaryText)
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.42))
+                        }
+
+                        Spacer()
+
+                        Button {
+                            showProfileSheet = true
+                        } label: {
+                            ProfileAvatarView(name: profileName)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 6)
                     
                     if viewModels.isEmpty {
                         VStack(spacing: 20) {
@@ -89,30 +108,13 @@ struct HomeView: View {
                             let cardHeight = max(cardProxy.size.height - cardToTabBarSpacing, 0)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: isZoomedOut ? 16 : 20) {
+                                HStack(spacing: 20) {
                                     ForEach(0..<viewModels.count, id: \.self) { idx in
                                         let vm = viewModels[idx]
-                                        LiveTimerCard(viewModel: vm, isZoomedOut: isZoomedOut, activeIndex: $activeIndex, myIndex: idx)
+                                        LiveTimerCard(viewModel: vm)
                                             .frame(width: cardWidth, height: cardHeight)
-                                            .scaleEffect(isZoomedOut ? 0.85 : (activeIndex == idx ? 1.0 : 0.92))
+                                            .scaleEffect(activeIndex == idx ? 1.0 : 0.92)
                                             .id(idx)
-                                            .onTapGesture {
-                                                if isZoomedOut {
-                                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                                        isZoomedOut = false
-                                                        activeIndex = idx
-                                                    }
-                                                }
-                                            }
-                                            .gesture(
-                                                LongPressGesture(minimumDuration: 0.5)
-                                                    .onEnded { _ in
-                                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                                            isZoomedOut = true
-                                                        }
-                                                    }
-                                            )
                                     }
                                 }
                                 .scrollTargetLayout()
@@ -123,7 +125,7 @@ struct HomeView: View {
                                 get: { activeIndex },
                                 set: { if let val = $0 { activeIndex = val } }
                             ))
-                            .safeAreaPadding(.horizontal, isZoomedOut ? 48 : 32)
+                            .safeAreaPadding(.horizontal, 32)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         }
                     }
@@ -131,15 +133,67 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
+        .sheet(isPresented: $showProfileSheet) {
+            ProfileSetupView(mode: .edit)
+        }
+    }
+
+    private var greetingText: String {
+        let trimmedName = profileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedName.isEmpty ? AppConstants.Text.helloFallback : "Hello, \(trimmedName)"
+    }
+
+    private var profileSummaryText: String {
+        let experience = ProfileExperienceLevel(rawValue: experienceLevelRaw)?.title ?? ProfileExperienceLevel.justStarting.title
+        let guidance = GuidanceMode(rawValue: guidanceModeRaw)?.title ?? GuidanceMode.guided.title
+        return "\(experience) • \(guidance) mode"
+    }
+}
+
+private struct ProfileAvatarView: View {
+    let name: String
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.white.opacity(0.06))
+
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.14), Color.primaryCopper.opacity(0.35)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+
+            if initials.isEmpty {
+                Image(systemName: "person.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.primaryCopper)
+            } else {
+                Text(initials)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.primaryCopper)
+            }
+        }
+        .frame(width: 36, height: 36)
+    }
+
+    private var initials: String {
+        let parts = name
+            .split(whereSeparator: \.isWhitespace)
+            .prefix(2)
+            .compactMap { $0.first }
+
+        return String(parts)
     }
 }
 
 @MainActor
 struct LiveTimerCard: View {
     let viewModel: HomeBrewViewModel
-    let isZoomedOut: Bool
-    @Binding var activeIndex: Int
-    let myIndex: Int
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -158,9 +212,9 @@ struct LiveTimerCard: View {
                             let targetWaterStr = "\(Int(viewModel.targetWater))g"
                             let doseStr = viewModel.beanWeight.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(viewModel.beanWeight))g" : String(format: "%.1fg", viewModel.beanWeight)
                             
-                            Text("\(viewModel.method.rawValue.lowercased()) - Target water: \(targetWaterStr) - \(doseStr)")
-                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
+                            Text("\(viewModel.method.rawValue.lowercased()) - Target: \(targetWaterStr) - \(doseStr)")
+                                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.primaryCopper)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                         }
@@ -169,13 +223,6 @@ struct LiveTimerCard: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
-                // .background(
-                //     RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius)
-                //         .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
-                // )
-                // .liquidGlassBorder(cornerRadius: 16)
-                
-
                 
                 PhaseStackPickerView(phases: phases, selectedIndex: pickerPhaseIndex)
                     .padding(.horizontal, 16)
@@ -328,7 +375,11 @@ struct TimerCircleView: View {
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(
-                        LinearGradient(colors: [Color.appTertiary, Color.appSecondary.opacity(0.8)], startPoint: .top, endPoint: .bottom),
+                        LinearGradient(
+                            colors: [Color.primaryCopper, Color.brushedCopper.opacity(0.92)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
                         style: StrokeStyle(lineWidth: 10, lineCap: .round)
                     )
                     .frame(width: 260, height: 260)

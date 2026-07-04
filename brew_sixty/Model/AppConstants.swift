@@ -21,7 +21,7 @@ struct AppConstants {
     struct Text {
         // App Core
         static let appTitle = "brew_sixty"
-        static let helloCharu = "Hello Charu!"
+        static let helloFallback = "Hello"
         
         // Empty State dashboard
         static let emptyCanvasTitle = "The Canvas is Clean"

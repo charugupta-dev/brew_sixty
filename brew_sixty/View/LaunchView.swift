@@ -1,19 +1,14 @@
 import SwiftUI
 
 struct LaunchView: View {
-    @State private var thought = CoffeeThought.random
     @Binding var showLaunch: Bool
     @State private var animateText = false
     
     var body: some View {
         ZStack {
-            VideoWallpaperBackground()
+            VideoWallpaperBackground(style: .hero)
 
             VStack(spacing: 16) {
-                Text("☕️")
-                    .font(.system(size: 64))
-                    .scaleEffect(animateText ? 1.0 : 0.8)
-                    .opacity(animateText ? 1.0 : 0.0)
                 
                 Text("Brew Sixty")
                     .font(.system(size: 32, weight: .bold, design: .serif))
@@ -21,9 +16,9 @@ struct LaunchView: View {
                     .scaleEffect(animateText ? 1.0 : 0.9)
                     .opacity(animateText ? 1.0 : 0.0)
                 
-                Text(thought)
-                    .font(.system(size: 16, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Color.coffeeAccent)
+                Text("Slow coffee, Beautifully timed")
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color.primaryCopper)
                     .scaleEffect(animateText ? 1.0 : 0.9)
                     .opacity(animateText ? 0.7 : 0.0)
             }

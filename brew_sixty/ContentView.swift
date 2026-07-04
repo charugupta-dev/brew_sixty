@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @State private var showLaunchScreen = true
     @State private var selectedTab: Tab = .brew
+    @AppStorage(ProfilePreferences.Keys.hasCompletedProfile) private var hasCompletedProfile = false
     
     enum Tab {
         case brew
@@ -47,6 +48,14 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { !showLaunchScreen && !hasCompletedProfile },
+                set: { _ in }
+            )
+        ) {
+            ProfileSetupView(mode: .onboarding)
+        }
     }
 }
 

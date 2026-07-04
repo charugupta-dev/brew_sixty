@@ -19,18 +19,74 @@ private enum VideoWallpaperAsset {
 }
 
 struct VideoWallpaperBackground: View {
+    enum Style {
+        case hero
+        case quiet
+        case onboarding
+
+        var blurRadius: CGFloat {
+            switch self {
+            case .hero:
+                return 2
+            case .quiet:
+                return 4
+            case .onboarding:
+                return 3
+            }
+        }
+
+        var baseDimOpacity: Double {
+            switch self {
+            case .hero:
+                return 0.48
+            case .quiet:
+                return 0.62
+            case .onboarding:
+                return 0.56
+            }
+        }
+
+        var topOverlayOpacity: Double {
+            switch self {
+            case .hero:
+                return 0.45
+            case .quiet:
+                return 0.58
+            case .onboarding:
+                return 0.52
+            }
+        }
+
+        var bottomOverlayOpacity: Double {
+            switch self {
+            case .hero:
+                return 0.38
+            case .quiet:
+                return 0.48
+            case .onboarding:
+                return 0.42
+            }
+        }
+    }
+
+    let style: Style
+
+    init(style: Style = .hero) {
+        self.style = style
+    }
+
     var body: some View {
         ZStack {
             LoopingVideoPlayerView()
-                .blur(radius: 2)
+                .blur(radius: style.blurRadius)
 
-            Color.black.opacity(0.48)
+            Color.black.opacity(style.baseDimOpacity)
 
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.45),
+                    Color.black.opacity(style.topOverlayOpacity),
                     Color.clear,
-                    Color.black.opacity(0.38)
+                    Color.black.opacity(style.bottomOverlayOpacity)
                 ],
                 startPoint: .top,
                 endPoint: .bottom

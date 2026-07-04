@@ -25,7 +25,7 @@ struct MethodsView: View {
     
     var body: some View {
         ZStack {
-            VideoWallpaperBackground()
+            VideoWallpaperBackground(style: .quiet)
 
             ScrollView {
                 VStack(spacing: 20) {
@@ -41,8 +41,7 @@ struct MethodsView: View {
                                     .tracking(1.5)
                                 
                                 Text("\(templates.count) Saved Templates")
-                                    .font(.system(.title2, design: .serif))
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 22, weight: .semibold, design: .rounded))
                                     .foregroundStyle(Color.coffeeCream)
                                 
                                 Text("Tap to view or delete your recipes")
@@ -60,7 +59,10 @@ struct MethodsView: View {
                             RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
                                 .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                         )
-                        .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                        )
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal)
@@ -114,57 +116,25 @@ struct MethodsView: View {
                         .padding(.horizontal)
                     }
                     
-                    // 3. Bean Weight (Stepped Scale Picker with presets)
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text(AppConstants.Text.beanWeight)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.coffeeCream)
-                                .tracking(1.0)
-                            Spacer()
-                            Text(String(format: "%.1fg", beanWeight))
-                                .font(.system(.headline, design: .monospaced))
-                                .foregroundStyle(Color.primaryCopper)
-                        }
-                        
-                        SteppedWeightPicker(value: $beanWeight)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
-                    )
-                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
-                    .padding(.horizontal)
-                    
-                    // 4. Target Temperature (Horizontal scrolling Ruler)
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text(AppConstants.Text.targetTemperature)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.coffeeCream)
-                                .tracking(1.0)
-                            Spacer()
-                            Text(String(format: "%.1f°C", targetTemperature))
-                                .font(.system(.headline, design: .monospaced))
-                                .foregroundStyle(Color.primaryCopper)
-                        }
-                        
-                        RulerPicker(value: $targetTemperature, range: 75.0...100.0, step: 0.5)
-                            .padding(.vertical, 8)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
-                    )
-                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
-                    .padding(.horizontal)
-                    
-                    // 5. Dynamic Brew Parameters Card (Combined Water Volume/Ratio and Pre-infusion/Steep Options)
                     VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text(AppConstants.Text.beanWeight)
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.coffeeCream)
+                                    .tracking(1.0)
+                                Spacer()
+                                Text(String(format: "%.1fg", beanWeight))
+                                    .font(.system(.headline, design: .monospaced))
+                                    .foregroundStyle(Color.primaryCopper)
+                            }
+
+                            SteppedWeightPicker(value: $beanWeight)
+                        }
+
+                        Divider().background(Color.white.opacity(0.08))
+
                         // Section A: Water Ratio (V60/Chemex) or Target Water Volume (French Press/Aeropress)
                         if selectedMethod == .v60 || selectedMethod == .chemex {
                             VStack(alignment: .leading, spacing: 8) {
@@ -179,9 +149,9 @@ struct MethodsView: View {
                                         .font(.system(.headline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
-                                
+
                                 PrecisionSlider(value: $ratio, range: 12.0...20.0, step: 0.5)
-                                
+
                                 HStack {
                                     Text("1:12")
                                     Spacer()
@@ -203,9 +173,9 @@ struct MethodsView: View {
                                         .font(.system(.headline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
-                                
+
                                 PrecisionSlider(value: $waterVolume, range: 100.0...600.0, step: 10.0)
-                                
+
                                 HStack {
                                     Text("100g")
                                     Spacer()
@@ -215,9 +185,9 @@ struct MethodsView: View {
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
                             }
                         }
-                        
-                        Divider().background(Color.white.opacity(0.1))
-                        
+
+                        Divider().background(Color.white.opacity(0.08))
+
                         // Section B: Bloom toggle or Steep slider
                         if selectedMethod == .v60 || selectedMethod == .chemex {
                             VStack(alignment: .leading, spacing: 10) {
@@ -228,7 +198,7 @@ struct MethodsView: View {
                                         .foregroundStyle(Color.coffeeCream)
                                 }
                                 .tint(Color.primaryCopper)
-                                
+
                                 if preInfusionActive {
                                     VStack(alignment: .leading, spacing: 8) {
                                         HStack {
@@ -240,7 +210,7 @@ struct MethodsView: View {
                                                 .font(.system(.subheadline, design: .monospaced))
                                                 .foregroundStyle(Color.primaryCopper)
                                         }
-                                        
+
                                         PrecisionSlider(value: $preInfusionDuration, range: 30.0...60.0, step: 5.0)
                                     }
                                     .padding(.top, 4)
@@ -259,9 +229,9 @@ struct MethodsView: View {
                                         .font(.system(.headline, design: .monospaced))
                                         .foregroundStyle(Color.primaryCopper)
                                 }
-                                
+
                                 PrecisionSlider(value: $steepDuration, range: 10.0...480.0, step: 5.0)
-                                
+
                                 HStack {
                                     Text("10s")
                                     Spacer()
@@ -269,10 +239,10 @@ struct MethodsView: View {
                                 }
                                 .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(Color.coffeeCream.opacity(0.3))
-                                
+
                                 if selectedMethod == .aeropress {
                                     Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
-                                    
+
                                     VStack(alignment: .leading, spacing: 8) {
                                         HStack {
                                             Text("PRESS DURATION")
@@ -285,9 +255,9 @@ struct MethodsView: View {
                                                 .font(.system(.headline, design: .monospaced))
                                                 .foregroundStyle(Color.primaryCopper)
                                         }
-                                        
+
                                         PrecisionSlider(value: $pressDuration, range: 10.0...60.0, step: 5.0)
-                                        
+
                                         HStack {
                                             Text("10s")
                                             Spacer()
@@ -307,28 +277,50 @@ struct MethodsView: View {
                     )
                     .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
                     .padding(.horizontal)
-                    
-                    // Recipe Name Card
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(AppConstants.Text.recipeName)
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Color.coffeeCream)
-                            .tracking(1.0)
-                        
-                        TextField("Recipe Name", text: $recipeName)
-                            .font(.system(.title2, design: .serif))
-                            .fontWeight(.bold)
-                            .foregroundStyle(Color.coffeeCream)
-                            .textFieldStyle(.plain)
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text(AppConstants.Text.targetTemperature)
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.coffeeCream)
+                                    .tracking(1.0)
+                                Spacer()
+                                Text(String(format: "%.1f°C", targetTemperature))
+                                    .font(.system(.headline, design: .monospaced))
+                                    .foregroundStyle(Color.primaryCopper)
+                            }
+
+                            RulerPicker(value: $targetTemperature, range: 75.0...100.0, step: 0.5)
+                                .padding(.vertical, 8)
+                        }
+
+                        Divider().background(Color.white.opacity(0.08))
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(AppConstants.Text.recipeName)
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.coffeeCream)
+                                .tracking(1.0)
+
+                            TextField("Recipe Name", text: $recipeName)
+                                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Color.coffeeCream)
+                                .textFieldStyle(.plain)
+                        }
                     }
                     .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
                             .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
                     )
-                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
+                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                    )
                     .padding(.horizontal)
                     
                     // 8. Save Button
@@ -414,7 +406,7 @@ struct TemplatesListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                VideoWallpaperBackground()
+                VideoWallpaperBackground(style: .quiet)
                 
                 if templates.isEmpty {
                     ContentUnavailableView {

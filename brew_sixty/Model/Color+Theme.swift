@@ -49,18 +49,18 @@ struct LiquidGlassBorder: ViewModifier {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.18),
+                                Color.white.opacity(0.10),
                                 Color.white.opacity(0.02),
-                                Color.primaryCopper.opacity(0.50),
-                                Color.white.opacity(0.02)
+                                Color.primaryCopper.opacity(0.22),
+                                Color.white.opacity(0.01)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 1.5
+                        lineWidth: 1
                     )
             )
-            .shadow(color: Color.black.opacity(0.45), radius: 14, x: 0, y: 8)
+            .shadow(color: Color.black.opacity(0.26), radius: 10, x: 0, y: 6)
     }
 }
 
@@ -147,4 +147,3 @@ private func colorSwatch(name: String, color: Color) -> some View {
             .multilineTextAlignment(.center)
     }
 }
-
