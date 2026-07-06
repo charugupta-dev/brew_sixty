@@ -68,11 +68,10 @@ struct ProfileSetupView: View {
                                     .submitLabel(.done)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 14)
-                                    .background(Color.white.opacity(0.08)) // High contrast fill
-                                    .cornerRadius(14)
+                                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .stroke(Color.white.opacity(0.15), lineWidth: 1) // High contrast stroke
+                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
                                     )
                                     .foregroundStyle(Color.coffeeCream)
                             }
