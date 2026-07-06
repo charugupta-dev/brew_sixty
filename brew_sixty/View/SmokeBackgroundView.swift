@@ -180,7 +180,7 @@ struct SmokeParticleOverlay: View {
                         context.fill(Path(ellipseIn: rect), with: shading)
                     }
                     
-                    // Render embers (dots)
+                    // Render embers
                     for e in system.embers {
                         let rect = CGRect(
                             x: e.x - e.size / 2,
@@ -192,25 +192,16 @@ struct SmokeParticleOverlay: View {
                         context.fill(Path(ellipseIn: rect), with: .color(e.color.opacity(e.opacity)))
                     }
                 }
+                .mask(
+                    LinearGradient(
+                        colors: [.white, .white.opacity(0.8), .clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
             }
         }
-        .allowsHitTesting(false) // Let user swipe/tap through the overlay
-        .overlay(
-            VStack {
-                LinearGradient(
-                    colors: [Color.black.opacity(0.4), Color.clear],
-                    startPoint: .top,
-                    endPoint: .center
-                )
-                Spacer()
-                LinearGradient(
-                    colors: [Color.clear, Color.black.opacity(0.5)],
-                    startPoint: .center,
-                    endPoint: .bottom
-                )
-            }
-            .allowsHitTesting(false)
-        )
+        .allowsHitTesting(false)
         .ignoresSafeArea()
     }
 }

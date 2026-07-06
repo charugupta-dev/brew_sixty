@@ -13,10 +13,7 @@ struct ContentView: View {
     
     init() {
         let appearance = UITabBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.shadowColor = .clear
-        appearance.shadowImage = UIImage()
+        appearance.configureWithDefaultBackground() // Restore translucent system glass
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance

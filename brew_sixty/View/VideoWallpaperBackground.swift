@@ -77,20 +77,20 @@ struct VideoWallpaperBackground: View {
 
     var body: some View {
         ZStack {
+            Color(red: 0.05, green: 0.05, blue: 0.05) // Deep solid obsidian
+            
             LoopingVideoPlayerView()
                 .blur(radius: style.blurRadius)
+                .mask(
+                    LinearGradient(
+                        colors: [.white, .white.opacity(0.8), .clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+                .opacity(0.4) // Softened to avoid visual noise
 
             Color.black.opacity(style.baseDimOpacity)
-
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(style.topOverlayOpacity),
-                    Color.clear,
-                    Color.black.opacity(style.bottomOverlayOpacity)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
