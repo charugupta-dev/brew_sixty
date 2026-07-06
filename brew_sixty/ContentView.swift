@@ -40,7 +40,6 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .tint(Color.primaryCopper)
-                .toolbarBackground(.hidden, for: .tabBar)
                 .transition(.opacity)
             }
         }

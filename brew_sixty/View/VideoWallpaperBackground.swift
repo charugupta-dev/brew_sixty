@@ -46,27 +46,6 @@ struct VideoWallpaperBackground: View {
             }
         }
 
-        var topOverlayOpacity: Double {
-            switch self {
-            case .hero:
-                return 0.45
-            case .quiet:
-                return 0.58
-            case .onboarding:
-                return 0.52
-            }
-        }
-
-        var bottomOverlayOpacity: Double {
-            switch self {
-            case .hero:
-                return 0.38
-            case .quiet:
-                return 0.48
-            case .onboarding:
-                return 0.42
-            }
-        }
     }
 
     let style: Style
@@ -79,18 +58,19 @@ struct VideoWallpaperBackground: View {
         ZStack {
             Color(red: 0.05, green: 0.05, blue: 0.05) // Deep solid obsidian
             
-            LoopingVideoPlayerView()
-                .blur(radius: style.blurRadius)
-                .mask(
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.8), .clear],
-                        startPoint: .top,
-                        endPoint: .center
-                    )
+            ZStack {
+                LoopingVideoPlayerView()
+                    .blur(radius: style.blurRadius)
+                Color.black.opacity(style.baseDimOpacity)
+            }
+            .mask(
+                LinearGradient(
+                    colors: [.white, .white.opacity(0.8), .clear],
+                    startPoint: .top,
+                    endPoint: .center
                 )
-                .opacity(0.4) // Softened to avoid visual noise
-
-            Color.black.opacity(style.baseDimOpacity)
+            )
+            .opacity(0.4)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
