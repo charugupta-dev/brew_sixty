@@ -6,6 +6,8 @@ struct SteppedWeightPicker: View {
     let step: Double = AppConstants.Pickers.steppedWeightStep
     let presets: [Double] = AppConstants.Pickers.steppedWeightPresets
     let onInteraction: (() -> Void)?
+    
+    @State private var showPresets = false // Collapsible disclosure state
 
     init(value: Binding<Double>, onInteraction: (() -> Void)? = nil) {
         _value = value
@@ -63,33 +65,55 @@ struct SteppedWeightPicker: View {
             }
             .padding(.vertical, 4)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(presets, id: \.self) { preset in
-                        let isSelected = abs(value - preset) < 0.01
-                        Button {
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                onInteraction?()
-                                value = preset
-                                UISelectionFeedbackGenerator().selectionChanged()
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    showPresets.toggle()
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(showPresets ? "Hide Presets" : "Quick Presets")
+                    Image(systemName: showPresets ? "chevron.up" : "chevron.down")
+                }
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(Color.primaryCopper)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 10)
+                .background(Color.white.opacity(0.04))
+                .cornerRadius(12)
+            }
+            .buttonStyle(.plain)
+            
+            if showPresets {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(presets, id: \.self) { preset in
+                            let isSelected = abs(value - preset) < 0.01
+                            Button {
+                                withAnimation(.easeOut(duration: 0.15)) {
+                                    onInteraction?()
+                                    value = preset
+                                    UISelectionFeedbackGenerator().selectionChanged()
+                                }
+                            } label: {
+                                Text(String(format: "%.0fg", preset))
+                                    .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .monospaced))
+                                    .foregroundStyle(isSelected ? .black : .white.opacity(0.65))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.04))
+                                    )
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
+                                    )
                             }
-                        } label: {
-                            Text(String(format: "%.0fg", preset))
-                                .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .monospaced))
-                                .foregroundStyle(isSelected ? .black : .white.opacity(0.65))
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 6)
-                                .background(
-                                    Capsule()
-                                        .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.04))
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
-                                )
                         }
                     }
+                    .padding(.top, 4)
                 }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }
