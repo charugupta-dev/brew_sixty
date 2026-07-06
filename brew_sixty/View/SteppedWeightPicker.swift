@@ -76,8 +76,8 @@ struct SteppedWeightPicker: View {
                 }
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundStyle(Color.primaryCopper)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 12)
+                .frame(minHeight: 44) // Meets the 44pt HIG touch target requirement
                 .background(Color.white.opacity(0.04))
                 .cornerRadius(12)
             }

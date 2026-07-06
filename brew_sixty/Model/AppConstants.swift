@@ -141,7 +141,7 @@ struct AppConstants {
     }
 
     struct Pickers {
-        static let precisionTrackHeight: CGFloat = 8
+        static let precisionTrackHeight: CGFloat = 10
         static let precisionThumbSize: CGFloat = 22
         static let precisionCenterDotSize: CGFloat = 6
 
