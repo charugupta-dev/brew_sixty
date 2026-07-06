@@ -133,7 +133,7 @@ struct MethodsView: View {
                             }
                         }
 
-                        Divider().background(Color.white.opacity(0.08))
+                        Divider().overlay(Color.white.opacity(0.08))
 
                         if isPourOverMethod {
                             VStack(alignment: .leading, spacing: 8) {
@@ -235,7 +235,7 @@ struct MethodsView: View {
                             }
                         }
 
-                        Divider().background(Color.white.opacity(0.08))
+                        Divider().overlay(Color.white.opacity(0.08))
 
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
@@ -257,25 +257,13 @@ struct MethodsView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        sectionLabel(AppConstants.Text.recipeName)
-
+                    SectionCard("Recipe Name") {
                         TextField(AppConstants.Methods.Text.recipeNamePlaceholder, text: $recipeName)
                             .font(.system(size: 22, weight: .semibold, design: .rounded))
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.coffeeCream)
                             .textFieldStyle(.plain)
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .fill(Color.appPanel.opacity(AppConstants.UI.cardOpacity))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
-                    )
-                    .padding(.horizontal)
                     
                     Button {
                         saveTemplate()
@@ -970,7 +958,7 @@ struct SectionCard<Content: View>: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title.uppercased())
+            Text(title.localizedUppercase)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(Color.primaryCopper)
                 .tracking(1.5)
@@ -983,10 +971,7 @@ struct SectionCard<Content: View>: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white.opacity(0.03))
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
-        )
+        .liquidGlassBorder(cornerRadius: 16)
         .padding(.horizontal, 16)
     }
 }
