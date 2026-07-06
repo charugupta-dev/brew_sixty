@@ -25,24 +25,26 @@ final class HomeBrewViewModel: Identifiable {
     var customBloomDuration: TimeInterval? = nil
     var customSteepDuration: TimeInterval? = nil
     var customPressDuration: TimeInterval? = nil
-    var customPreInfusionActive: Bool? = nil
-    
-    // MARK: - Configuration Constants
-    private struct Config {
-        static let v60BloomDuration: TimeInterval = 45.0
-        static let v60TotalDuration: TimeInterval = 150.0 // 2m 30s
-        static let v60FirstPourMultiplier: Double = 0.6
-        static let frenchPressSteepDuration: TimeInterval = 240.0 // 4m 00s
-        static let frenchPressPlungeDuration: TimeInterval = 15.0 // 15s plunge
-        static let bloomWaterMultiplier: Double = 3.0
-        static let timerInterval: TimeInterval = 0.1
-    }
     
     // MARK: - Computed Properties
+    private var isPourOverMethod: Bool {
+        method == .v60 || method == .chemex
+    }
+
+    private var steepPhaseDuration: TimeInterval {
+        switch method {
+        case .frenchPress:
+            return customSteepDuration ?? AppConstants.BrewTimer.frenchPressSteepDuration
+        case .aeropress:
+            return customSteepDuration ?? AppConstants.BrewTimer.aeropressSteepDuration
+        case .v60, .chemex:
+            return 0.0
+        }
+    }
+
     var bloomDuration: TimeInterval {
-        if method == .v60 || method == .chemex {
-            if let active = customPreInfusionActive, !active { return 0.0 }
-            return customBloomDuration ?? Config.v60BloomDuration
+        if isPourOverMethod {
+            return customBloomDuration ?? AppConstants.BrewTimer.v60BloomDuration
         }
         return 0.0
     }
@@ -50,22 +52,18 @@ final class HomeBrewViewModel: Identifiable {
     var totalDuration: TimeInterval {
         switch method {
         case .v60:
-            return bloomDuration + 105.0
+            return bloomDuration + AppConstants.BrewTimer.v60DrawdownDuration
         case .chemex:
-            return bloomDuration + (customSteepDuration ?? 195.0)
+            return bloomDuration + (customSteepDuration ?? AppConstants.BrewTimer.chemexDrawdownDuration)
         case .frenchPress:
-            let steep = customSteepDuration ?? Config.frenchPressSteepDuration
-            let plunge = customPressDuration ?? Config.frenchPressPlungeDuration
-            return steep + plunge
+            return steepPhaseDuration + (customPressDuration ?? AppConstants.BrewTimer.frenchPressPlungeDuration)
         case .aeropress:
-            let steep = customSteepDuration ?? 60.0
-            let press = customPressDuration ?? 30.0
-            return steep + press
+            return steepPhaseDuration + (customPressDuration ?? AppConstants.BrewTimer.aeropressPressDuration)
         }
     }
     
     var targetWater: Double {
-        if method == .v60 || method == .chemex {
+        if isPourOverMethod {
             return beanWeight * ratio
         } else {
             return waterVolume
@@ -73,11 +71,11 @@ final class HomeBrewViewModel: Identifiable {
     }
     
     var bloomWater: Double {
-        beanWeight * Config.bloomWaterMultiplier
+        beanWeight * AppConstants.BrewTimer.bloomWaterMultiplier
     }
 
     var firstPourWater: Double {
-        targetWater * Config.v60FirstPourMultiplier
+        targetWater * AppConstants.BrewTimer.firstPourMultiplier
     }
     
     var activePhaseIndex: Int {
@@ -88,14 +86,13 @@ final class HomeBrewViewModel: Identifiable {
             let bloom = bloomDuration
             if bloom > 0 && elapsed < bloom {
                 return 0
-            } else if elapsed < (bloom + 60.0) {
+            } else if elapsed < (bloom + AppConstants.BrewTimer.pourOverMainPourDuration) {
                 return bloom > 0 ? 1 : 0
             } else {
                 return bloom > 0 ? 2 : 1
             }
         case .frenchPress, .aeropress:
-            let steep = customSteepDuration ?? (method == .frenchPress ? Config.frenchPressSteepDuration : 60.0)
-            if elapsed < steep {
+            if elapsed < steepPhaseDuration {
                 return 0
             } else {
                 return 1
@@ -105,7 +102,7 @@ final class HomeBrewViewModel: Identifiable {
 
     var currentPhaseTitle: String {
         if isFinished || elapsed >= totalDuration {
-            return "Done"
+            return AppConstants.BrewTimer.donePhaseTitle
         }
 
         switch method {
@@ -113,17 +110,17 @@ final class HomeBrewViewModel: Identifiable {
             let bloom = bloomDuration
             if bloom > 0 {
                 switch activePhaseIndex {
-                case 0: return "Bloom"
-                case 1: return "First Pour"
-                default: return "Final Drawdown"
+                case 0: return AppConstants.BrewTimer.bloomPhaseTitle
+                case 1: return AppConstants.BrewTimer.firstPourPhaseTitle
+                default: return AppConstants.BrewTimer.finalDrawdownPhaseTitle
                 }
             } else {
-                return activePhaseIndex == 0 ? "First Pour" : "Final Drawdown"
+                return activePhaseIndex == 0 ? AppConstants.BrewTimer.firstPourPhaseTitle : AppConstants.BrewTimer.finalDrawdownPhaseTitle
             }
         case .frenchPress:
-            return activePhaseIndex == 0 ? "Steep" : "Plunge"
+            return activePhaseIndex == 0 ? AppConstants.BrewTimer.steepPhaseTitle : AppConstants.BrewTimer.plungePhaseTitle
         case .aeropress:
-            return activePhaseIndex == 0 ? "Steep" : "Press"
+            return activePhaseIndex == 0 ? AppConstants.BrewTimer.steepPhaseTitle : AppConstants.BrewTimer.pressPhaseTitle
         }
     }
     
@@ -136,12 +133,11 @@ final class HomeBrewViewModel: Identifiable {
         self.waterVolume = waterVolume
     }
     
-    convenience init(method: BrewMethod, beanWeight: Double, ratio: Double, waterVolume: Double, bloomDuration: TimeInterval? = nil, steepDuration: TimeInterval? = nil, pressDuration: TimeInterval? = nil, preInfusionActive: Bool? = nil) {
+    convenience init(method: BrewMethod, beanWeight: Double, ratio: Double, waterVolume: Double, bloomDuration: TimeInterval? = nil, steepDuration: TimeInterval? = nil, pressDuration: TimeInterval? = nil) {
         self.init(method: method, beanWeight: beanWeight, ratio: ratio, waterVolume: waterVolume)
         self.customBloomDuration = bloomDuration
         self.customSteepDuration = steepDuration
         self.customPressDuration = pressDuration
-        self.customPreInfusionActive = preInfusionActive
     }
 
     convenience init(template: BrewTemplate) {
@@ -150,10 +146,11 @@ final class HomeBrewViewModel: Identifiable {
             beanWeight: template.beanWeight,
             ratio: template.ratio,
             waterVolume: template.waterVolume,
-            bloomDuration: template.preInfusionActive ? template.preInfusionDuration : 0.0,
+            bloomDuration: template.method == .v60 || template.method == .chemex
+                ? (template.preInfusionDuration > 0 ? template.preInfusionDuration : AppConstants.BrewTimer.v60BloomDuration)
+                : 0.0,
             steepDuration: template.steepDuration,
-            pressDuration: template.pressDuration,
-            preInfusionActive: template.preInfusionActive
+            pressDuration: template.pressDuration
         )
     }
     
@@ -171,7 +168,7 @@ final class HomeBrewViewModel: Identifiable {
         let currentStartDate = Date().addingTimeInterval(-elapsed)
         startDate = currentStartDate
         
-        timer = Timer.scheduledTimer(withTimeInterval: Config.timerInterval, repeats: true) { [weak self] timer in
+        timer = Timer.scheduledTimer(withTimeInterval: AppConstants.BrewTimer.timerInterval, repeats: true) { [weak self] timer in
             Task { @MainActor [weak self] in
                 guard let self = self else {
                     timer.invalidate()
@@ -217,7 +214,7 @@ final class HomeBrewViewModel: Identifiable {
             if bloom > 0 && elapsed < bloom {
                 newElapsed = bloom
             } else {
-                let firstPourEnd = (bloom > 0 ? bloom : 0.0) + 60.0
+                let firstPourEnd = (bloom > 0 ? bloom : 0.0) + AppConstants.BrewTimer.pourOverMainPourDuration
                 if elapsed < firstPourEnd {
                     newElapsed = firstPourEnd
                 } else {
@@ -225,9 +222,8 @@ final class HomeBrewViewModel: Identifiable {
                 }
             }
         case .frenchPress, .aeropress:
-            let steep = customSteepDuration ?? (method == .frenchPress ? Config.frenchPressSteepDuration : 60.0)
-            if elapsed < steep {
-                newElapsed = steep
+            if elapsed < steepPhaseDuration {
+                newElapsed = steepPhaseDuration
             } else {
                 newElapsed = totalDuration
             }
@@ -253,34 +249,33 @@ final class HomeBrewViewModel: Identifiable {
     
     func getPhaseText() -> String {
         if isFinished || elapsed >= totalDuration {
-            return "Enjoy your coffee!"
+            return AppConstants.BrewTimer.enjoyCoffeeMessage
         }
         
         switch method {
         case .v60, .chemex:
             let bloom = bloomDuration
             if elapsed == 0 {
-                return "Target: \(formattedGrams(targetWater))"
+                return "\(AppConstants.BrewTimer.targetPrefix) \(formattedGrams(targetWater))"
             } else if bloom > 0 && elapsed < bloom {
-                return "Bloom: Pour \(formattedGrams(bloomWater))"
-            } else if elapsed < (bloom > 0 ? bloom : 0.0) + 60.0 {
-                return "First Pour: Pour to \(formattedGrams(firstPourWater))"
+                return "\(AppConstants.BrewTimer.bloomInstructionPrefix) \(formattedGrams(bloomWater))"
+            } else if elapsed < (bloom > 0 ? bloom : 0.0) + AppConstants.BrewTimer.pourOverMainPourDuration {
+                return "\(AppConstants.BrewTimer.firstPourInstructionPrefix) \(formattedGrams(firstPourWater))"
             } else {
-                return "Drawdown: Pour to \(formattedGrams(targetWater))"
+                return "\(AppConstants.BrewTimer.drawdownInstructionPrefix) \(formattedGrams(targetWater))"
             }
         case .frenchPress, .aeropress:
-            let steep = customSteepDuration ?? (method == .frenchPress ? Config.frenchPressSteepDuration : 60.0)
             if elapsed == 0 {
-                return "Target: \(formattedGrams(targetWater))"
-            } else if elapsed < steep {
-                return "Steep: Pour \(formattedGrams(targetWater))"
+                return "\(AppConstants.BrewTimer.targetPrefix) \(formattedGrams(targetWater))"
+            } else if elapsed < steepPhaseDuration {
+                return "\(AppConstants.BrewTimer.steepInstructionPrefix) \(formattedGrams(targetWater))"
             } else {
-                return method == .frenchPress ? "Plunge: Press down slowly" : "Press: Press down slowly"
+                return method == .frenchPress ? AppConstants.BrewTimer.plungeInstruction : AppConstants.BrewTimer.pressInstruction
             }
         }
     }
 
     private func formattedGrams(_ value: Double) -> String {
-        "\(Int(value.rounded()))g"
+        "\(Int(value.rounded()))\(AppConstants.Text.gramsUnit)"
     }
 }

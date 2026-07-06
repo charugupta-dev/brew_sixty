@@ -26,6 +26,10 @@ extension Color {
     /// Copper color tokens (Option 1 Warm Amber & Gold)
     static let primaryCopper = Color.appPrimary
     static let brushedCopper = Color.appNeutral
+    static let appPanel = Color(red: 0.10, green: 0.09, blue: 0.09)
+    static let appSheetTop = Color(red: 0.11, green: 0.10, blue: 0.09)
+    static let appSheetBottom = Color(red: 0.07, green: 0.07, blue: 0.08)
+    static let deepRoastInk = Color(red: 0.12, green: 0.08, blue: 0.08)
 }
 
 extension RadialGradient {

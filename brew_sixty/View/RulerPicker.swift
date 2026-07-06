@@ -5,6 +5,7 @@ struct RulerPicker: View {
     let range: ClosedRange<Double>
     let step: Double
     let majorStep: Double?
+    let onInteraction: (() -> Void)?
     
     @State private var dragOffset: CGFloat = 0
     @State private var baseOffset: CGFloat = 0
@@ -13,18 +14,20 @@ struct RulerPicker: View {
         Int(round((range.upperBound - range.lowerBound) / step)) + 1
     }
     
-    private let itemWidth: CGFloat = 16 // tick width + spacing
+    private let itemWidth = AppConstants.Pickers.rulerItemWidth
 
     init(
         value: Binding<Double>,
         range: ClosedRange<Double>,
         step: Double,
-        majorStep: Double? = nil
+        majorStep: Double? = nil,
+        onInteraction: (() -> Void)? = nil
     ) {
         _value = value
         self.range = range
         self.step = step
         self.majorStep = majorStep
+        self.onInteraction = onInteraction
     }
     
     var body: some View {
@@ -33,17 +36,13 @@ struct RulerPicker: View {
             let maxOffset: CGFloat = 0
             let minOffset: CGFloat = -CGFloat(ticksCount - 1) * itemWidth
             
-            // Clamp offset during dragging to prevent sliding beyond boundaries
             let currentOffset = min(max(baseOffset + dragOffset, minOffset), maxOffset)
             
-            // Align the first tick (index 0) of the centered HStack directly under the pointer
             let alignmentOffset = CGFloat(ticksCount - 1) * itemWidth / 2.0
             
             ZStack(alignment: .bottom) {
-                // Background Track for capturing gestures
                 Color.white.opacity(0.01)
                 
-                // Ticks track
                 HStack(alignment: .bottom, spacing: 0) {
                     ForEach(0..<ticksCount, id: \.self) { idx in
                         let tickValue = range.lowerBound + Double(idx) * step
@@ -72,31 +71,30 @@ struct RulerPicker: View {
                             withAnimation(.easeOut(duration: 0.2)) {
                                 baseOffset = targetOffset
                                 dragOffset = 0
+                                onInteraction?()
                                 value = tickValue
                             }
                         }
                     }
                 }
-                .offset(x: alignmentOffset + currentOffset) // Center the active tick
+                .offset(x: alignmentOffset + currentOffset)
                 
-                // Central gold indicator needle (bottom-aligned)
                 Rectangle()
                     .fill(Color.primaryCopper)
-                    .frame(width: 2, height: 40)
+                    .frame(width: AppConstants.Pickers.rulerIndicatorWidth, height: AppConstants.Pickers.rulerIndicatorHeight)
                     .shadow(color: Color.primaryCopper.opacity(0.5), radius: 2)
                     .alignmentGuide(.bottom) { d in d[.bottom] - 8 }
                 
-                // Top indicator needle / triangle pointing down
                 VStack(spacing: 0) {
                     Image(systemName: "triangle.fill")
                         .resizable()
-                        .frame(width: 8, height: 6)
+                        .frame(width: AppConstants.Pickers.rulerTriangleWidth, height: AppConstants.Pickers.rulerTriangleHeight)
                         .foregroundStyle(Color.primaryCopper)
                         .rotationEffect(.degrees(180))
                         .shadow(color: Color.primaryCopper.opacity(0.5), radius: 2)
                     Spacer()
                 }
-                .frame(width: width, height: 60)
+                .frame(width: width, height: AppConstants.Pickers.rulerHeight)
             }
             .contentShape(Rectangle())
             .gesture(
@@ -104,13 +102,12 @@ struct RulerPicker: View {
                     .onChanged { gesture in
                         dragOffset = gesture.translation.width
                         
-                        // Calculate active value while dragging using live offset
                         let liveOffset = min(max(baseOffset + gesture.translation.width, minOffset), maxOffset)
                         let activeIdx = Int(round(-liveOffset / itemWidth))
                         let activeVal = range.lowerBound + Double(activeIdx) * step
                         
-                        // Haptic feedback when crossing a tick
                         if abs(value - activeVal) > 0.01 {
+                            onInteraction?()
                             UISelectionFeedbackGenerator().selectionChanged()
                             value = activeVal
                         }
@@ -120,7 +117,6 @@ struct RulerPicker: View {
                         baseOffset = min(max(baseOffset, minOffset), maxOffset)
                         dragOffset = 0
                         
-                        // Snap to nearest tick
                         let activeIdx = Int(round(-baseOffset / itemWidth))
                         let snappedOffset = -CGFloat(activeIdx) * itemWidth
                         
@@ -134,7 +130,6 @@ struct RulerPicker: View {
                 syncOffsetFromValue()
             }
             .onChange(of: value) { _, newValue in
-                // Only sync if not actively dragging
                 if dragOffset == 0 {
                     let targetIdx = Int(round((newValue - range.lowerBound) / step))
                     let targetOffset = -CGFloat(targetIdx) * itemWidth
@@ -146,8 +141,8 @@ struct RulerPicker: View {
                 }
             }
         }
-        .frame(height: 60)
-        .clipped() // Restrict the scale rendering to the card boundaries
+        .frame(height: AppConstants.Pickers.rulerHeight)
+        .clipped()
     }
     
     private func syncOffsetFromValue() {

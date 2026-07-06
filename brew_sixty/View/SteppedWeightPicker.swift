@@ -2,16 +2,22 @@ import SwiftUI
 
 struct SteppedWeightPicker: View {
     @Binding var value: Double
-    let range: ClosedRange<Double> = 1.0...40.0
-    let step: Double = 0.5
-    let presets: [Double] = [12.0, 15.0, 18.0, 20.0, 30.0]
+    let range: ClosedRange<Double> = AppConstants.Pickers.steppedWeightRange
+    let step: Double = AppConstants.Pickers.steppedWeightStep
+    let presets: [Double] = AppConstants.Pickers.steppedWeightPresets
+    let onInteraction: (() -> Void)?
+
+    init(value: Binding<Double>, onInteraction: (() -> Void)? = nil) {
+        _value = value
+        self.onInteraction = onInteraction
+    }
     
     var body: some View {
         VStack(spacing: 12) {
-            // Tactile Steppers + Digital Scale Display
             HStack(spacing: 16) {
                 Button {
                     if value > range.lowerBound {
+                        onInteraction?()
                         value = max(range.lowerBound, value - step)
                         UISelectionFeedbackGenerator().selectionChanged()
                     }
@@ -19,7 +25,7 @@ struct SteppedWeightPicker: View {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
+                        .frame(width: AppConstants.Pickers.steppedWeightButtonSize, height: AppConstants.Pickers.steppedWeightButtonSize)
                         .background(Color.white.opacity(0.06))
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
@@ -34,13 +40,14 @@ struct SteppedWeightPicker: View {
                     Text("GRAMS")
                         .font(.system(size: 8, weight: .bold))
                         .foregroundStyle(Color.primaryCopper)
-                        .tracking(1.5)
+                        .tracking(AppConstants.UI.eyebrowTracking)
                 }
                 
                 Spacer()
                 
                 Button {
                     if value < range.upperBound {
+                        onInteraction?()
                         value = min(range.upperBound, value + step)
                         UISelectionFeedbackGenerator().selectionChanged()
                     }
@@ -48,7 +55,7 @@ struct SteppedWeightPicker: View {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
+                        .frame(width: AppConstants.Pickers.steppedWeightButtonSize, height: AppConstants.Pickers.steppedWeightButtonSize)
                         .background(Color.white.opacity(0.06))
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
@@ -56,13 +63,13 @@ struct SteppedWeightPicker: View {
             }
             .padding(.vertical, 4)
             
-            // Standard Coffee Dose Capsules
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(presets, id: \.self) { preset in
                         let isSelected = abs(value - preset) < 0.01
                         Button {
                             withAnimation(.easeOut(duration: 0.15)) {
+                                onInteraction?()
                                 value = preset
                                 UISelectionFeedbackGenerator().selectionChanged()
                             }
