@@ -68,10 +68,11 @@ struct ProfileSetupView: View {
                                     .submitLabel(.done)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 14)
-                                    .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .background(Color.white.opacity(0.08)) // High contrast fill
+                                    .cornerRadius(14)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(Color.white.opacity(0.15), lineWidth: 1) // High contrast stroke
                                     )
                                     .foregroundStyle(Color.coffeeCream)
                             }
@@ -223,11 +224,11 @@ struct ProfileSetupView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.headline)
-                        .foregroundStyle(isSelected ? Color.coffeeCream : Color.coffeeCream.opacity(0.85))
+                        .foregroundStyle(Color.coffeeCream.opacity(isSelected ? 1.0 : 0.6))
 
                     Text(subtitle)
                         .font(.footnote)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.58))
+                        .foregroundStyle(Color.coffeeCream.opacity(isSelected ? 0.72 : 0.42))
                         .multilineTextAlignment(.leading)
                 }
 
