@@ -49,6 +49,8 @@ struct HomeView: View {
                                 .padding(.vertical, 4)
                                 .background(Color.primaryCopper.opacity(0.12))
                                 .cornerRadius(10)
+                                .frame(minHeight: 44) // Expands touch target to 44pt while preserving visual capsule size
+                                .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                         }
@@ -276,27 +278,15 @@ struct LiveTimerCard: View {
                             viewModel.resetTimer()
                         } label: {
                             Text(AppConstants.Text.reset)
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.85))
-                                .frame(minWidth: 100, minHeight: 44)
-                                .background(Color.white.opacity(0.08))
-                                .cornerRadius(22)
-                                .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color.white.opacity(0.12), lineWidth: 1))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(TimerControlButtonStyle())
                         
                         Button {
                             viewModel.skipPhase()
                         } label: {
                             Text(AppConstants.Text.skipPhase)
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.85))
-                                .frame(minWidth: 100, minHeight: 44)
-                                .background(Color.white.opacity(0.08))
-                                .cornerRadius(22)
-                                .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color.white.opacity(0.12), lineWidth: 1))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(TimerControlButtonStyle())
                         
                         Spacer()
                     }
@@ -1071,5 +1061,22 @@ struct TimerCircleView: View {
             }
             .frame(width: 288, height: 288)
         }
+    }
+}
+
+struct TimerControlButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(.white.opacity(configuration.isPressed ? 0.5 : 0.85))
+            .frame(minWidth: 100, minHeight: 44)
+            .background(Color.white.opacity(configuration.isPressed ? 0.04 : 0.08))
+            .cornerRadius(22)
+            .overlay(
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(Color.white.opacity(configuration.isPressed ? 0.08 : 0.12), lineWidth: 1)
+            )
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
