@@ -35,9 +35,22 @@ struct HomeView: View {
                                 .fontWeight(.medium)
                                 .foregroundStyle(Color.coffeeCream.opacity(0.72))
 
-                            Text(profileSummaryText)
-                                .font(.system(size: 11, weight: .medium, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.42))
+                            Button {
+                                showProfileSheet = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "hand.tap.fill")
+                                        .font(.system(size: 8))
+                                    Text(profileSummaryText)
+                                }
+                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.primaryCopper)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Color.primaryCopper.opacity(0.12))
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
                         }
 
                         Spacer()
@@ -263,29 +276,27 @@ struct LiveTimerCard: View {
                             viewModel.resetTimer()
                         } label: {
                             Text(AppConstants.Text.reset)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(
-                                    Capsule()
-                                        .stroke(Color.coffeeCream.opacity(0.18), lineWidth: 1)
-                                )
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(minWidth: 100, minHeight: 44)
+                                .background(Color.white.opacity(0.08))
+                                .cornerRadius(22)
+                                .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color.white.opacity(0.12), lineWidth: 1))
                         }
+                        .buttonStyle(.plain)
                         
                         Button {
                             viewModel.skipPhase()
                         } label: {
                             Text(AppConstants.Text.skipPhase)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.6))
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(
-                                    Capsule()
-                                        .stroke(Color.coffeeCream.opacity(0.18), lineWidth: 1)
-                                )
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(minWidth: 100, minHeight: 44)
+                                .background(Color.white.opacity(0.08))
+                                .cornerRadius(22)
+                                .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color.white.opacity(0.12), lineWidth: 1))
                         }
+                        .buttonStyle(.plain)
                         
                         Spacer()
                     }
@@ -434,13 +445,13 @@ struct TimerCircleView: View {
                         bodyPath.addLine(to: CGPoint(x: 24, y: 22)) // bottom-right
                         bodyPath.addQuadCurve(to: CGPoint(x: -24, y: 22), control: CGPoint(x: 0, y: 27))
                         bodyPath.closeSubpath()
-                        kettleCtx.stroke(bodyPath, with: goldGradient, lineWidth: 2)
+                        kettleCtx.stroke(bodyPath, with: goldGradient, lineWidth: 2.5)
                         
                         // Lid
                         var lidPath = Path()
                         lidPath.move(to: CGPoint(x: -14, y: -22))
                         lidPath.addQuadCurve(to: CGPoint(x: 14, y: -22), control: CGPoint(x: 0, y: -27))
-                        kettleCtx.stroke(lidPath, with: goldGradient, lineWidth: 2)
+                        kettleCtx.stroke(lidPath, with: goldGradient, lineWidth: 2.5)
                         
                         // Knob on Lid
                         var knobPath = Path()
@@ -449,7 +460,7 @@ struct TimerCircleView: View {
                         knobPath.addLine(to: CGPoint(x: 6, y: -32))
                         knobPath.addLine(to: CGPoint(x: -6, y: -32))
                         knobPath.closeSubpath()
-                        kettleCtx.stroke(knobPath, with: goldGradient, lineWidth: 1.5)
+                        kettleCtx.stroke(knobPath, with: goldGradient, lineWidth: 2.2)
                         
                         // Gooseneck Spout (double-lined for thickness)
                         var spoutOuter = Path()
@@ -470,13 +481,13 @@ struct TimerCircleView: View {
                         )
                         spoutInner.addQuadCurve(to: CGPoint(x: -48, y: -10), control: CGPoint(x: -47, y: -12))
                         
-                        kettleCtx.stroke(spoutOuter, with: goldGradient, lineWidth: 1.5)
-                        kettleCtx.stroke(spoutInner, with: goldGradient, lineWidth: 1.5)
+                        kettleCtx.stroke(spoutOuter, with: goldGradient, lineWidth: 2.2)
+                        kettleCtx.stroke(spoutInner, with: goldGradient, lineWidth: 2.2)
                         
                         var spoutTip = Path()
                         spoutTip.move(to: CGPoint(x: -52, y: -13))
                         spoutTip.addLine(to: CGPoint(x: -48, y: -10))
-                        kettleCtx.stroke(spoutTip, with: goldGradient, lineWidth: 1.5)
+                        kettleCtx.stroke(spoutTip, with: goldGradient, lineWidth: 2.2)
                         
                         // Handle (looping on the right)
                         var handlePath = Path()
@@ -493,8 +504,8 @@ struct TimerCircleView: View {
                             control1: CGPoint(x: 31, y: -16),
                             control2: CGPoint(x: 31, y: 5)
                         )
-                        kettleCtx.stroke(handlePath, with: goldGradient, lineWidth: 1.5)
-                        kettleCtx.stroke(handleInnerPath, with: goldGradient, lineWidth: 1.5)
+                        kettleCtx.stroke(handlePath, with: goldGradient, lineWidth: 2.2)
+                        kettleCtx.stroke(handleInnerPath, with: goldGradient, lineWidth: 2.2)
                         
                         // 2. DRAW VESSEL (Cup for V60, Chemex for Chemex)
                         if viewModel.method == .chemex {
@@ -547,7 +558,7 @@ struct TimerCircleView: View {
                                 clippedCtx.fill(fillPath, with: fillGradient)
                             }
                             
-                            scaledCtx.stroke(chemexPath, with: goldGradient, lineWidth: 1.5)
+                            scaledCtx.stroke(chemexPath, with: goldGradient, lineWidth: 2.5)
                             scaledCtx.stroke(collarPath, with: goldGradient, lineWidth: 1.0)
                         } else {
                             // DRAW CUP (bottom center)
@@ -559,7 +570,7 @@ struct TimerCircleView: View {
                             let rimRect = CGRect(x: -30, y: -20, width: 60, height: 10)
                             var rimPath = Path()
                             rimPath.addEllipse(in: rimRect)
-                            cupCtx.stroke(rimPath, with: goldGradient, lineWidth: 1.5)
+                            cupCtx.stroke(rimPath, with: goldGradient, lineWidth: 2.2)
                             
                             // Cup Body Path
                             var cupBody = Path()
@@ -576,12 +587,12 @@ struct TimerCircleView: View {
                                 control2: CGPoint(x: 28, y: 5)
                             )
                             cupBody.closeSubpath()
-                            cupCtx.stroke(cupBody, with: goldGradient, lineWidth: 2)
+                            cupCtx.stroke(cupBody, with: goldGradient, lineWidth: 2.5)
                             
                             // Cup Base Ring
                             var cupBase = Path()
                             cupBase.addEllipse(in: CGRect(x: -16, y: 17, width: 32, height: 6))
-                            cupCtx.stroke(cupBase, with: goldGradient, lineWidth: 1.5)
+                            cupCtx.stroke(cupBase, with: goldGradient, lineWidth: 2.2)
                             
                             // Handle on the right
                             var cupHandle = Path()
@@ -598,8 +609,8 @@ struct TimerCircleView: View {
                                 control1: CGPoint(x: 38, y: -4),
                                 control2: CGPoint(x: 36, y: 8)
                             )
-                            cupCtx.stroke(cupHandle, with: goldGradient, lineWidth: 1.5)
-                            cupCtx.stroke(cupHandleInner, with: goldGradient, lineWidth: 1.5)
+                            cupCtx.stroke(cupHandle, with: goldGradient, lineWidth: 2.2)
+                            cupCtx.stroke(cupHandleInner, with: goldGradient, lineWidth: 2.2)
                             
                             // Coffee Fill inside the cup (clipping to the cup body walls to look completely full)
                             if progress > 0 {
@@ -846,7 +857,7 @@ struct TimerCircleView: View {
                             chamberPath.move(to: CGPoint(x: chamberLeft - 6, y: chamberTop))
                             chamberPath.addLine(to: CGPoint(x: chamberRight + 6, y: chamberTop))
                             
-                            scaledCtx.stroke(chamberPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.8)
+                            scaledCtx.stroke(chamberPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 2.5)
                             
                             // Filter Cap at bottom (black grid attachment)
                             var filterCap = Path()
@@ -878,7 +889,7 @@ struct TimerCircleView: View {
                             cupPath.addLine(to: CGPoint(x: cupRight, y: cupBottomY))
                             cupPath.addLine(to: CGPoint(x: cupRight, y: cupRimY))
                             
-                            scaledCtx.stroke(cupPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.5)
+                            scaledCtx.stroke(cupPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 2.5)
                             
                             // Mug handle on the right
                             var cupHandle = Path()
@@ -886,7 +897,7 @@ struct TimerCircleView: View {
                             cupHandle.addCurve(to: CGPoint(x: cupRight, y: cupBottomY - 5.0),
                                                control1: CGPoint(x: cupRight + 12, y: cupRimY + 3.0),
                                                control2: CGPoint(x: cupRight + 12, y: cupBottomY - 3.0))
-                            scaledCtx.stroke(cupHandle, with: goldGradient, lineWidth: 1.5)
+                            scaledCtx.stroke(cupHandle, with: goldGradient, lineWidth: 2.2)
                         } else {
                             // French Press Plunger Animation
                             
@@ -965,7 +976,7 @@ struct TimerCircleView: View {
                             beakerPath.addLine(to: CGPoint(x: beakerLeft, y: beakerBottom)) // Left wall
                             beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerBottom)) // Bottom wall
                             beakerPath.addLine(to: CGPoint(x: beakerRight, y: beakerTop)) // Right wall
-                            scaledCtx.stroke(beakerPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 1.8)
+                            scaledCtx.stroke(beakerPath, with: .color(strokeColor.opacity(0.35)), lineWidth: 2.5)
                             
                             // 4. METAL SUPPORT FRAME & ERGONOMIC HANDLE
                             var baseFrame = Path()
@@ -998,7 +1009,7 @@ struct TimerCircleView: View {
                             baseFrame.move(to: CGPoint(x: beakerRight - 8, y: beakerTop + 2))
                             baseFrame.addLine(to: CGPoint(x: beakerRight - 8, y: beakerBottom))
                             
-                            scaledCtx.stroke(baseFrame, with: goldGradient, lineWidth: 1.5)
+                            scaledCtx.stroke(baseFrame, with: goldGradient, lineWidth: 2.2)
                             
                             // Curved Handle
                             var handlePath = Path()
@@ -1006,7 +1017,7 @@ struct TimerCircleView: View {
                             handlePath.addCurve(to: CGPoint(x: beakerRight - 1, y: beakerBottom - 35),
                                                 control1: CGPoint(x: beakerRight + 24, y: beakerTop + 10),
                                                 control2: CGPoint(x: beakerRight + 24, y: beakerBottom - 30))
-                            scaledCtx.stroke(handlePath, with: goldGradient, lineWidth: 2.0)
+                            scaledCtx.stroke(handlePath, with: goldGradient, lineWidth: 2.5)
                             
                             // 5. LID DOME
                             var lidPath = Path()
@@ -1017,20 +1028,20 @@ struct TimerCircleView: View {
                             lidPath.closeSubpath()
                             
                             scaledCtx.fill(lidPath, with: .color(Color.primaryCopper.opacity(0.12)))
-                            scaledCtx.stroke(lidPath, with: goldGradient, lineWidth: 1.5)
+                            scaledCtx.stroke(lidPath, with: goldGradient, lineWidth: 2.2)
                             
                             // Silicone seal band
                             var sealPath = Path()
                             sealPath.move(to: CGPoint(x: beakerLeft - 1, y: beakerTop))
                             sealPath.addLine(to: CGPoint(x: beakerRight + 1, y: beakerTop))
-                            scaledCtx.stroke(sealPath, with: .color(strokeColor.opacity(0.65)), lineWidth: 1.8)
+                            scaledCtx.stroke(sealPath, with: .color(strokeColor.opacity(0.65)), lineWidth: 2.2)
                             
                             // 6. DYNAMIC PLUNGER SHAFT, KNOB & FILTER PLATE
                             // Plunger Shaft
                             var shaftPath = Path()
                             shaftPath.move(to: CGPoint(x: centerX, y: knobY + 5))
                             shaftPath.addLine(to: CGPoint(x: centerX, y: filterY))
-                            scaledCtx.stroke(shaftPath, with: goldGradient, lineWidth: 1.8)
+                            scaledCtx.stroke(shaftPath, with: goldGradient, lineWidth: 2.2)
                             
                             // Plunger Knob (sphere)
                             var knobPath = Path()
