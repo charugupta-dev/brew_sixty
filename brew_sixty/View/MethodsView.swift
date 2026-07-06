@@ -114,7 +114,7 @@ struct MethodsView: View {
                         .padding(.horizontal)
                     }
                     
-                    VStack(alignment: .leading, spacing: 16) {
+                    SectionCard("Dose & Yield") {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
                                 parameterLabel(AppConstants.Text.beanWeight, helpTopic: .beanWeight)
@@ -149,14 +149,6 @@ struct MethodsView: View {
                                     registerInteraction(.waterRatio)
                                 })
 
-                                HStack {
-                                    Text(AppConstants.Methods.Text.firstRatioLabel)
-                                    Spacer()
-                                    Text(AppConstants.Methods.Text.lastRatioLabel)
-                                }
-                                .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
-
                                 if shouldShowContextualHint(for: .waterRatio) {
                                     contextualHint(waterControlHelperText)
                                 }
@@ -175,22 +167,14 @@ struct MethodsView: View {
                                     registerInteraction(.waterVolume)
                                 })
 
-                                HStack {
-                                    Text(AppConstants.Methods.Text.firstWaterVolumeLabel)
-                                    Spacer()
-                                    Text(AppConstants.Methods.Text.lastWaterVolumeLabel)
-                                }
-                                .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
-
                                 if shouldShowContextualHint(for: .waterVolume) {
                                     contextualHint(waterControlHelperText)
                                 }
                             }
                         }
+                    }
 
-                        Divider().background(Color.white.opacity(0.08))
-
+                    SectionCard("Time & Temperature") {
                         if isPourOverMethod {
                             VStack(alignment: .leading, spacing: 10) {
                                 HStack {
@@ -223,14 +207,6 @@ struct MethodsView: View {
                                     registerInteraction(.steepDuration)
                                 })
 
-                                HStack {
-                                    Text(AppConstants.Methods.Text.firstSteepLabel)
-                                    Spacer()
-                                    Text(AppConstants.Methods.Text.lastSteepLabel)
-                                }
-                                .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.3))
-
                                 if shouldShowContextualHint(for: .steepDuration) {
                                     contextualHint(steepDurationHelperText)
                                 }
@@ -251,14 +227,6 @@ struct MethodsView: View {
                                             registerInteraction(.pressDuration)
                                         })
 
-                                        HStack {
-                                            Text(AppConstants.Methods.Text.firstSteepLabel)
-                                            Spacer()
-                                            Text(AppConstants.Methods.Text.lastPressLabel)
-                                        }
-                                        .font(.system(.caption2, design: .monospaced))
-                                        .foregroundStyle(Color.coffeeCream.opacity(0.3))
-
                                         if shouldShowContextualHint(for: .pressDuration) {
                                             contextualHint(pressDurationHelperText)
                                         }
@@ -266,16 +234,9 @@ struct MethodsView: View {
                                 }
                             }
                         }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius)
-                            .fill(Color.appPanel.opacity(AppConstants.UI.cardOpacity))
-                    )
-                    .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
-                    .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 16) {
+                        Divider().background(Color.white.opacity(0.08))
+
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 parameterLabel(AppConstants.Text.targetTemperature, helpTopic: .temperature)
@@ -288,24 +249,22 @@ struct MethodsView: View {
                             RulerPicker(value: $targetTemperature, range: AppConstants.Methods.Ranges.temperature, step: AppConstants.Methods.Steps.temperature, onInteraction: {
                                 registerInteraction(.temperature)
                             })
-                                .padding(.vertical, 8)
+                            .padding(.vertical, 8)
 
                             if shouldShowContextualHint(for: .temperature) {
                                 contextualHint(temperatureHelperText)
                             }
                         }
+                    }
 
-                        Divider().background(Color.white.opacity(0.08))
+                    VStack(alignment: .leading, spacing: 6) {
+                        sectionLabel(AppConstants.Text.recipeName)
 
-                        VStack(alignment: .leading, spacing: 6) {
-                            sectionLabel(AppConstants.Text.recipeName)
-
-                            TextField(AppConstants.Methods.Text.recipeNamePlaceholder, text: $recipeName)
-                                .font(.system(size: 22, weight: .semibold, design: .rounded))
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Color.coffeeCream)
-                                .textFieldStyle(.plain)
-                        }
+                        TextField(AppConstants.Methods.Text.recipeNamePlaceholder, text: $recipeName)
+                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.coffeeCream)
+                            .textFieldStyle(.plain)
                     }
                     .padding()
                     .background(
@@ -999,3 +958,36 @@ struct TemplatesListView: View {
         }
     }
 }
+
+struct SectionCard<Content: View>: View {
+    let title: String
+    let content: Content
+    
+    init(_ title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(title.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(Color.primaryCopper)
+                .tracking(1.5)
+                .padding(.bottom, 4)
+            
+            content
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.03))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
+    }
+}
+
