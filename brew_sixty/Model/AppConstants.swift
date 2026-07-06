@@ -144,8 +144,6 @@ struct AppConstants {
         static let precisionTrackHeight: CGFloat = 8
         static let precisionThumbSize: CGFloat = 22
         static let precisionCenterDotSize: CGFloat = 6
-        static let precisionTickCount = 9
-        static let precisionTickWidth: CGFloat = 1.5
 
         static let rulerItemWidth: CGFloat = 16
         static let rulerHeight: CGFloat = 60

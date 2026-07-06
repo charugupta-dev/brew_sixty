@@ -27,27 +27,13 @@ struct PrecisionSlider: View {
             let thumbSize = AppConstants.Pickers.precisionThumbSize
             
             ZStack(alignment: .leading) {
-                ZStack {
-                    Capsule()
-                        .fill(Color.black.opacity(0.35))
-                        .frame(height: AppConstants.Pickers.precisionTrackHeight)
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
-                        )
-                    
-                    HStack(spacing: 0) {
-                        let ticks = AppConstants.Pickers.precisionTickCount
-                        ForEach(0..<ticks, id: \.self) { idx in
-                            Rectangle()
-                                .fill(Color.coffeeCream.opacity(0.18))
-                                .frame(width: AppConstants.Pickers.precisionTickWidth, height: AppConstants.Pickers.precisionTrackHeight)
-                            if idx < ticks - 1 {
-                                Spacer()
-                            }
-                        }
-                    }
-                }
+                Capsule()
+                    .fill(Color.black.opacity(0.35))
+                    .frame(height: AppConstants.Pickers.precisionTrackHeight)
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                    )
                 
                 Capsule()
                     .fill(
