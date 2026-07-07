@@ -66,7 +66,7 @@ struct MethodsView: View {
                                     .foregroundStyle(Color.primaryCopper)
                                     .tracking(AppConstants.UI.eyebrowTracking)
                                 
-                                Text("\(templates.count) \(AppConstants.Methods.Text.savedTemplatesSuffix)")
+                                Text("\(templates.count) \(templates.count == 1 ? "Saved Template" : AppConstants.Methods.Text.savedTemplatesSuffix)")
                                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                                     .foregroundStyle(Color.coffeeCream)
                                 
@@ -605,28 +605,28 @@ struct MethodsView: View {
             switch selectedMethod {
             case .v60:
                 return HelpContent(
-                    title: "Bean Weight",
+                    title: "Coffee Dose",
                     summary: beanWeightHelperText,
                     startingPoint: "18g is an easy, balanced place to start for a single mug.",
                     note: "Once the cup feels right, you can scale the recipe up or down without changing its personality too much."
                 )
             case .chemex:
                 return HelpContent(
-                    title: "Bean Weight",
+                    title: "Coffee Dose",
                     summary: beanWeightHelperText,
                     startingPoint: "Start around 18-20g if you want a clean cup for one generous serving.",
                     note: "Chemex tends to shine when you think in servings and flow, not just precision on paper."
                 )
             case .frenchPress:
                 return HelpContent(
-                    title: "Bean Weight",
+                    title: "Coffee Dose",
                     summary: beanWeightHelperText,
                     startingPoint: "18-20g is a nice first stop if you like the cup round and comforting.",
                     note: "A touch more coffee adds weight quickly here, so small moves are enough."
                 )
             case .aeropress:
                 return HelpContent(
-                    title: "Bean Weight",
+                    title: "Coffee Dose",
                     summary: beanWeightHelperText,
                     startingPoint: "15-18g gives you room to go either lighter or stronger without fuss.",
                     note: "If the cup feels too quiet, this is often the first dial worth nudging."
@@ -658,7 +658,7 @@ struct MethodsView: View {
             }
         case .waterVolume:
             return HelpContent(
-                title: "Water Volume",
+                title: "Water Yield",
                 summary: waterControlHelperText,
                 startingPoint: "Pick the cup size you actually want first, then let the recipe meet you there.",
                 note: "If you want a shorter, stronger cup, stay lower; if you want a longer one, stretch it gently."

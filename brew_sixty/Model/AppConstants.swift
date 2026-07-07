@@ -35,9 +35,9 @@ struct AppConstants {
         
         // Parameter Card Labels
         static let selectMethod = "SELECT METHOD"
-        static let beanWeight = "BEAN WEIGHT"
+        static let beanWeight = "COFFEE DOSE"
         static let waterRatio = "WATER RATIO"
-        static let targetWaterVolume = "TARGET WATER VOLUME"
+        static let targetWaterVolume = "WATER YIELD"
         static let targetTemperature = "TARGET TEMPERATURE"
         static let bloomDuration = "BLOOM DURATION"
         static let steepDuration = "STEEP DURATION"
@@ -109,7 +109,7 @@ struct AppConstants {
         struct Text {
             static let recipesTitle = "YOUR RECIPES"
             static let savedTemplatesSuffix = "Saved Templates"
-            static let recipesSubtitle = "Tap to view or delete your recipes"
+            static let recipesSubtitle = "Manage saved templates"
             static let guidedMode = "Guided setup"
             static let manualMode = "Manual setup"
             static let recipeNamePlaceholder = "Recipe Name"

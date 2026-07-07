@@ -35,7 +35,7 @@ struct ContentView: View {
                     MethodsView(selectedTab: $selectedTab)
                         .tag(Tab.methods)
                         .tabItem {
-                            Label("METHODS", systemImage: "square.grid.2x2.fill")
+                            Label("RECIPES", systemImage: "square.grid.2x2.fill")
                         }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

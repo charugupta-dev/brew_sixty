@@ -25,7 +25,7 @@ enum ProfileExperienceLevel: String, CaseIterable, Identifiable {
         case .someExperience:
             return "A balanced mix of help and control"
         case .enthusiast:
-            return "Fast setup with less hand-holding"
+            return "Fast, streamlined setup"
         }
     }
 }
