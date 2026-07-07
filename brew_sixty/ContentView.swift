@@ -4,11 +4,12 @@ import SwiftData
 struct ContentView: View {
     @State private var showLaunchScreen = true
     @State private var selectedTab: Tab = .brew
+    @State private var brewSessionStore = BrewSessionStore()
     @AppStorage(ProfilePreferences.Keys.hasCompletedProfile) private var hasCompletedProfile = false
     
     enum Tab {
         case brew
-        case methods
+        case recipes
     }
     
     init() {
@@ -26,14 +27,14 @@ struct ContentView: View {
                     .transition(.opacity)
             } else {
                 TabView(selection: $selectedTab) {
-                    HomeView(selectedTab: $selectedTab)
+                    HomeView(selectedTab: $selectedTab, brewSessionStore: brewSessionStore)
                         .tag(Tab.brew)
                         .tabItem {
                             Label("BREW", systemImage: "cup.and.saucer.fill")
                         }
                     
-                    MethodsView(selectedTab: $selectedTab)
-                        .tag(Tab.methods)
+                    MethodsView(selectedTab: $selectedTab, brewSessionStore: brewSessionStore)
+                        .tag(Tab.recipes)
                         .tabItem {
                             Label("RECIPES", systemImage: "square.grid.2x2.fill")
                         }

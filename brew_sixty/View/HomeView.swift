@@ -3,13 +3,13 @@ import SwiftData
 
 @MainActor
 struct HomeView: View {
-    @Environment(\.modelContext) private var modelContext
     @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
     @AppStorage(ProfilePreferences.Keys.name) private var profileName = ""
     @AppStorage(ProfilePreferences.Keys.experienceLevel) private var experienceLevelRaw = ProfileExperienceLevel.justStarting.rawValue
     @AppStorage(ProfilePreferences.Keys.guidanceMode) private var guidanceModeRaw = GuidanceMode.guided.rawValue
     
     @Binding var selectedTab: ContentView.Tab
+    let brewSessionStore: BrewSessionStore
     @State private var activeIndex: Int = 0
     @State private var isAnimating = false
     @State private var showProfileSheet = false
@@ -18,11 +18,7 @@ struct HomeView: View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width - 64
             let cardToTabBarSpacing: CGFloat = 30
-            
-            // Map SwiftData templates dynamically to HomeBrewViewModel instances
-            let viewModels: [HomeBrewViewModel] = templates.map { template in
-                HomeBrewViewModel(template: template)
-            }
+            let viewModels = brewSessionStore.brewViewModels(for: templates)
             
             ZStack {
                 VideoWallpaperBackground(style: .hero)
@@ -96,12 +92,12 @@ struct HomeView: View {
                             }
                             
                             Button {
-                                selectedTab = .methods
+                                selectedTab = .recipes
                             } label: {
                                 Text(AppConstants.Text.craftFirstRecipe)
                                     .font(.headline)
                                     .fontWeight(.bold)
-                                    .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                                    .foregroundStyle(Color.deepRoastInk)
                                     .padding(.horizontal, 24)
                                     .padding(.vertical, 14)
                                     .background(
@@ -148,6 +144,15 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
+        .onAppear {
+            syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+        }
+        .onChange(of: templates.map(\.id)) { _, _ in
+            syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+        }
+        .onChange(of: brewSessionStore.pendingFocusBrewID) { _, _ in
+            syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+        }
         .sheet(isPresented: $showProfileSheet) {
             ProfileSetupView(mode: .edit)
         }
@@ -162,6 +167,16 @@ struct HomeView: View {
         let experience = ProfileExperienceLevel(rawValue: experienceLevelRaw)?.title ?? ProfileExperienceLevel.justStarting.title
         let guidance = GuidanceMode(rawValue: guidanceModeRaw)?.title ?? GuidanceMode.guided.title
         return "\(experience) • \(guidance) mode"
+    }
+
+    private func syncFocusIfNeeded(for viewModels: [HomeBrewViewModel]) {
+        if activeIndex >= viewModels.count {
+            activeIndex = max(viewModels.count - 1, 0)
+        }
+
+        guard let pendingID = brewSessionStore.consumePendingFocusBrewID() else { return }
+        guard let index = viewModels.firstIndex(where: { $0.id == pendingID }) else { return }
+        activeIndex = index
     }
 }
 

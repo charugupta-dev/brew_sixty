@@ -25,6 +25,7 @@ final class HomeBrewViewModel: Identifiable {
     var customBloomDuration: TimeInterval? = nil
     var customSteepDuration: TimeInterval? = nil
     var customPressDuration: TimeInterval? = nil
+    var onReset: (() -> Void)?
     
     // MARK: - Computed Properties
     private var isPourOverMethod: Bool {
@@ -153,6 +154,18 @@ final class HomeBrewViewModel: Identifiable {
             pressDuration: template.pressDuration
         )
     }
+
+    convenience init(draft: RecipeDraft) {
+        self.init(
+            method: draft.method,
+            beanWeight: draft.beanWeight,
+            ratio: draft.ratio,
+            waterVolume: draft.waterVolume,
+            bloomDuration: draft.isPourOverMethod ? draft.preInfusionDuration : 0.0,
+            steepDuration: draft.isPourOverMethod ? 0.0 : draft.steepDuration,
+            pressDuration: draft.pressDuration
+        )
+    }
     
     // MARK: - Timer Controls
     func toggleTimer() {
@@ -196,7 +209,7 @@ final class HomeBrewViewModel: Identifiable {
         timer = nil
     }
     
-    func resetTimer() {
+    func resetTimer(notifyObservers: Bool = true) {
         isRunning = false
         isFinished = false
         elapsed = 0
@@ -204,6 +217,10 @@ final class HomeBrewViewModel: Identifiable {
         timer?.invalidate()
         timer = nil
         beanWeight = initialBeanWeight
+
+        if notifyObservers {
+            onReset?()
+        }
     }
     
     func skipPhase() {
