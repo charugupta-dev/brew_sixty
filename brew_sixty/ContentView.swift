@@ -30,13 +30,13 @@ struct ContentView: View {
                     HomeView(selectedTab: $selectedTab, brewSessionStore: brewSessionStore)
                         .tag(Tab.brew)
                         .tabItem {
-                            Label("BREW", systemImage: "cup.and.saucer.fill")
+                            Label("Brew", systemImage: "cup.and.saucer.fill")
                         }
                     
                     MethodsView(selectedTab: $selectedTab, brewSessionStore: brewSessionStore)
                         .tag(Tab.recipes)
                         .tabItem {
-                            Label("RECIPES", systemImage: "square.grid.2x2.fill")
+                            Label("Recipes", systemImage: "square.grid.2x2.fill")
                         }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

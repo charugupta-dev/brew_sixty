@@ -177,6 +177,11 @@ final class HomeBrewViewModel: Identifiable {
     }
     
     private func start() {
+        if isFinished || elapsed >= totalDuration {
+            prepareForRestart()
+        }
+
+        isFinished = false
         isRunning = true
         let currentStartDate = Date().addingTimeInterval(-elapsed)
         startDate = currentStartDate
@@ -210,13 +215,7 @@ final class HomeBrewViewModel: Identifiable {
     }
     
     func resetTimer(notifyObservers: Bool = true) {
-        isRunning = false
-        isFinished = false
-        elapsed = 0
-        startDate = nil
-        timer?.invalidate()
-        timer = nil
-        beanWeight = initialBeanWeight
+        prepareForRestart()
 
         if notifyObservers {
             onReset?()
@@ -294,5 +293,15 @@ final class HomeBrewViewModel: Identifiable {
 
     private func formattedGrams(_ value: Double) -> String {
         "\(Int(value.rounded()))\(AppConstants.Text.gramsUnit)"
+    }
+
+    private func prepareForRestart() {
+        isRunning = false
+        isFinished = false
+        elapsed = 0
+        startDate = nil
+        timer?.invalidate()
+        timer = nil
+        beanWeight = initialBeanWeight
     }
 }

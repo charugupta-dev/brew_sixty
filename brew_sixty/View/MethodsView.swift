@@ -188,6 +188,7 @@ private struct RecipeTemplateCard: View {
                     )
                     .cornerRadius(20)
                 }
+                .buttonStyle(.borderless)
 
                 Button(action: onEdit) {
                     HStack {
@@ -208,6 +209,7 @@ private struct RecipeTemplateCard: View {
                             .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
                     )
                 }
+                .buttonStyle(.borderless)
             }
         }
         .padding(18)

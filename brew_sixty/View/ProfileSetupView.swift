@@ -36,7 +36,7 @@ struct ProfileSetupView: View {
     }
 
     private var ctaText: String {
-        mode == .onboarding ? "CONTINUE" : "SAVE CHANGES"
+        mode == .onboarding ? "Continue" : "Save Changes"
     }
 
     var body: some View {

@@ -21,6 +21,7 @@ struct AppConstants {
         static let strongBorderOpacity: Double = 0.10
         static let captionEmphasisTracking: CGFloat = 1.0
         static let eyebrowTracking: CGFloat = 1.5
+        static let minimumTouchHeight: CGFloat = 48
     }
     
     struct Text {
@@ -29,9 +30,9 @@ struct AppConstants {
         static let helloFallback = "Hello"
         
         // Empty State dashboard
-        static let emptyCanvasTitle = "The Canvas is Clean"
-        static let emptyCanvasDescription = "Every great cup begins with a recipe. Let's design a custom method to match your beans."
-        static let craftFirstRecipe = "CRAFT FIRST RECIPE"
+        static let emptyCanvasTitle = "Ready to Brew"
+        static let emptyCanvasDescription = "Design a custom method or choose a saved recipe to get started."
+        static let craftFirstRecipe = "Craft First Recipe"
         
         // Parameter Card Labels
         static let selectMethod = "SELECT METHOD"
@@ -46,8 +47,8 @@ struct AppConstants {
         static let saveTemplate = "SAVE TEMPLATE"
         
         // Timer View Dashboard
-        static let startBrew = "START BREW"
-        static let pauseBrew = "PAUSE BREW"
+        static let startBrew = "Start Brew"
+        static let pauseBrew = "Pause Brew"
         static let reset = "Reset"
         static let skipPhase = "Skip Phase"
         
@@ -116,13 +117,13 @@ struct AppConstants {
             static let guidedMode = "Guided setup"
             static let manualMode = "Manual setup"
             static let recipeNamePlaceholder = "Recipe Name"
-            static let startBrew = "START BREW"
-            static let saveAsPreset = "SAVE AS PRESET"
-            static let saveChanges = "SAVE CHANGES"
+            static let startBrew = "Start Brew"
+            static let saveAsPreset = "Save as Preset"
+            static let saveChanges = "Save Changes"
             static let brew = "Brew"
             static let edit = "Edit"
             static let newRecipe = "New Recipe"
-            static let createFirstRecipe = "Create your first recipe"
+            static let createFirstRecipe = "Create Your First Recipe"
             static let errorTitle = "Something went wrong"
             static let saveFailedMessage = "Couldn't save this recipe right now. Please try again."
             static let deleteFailedMessage = "Couldn't delete this recipe right now. Please try again."

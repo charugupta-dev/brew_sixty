@@ -1082,14 +1082,17 @@ struct TimerCircleView: View {
 struct TimerControlButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .bold))
-            .foregroundStyle(.white.opacity(configuration.isPressed ? 0.5 : 0.85))
-            .frame(minWidth: 100, minHeight: 44)
-            .background(Color.white.opacity(configuration.isPressed ? 0.04 : 0.08))
-            .cornerRadius(22)
+            .font(.system(size: 15, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(configuration.isPressed ? 0.6 : 0.9))
+            .padding(.horizontal, 18)
+            .frame(minWidth: 116, minHeight: AppConstants.UI.minimumTouchHeight)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(uiColor: .secondarySystemFill).opacity(configuration.isPressed ? 0.72 : 0.9))
+            )
             .overlay(
-                RoundedRectangle(cornerRadius: 22)
-                    .stroke(Color.white.opacity(configuration.isPressed ? 0.08 : 0.12), lineWidth: 1)
+                Capsule(style: .continuous)
+                    .stroke(Color.white.opacity(configuration.isPressed ? 0.10 : 0.16), lineWidth: 1)
             )
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
