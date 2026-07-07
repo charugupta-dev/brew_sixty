@@ -2,8 +2,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var showLaunchScreen = true
-    @State private var selectedTab: Tab = .brew
+    @State private var showLaunchScreen: Bool
+    @State private var selectedTab: Tab
     @State private var brewSessionStore = BrewSessionStore()
     @AppStorage(ProfilePreferences.Keys.hasCompletedProfile) private var hasCompletedProfile = false
     
@@ -13,6 +13,11 @@ struct ContentView: View {
     }
     
     init() {
+        _showLaunchScreen = State(initialValue: !ReadmeCaptureConfiguration.shouldSkipLaunchScreen)
+        _selectedTab = State(
+            initialValue: ReadmeCaptureConfiguration.initialTab == .recipes ? .recipes : .brew
+        )
+
         let appearance = UITabBarAppearance()
         appearance.configureWithDefaultBackground() // Restore translucent system glass
         

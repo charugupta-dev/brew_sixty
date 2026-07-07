@@ -10,10 +10,29 @@ import SwiftData
 
 @main
 struct brew_sixtyApp: App {
+    private let sharedModelContainer: ModelContainer
+
+    init() {
+        ReadmeCaptureConfiguration.prepareUserDefaults()
+
+        do {
+            let configuration = ModelConfiguration(isStoredInMemoryOnly: ReadmeCaptureConfiguration.isEnabled)
+            sharedModelContainer = try ModelContainer(
+                for: BrewLog.self,
+                BrewTemplate.self,
+                configurations: configuration
+            )
+
+            try ReadmeCaptureConfiguration.seedDemoDataIfNeeded(in: sharedModelContainer.mainContext)
+        } catch {
+            fatalError("Failed to configure model container: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [BrewLog.self, BrewTemplate.self])
+        .modelContainer(sharedModelContainer)
     }
 }

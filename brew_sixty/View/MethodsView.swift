@@ -11,6 +11,7 @@ struct MethodsView: View {
 
     @State private var editorMode: RecipeEditorView.Mode?
     @State private var deletionErrorMessage: String?
+    @State private var hasAppliedReadmeCaptureState = false
 
     var body: some View {
         NavigationStack {
@@ -69,6 +70,7 @@ struct MethodsView: View {
             } message: {
                 Text(deletionErrorMessage ?? AppConstants.Methods.Text.deleteFailedMessage)
             }
+            .onAppear(perform: applyReadmeCaptureStateIfNeeded)
         }
     }
 
@@ -123,6 +125,21 @@ struct MethodsView: View {
             brewSessionStore.discardPersistentBrew(for: template.id)
         } catch {
             deletionErrorMessage = AppConstants.Methods.Text.deleteFailedMessage
+        }
+    }
+
+    private func applyReadmeCaptureStateIfNeeded() {
+        guard ReadmeCaptureConfiguration.shouldPresentRecipeEditor,
+              !hasAppliedReadmeCaptureState else {
+            return
+        }
+
+        hasAppliedReadmeCaptureState = true
+
+        guard let template = templates.first else { return }
+
+        DispatchQueue.main.async {
+            editorMode = .edit(template)
         }
     }
 }

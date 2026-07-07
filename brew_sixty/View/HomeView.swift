@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var activeIndex: Int = 0
     @State private var isAnimating = false
     @State private var showProfileSheet = false
+    @State private var hasStartedReadmeCaptureBrew = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -146,9 +147,11 @@ struct HomeView: View {
         }
         .onAppear {
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+            startReadmeCaptureBrewIfNeeded()
         }
         .onChange(of: templates.map(\.id)) { _, _ in
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+            startReadmeCaptureBrewIfNeeded()
         }
         .onChange(of: brewSessionStore.pendingFocusBrewID) { _, _ in
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
@@ -177,6 +180,17 @@ struct HomeView: View {
         guard let pendingID = brewSessionStore.consumePendingFocusBrewID() else { return }
         guard let index = viewModels.firstIndex(where: { $0.id == pendingID }) else { return }
         activeIndex = index
+    }
+
+    private func startReadmeCaptureBrewIfNeeded() {
+        guard ReadmeCaptureConfiguration.shouldStartDemoBrew,
+              !hasStartedReadmeCaptureBrew,
+              let template = templates.first else {
+            return
+        }
+
+        hasStartedReadmeCaptureBrew = true
+        brewSessionStore.startSavedTemplate(template)
     }
 }
 
