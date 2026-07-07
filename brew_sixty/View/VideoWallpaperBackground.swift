@@ -49,28 +49,36 @@ struct VideoWallpaperBackground: View {
     }
 
     let style: Style
+    let isMasked: Bool
 
-    init(style: Style = .hero) {
+    init(style: Style = .hero, isMasked: Bool = true) {
         self.style = style
+        self.isMasked = isMasked
     }
 
     var body: some View {
         ZStack {
             Color(red: 0.05, green: 0.05, blue: 0.05) // Deep solid obsidian
             
-            ZStack {
+            if isMasked {
+                ZStack {
+                    LoopingVideoPlayerView()
+                        .blur(radius: style.blurRadius)
+                    Color.black.opacity(style.baseDimOpacity)
+                }
+                .mask(
+                    LinearGradient(
+                        colors: [.white, .white.opacity(0.8), .clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+                .opacity(0.4)
+            } else {
                 LoopingVideoPlayerView()
                     .blur(radius: style.blurRadius)
                 Color.black.opacity(style.baseDimOpacity)
             }
-            .mask(
-                LinearGradient(
-                    colors: [.white, .white.opacity(0.8), .clear],
-                    startPoint: .top,
-                    endPoint: .center
-                )
-            )
-            .opacity(0.4)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)

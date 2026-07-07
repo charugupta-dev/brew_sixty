@@ -6,7 +6,7 @@ struct LaunchView: View {
     
     var body: some View {
         ZStack {
-            VideoWallpaperBackground(style: .hero)
+            VideoWallpaperBackground(style: .hero, isMasked: false)
 
             VStack(spacing: 16) {
                 
