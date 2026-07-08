@@ -1119,38 +1119,21 @@ private struct WaitStateCard: View {
     let message: String
 
     var body: some View {
-        VStack(spacing: 10) {
-            Text(title.uppercased())
+        VStack(spacing: 8) {
+            Text(title.localizedUppercase)
                 .font(.system(size: 10, weight: .bold, design: .rounded))
-                .tracking(1.2)
+                .tracking(1.5)
                 .foregroundStyle(Color.primaryCopper)
+                .shadow(color: .black.opacity(0.40), radius: 2, x: 0, y: 1)
 
             Text(message)
-                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Color.coffeeCream.opacity(0.92))
+                .foregroundStyle(Color.coffeeCream)
                 .fixedSize(horizontal: false, vertical: true)
+                .shadow(color: .black.opacity(0.45), radius: 3, x: 0, y: 1.5)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 20)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.06),
-                            Color.black.opacity(0.28)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.16), radius: 18, y: 10)
+        .padding(.horizontal, 12)
     }
 }
 
