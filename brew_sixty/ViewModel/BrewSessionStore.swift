@@ -34,7 +34,7 @@ final class BrewSessionStore {
     func refreshPersistentBrew(from template: BrewTemplate) {
         guard let existing = persistentBrews[template.id] else { return }
 
-        if !existing.isRunning, existing.elapsed == 0 {
+        if !existing.isRunning, !existing.isCountingDown, existing.elapsed == 0 {
             persistentBrews[template.id] = HomeBrewViewModel(template: template)
             pendingPersistentRefreshes.remove(template.id)
         } else {
@@ -63,7 +63,7 @@ final class BrewSessionStore {
                 continue
             }
 
-            if !existing.isRunning, existing.elapsed == 0 {
+            if !existing.isRunning, !existing.isCountingDown, existing.elapsed == 0 {
                 persistentBrews[template.id] = HomeBrewViewModel(template: template)
                 pendingPersistentRefreshes.remove(template.id)
             }

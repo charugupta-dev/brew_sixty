@@ -175,7 +175,7 @@ private struct RecipeTemplateCard: View {
                 Label(String(format: "%.1f%@", template.beanWeight, AppConstants.Text.gramsUnit), systemImage: "scalemass.fill")
 
                 if template.method == .v60 || template.method == .chemex {
-                    Label(String(format: "1:%.1f", template.ratio), systemImage: "drop.fill")
+                    Label("1:\(Int(template.ratio.rounded()))", systemImage: "drop.fill")
                 } else {
                     Label("\(Int(template.waterVolume))\(AppConstants.Text.gramsUnit)", systemImage: "drop.fill")
                 }

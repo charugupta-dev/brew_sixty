@@ -14,12 +14,11 @@ struct ProfileSetupView: View {
     @AppStorage(ProfilePreferences.Keys.name) private var storedName = ""
     @AppStorage(ProfilePreferences.Keys.experienceLevel) private var storedExperienceLevel = ProfileExperienceLevel.justStarting.rawValue
     @AppStorage(ProfilePreferences.Keys.methodsUsed) private var storedMethodsUsed = ""
-    @AppStorage(ProfilePreferences.Keys.guidanceMode) private var storedGuidanceMode = GuidanceMode.guided.rawValue
 
     @State private var name = ""
     @State private var experienceLevel: ProfileExperienceLevel = .justStarting
     @State private var selectedMethods: Set<BrewMethod> = []
-    @State private var guidanceMode: GuidanceMode = .guided
+    @State private var isShowingMethodGuide = false
 
     private var isSaveDisabled: Bool {
         name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || selectedMethods.isEmpty
@@ -32,11 +31,19 @@ struct ProfileSetupView: View {
     private var subtitleText: String {
         mode == .onboarding
             ? "Make the app feel personal and easier to use from the very first brew."
-            : "Update how the app greets you and how much guidance it should give."
+            : "Update how the app greets you and which brewers you want front and center."
     }
 
     private var ctaText: String {
         mode == .onboarding ? "Continue" : "Save Changes"
+    }
+
+    private var methodsSectionTitle: String {
+        mode == .onboarding ? "WHICH BREWER DO YOU HAVE?" : "METHODS YOU USE"
+    }
+
+    private var methodsSectionSubtitle: String {
+        mode == .onboarding ? "Choose the one you have now or the one you want to start with" : "Select all that apply"
     }
 
     var body: some View {
@@ -97,9 +104,21 @@ struct ProfileSetupView: View {
 
                         profileCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                sectionLabel("METHODS YOU USE")
+                                HStack(spacing: 8) {
+                                    sectionLabel(methodsSectionTitle)
+                                    Spacer()
+                                    Button {
+                                        isShowingMethodGuide = true
+                                    } label: {
+                                        Image(systemName: "info.circle")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(Color.coffeeCream.opacity(0.68))
+                                            .frame(width: 28, height: 28)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                                 
-                                Text("Select all that apply")
+                                Text(methodsSectionSubtitle)
                                     .font(.footnote)
                                     .foregroundStyle(Color.coffeeCream.opacity(0.58))
 
@@ -126,24 +145,6 @@ struct ProfileSetupView: View {
                                                 )
                                         }
                                         .buttonStyle(.plain)
-                                    }
-                                }
-                            }
-                        }
-
-                        profileCard {
-                            VStack(alignment: .leading, spacing: 12) {
-                                sectionLabel("GUIDANCE MODE")
-
-                                VStack(spacing: 10) {
-                                    ForEach(GuidanceMode.allCases) { mode in
-                                        selectionRow(
-                                            title: mode.title,
-                                            subtitle: mode.subtitle,
-                                            isSelected: guidanceMode == mode
-                                        ) {
-                                            guidanceMode = mode
-                                        }
                                     }
                                 }
                             }
@@ -177,6 +178,11 @@ struct ProfileSetupView: View {
                 }
             }
             .interactiveDismissDisabled(mode == .onboarding)
+            .sheet(isPresented: $isShowingMethodGuide) {
+                MethodEducationLibrarySheet()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
             .toolbar {
                 if mode == .edit {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -262,7 +268,6 @@ struct ProfileSetupView: View {
         }
 
         experienceLevel = ProfileExperienceLevel(rawValue: storedExperienceLevel) ?? .justStarting
-        guidanceMode = GuidanceMode(rawValue: storedGuidanceMode) ?? .guided
         selectedMethods = ProfilePreferences.decode(methods: storedMethodsUsed)
     }
 
@@ -277,7 +282,6 @@ struct ProfileSetupView: View {
     private func saveProfile() {
         storedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         storedExperienceLevel = experienceLevel.rawValue
-        storedGuidanceMode = guidanceMode.rawValue
         storedMethodsUsed = ProfilePreferences.encode(methods: selectedMethods)
         hasCompletedProfile = true
 
@@ -287,4 +291,137 @@ struct ProfileSetupView: View {
 
 #Preview {
     ProfileSetupView(mode: .onboarding)
+}
+
+private struct MethodEducationLibrarySheet: View {
+    @State private var expandedMethod: BrewMethod? = .v60
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color.appSheetTop,
+                    Color.appSheetBottom
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Choose Your Brew Method")
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.coffeeCream)
+
+                    Text("See how each brewer feels in the cup before you decide which ones you want to use most.")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.coffeeCream.opacity(0.74))
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    VStack(spacing: 12) {
+                        ForEach(BrewMethod.allCases, id: \.self) { method in
+                            MethodEducationCard(
+                                method: method,
+                                isExpanded: expandedMethod == method
+                            ) {
+                                withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                                    expandedMethod = expandedMethod == method ? nil : method
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.top, 26)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
+    }
+}
+
+private struct MethodEducationCard: View {
+    let method: BrewMethod
+    let isExpanded: Bool
+    let action: () -> Void
+
+    private var content: MethodGuideContent {
+        method.guideContent
+    }
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(content.title)
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.coffeeCream)
+
+                        Text(content.startingPoint)
+                            .font(.footnote)
+                            .foregroundStyle(Color.coffeeCream.opacity(0.62))
+                            .lineLimit(isExpanded ? nil : 2)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.primaryCopper)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                }
+
+                if isExpanded {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(content.summary)
+                            .font(.subheadline)
+                            .foregroundStyle(Color.coffeeCream.opacity(0.84))
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Divider()
+                            .overlay(Color.white.opacity(0.08))
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Good place to start")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .tracking(1.2)
+                                .foregroundStyle(Color.primaryCopper)
+
+                            Text(content.startingPoint)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.80))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Why it matters")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .tracking(1.2)
+                                .foregroundStyle(Color.primaryCopper)
+
+                            Text(content.note)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.72))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .padding(18)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.white.opacity(isExpanded ? 0.07 : 0.04))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isExpanded ? Color.primaryCopper.opacity(0.24) : Color.white.opacity(0.06), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
 }

@@ -58,7 +58,6 @@ enum ReadmeCaptureConfiguration {
         defaults.set(true, forKey: ProfilePreferences.Keys.hasCompletedProfile)
         defaults.set("Charu", forKey: ProfilePreferences.Keys.name)
         defaults.set(ProfileExperienceLevel.someExperience.rawValue, forKey: ProfilePreferences.Keys.experienceLevel)
-        defaults.set(GuidanceMode.guided.rawValue, forKey: ProfilePreferences.Keys.guidanceMode)
         defaults.set(
             ProfilePreferences.encode(methods: [.v60, .chemex, .frenchPress, .aeropress]),
             forKey: ProfilePreferences.Keys.methodsUsed

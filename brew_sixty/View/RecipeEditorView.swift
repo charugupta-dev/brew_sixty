@@ -45,7 +45,6 @@ struct RecipeEditorView: View {
     let mode: Mode
 
     @AppStorage(ProfilePreferences.Keys.experienceLevel) private var experienceLevelRaw = ProfileExperienceLevel.justStarting.rawValue
-    @AppStorage(ProfilePreferences.Keys.guidanceMode) private var guidanceModeRaw = GuidanceMode.guided.rawValue
     @AppStorage(ProfilePreferences.Keys.methodsUsed) private var methodsUsedRaw = ""
 
     @State private var draft: RecipeDraft
@@ -123,8 +122,8 @@ struct RecipeEditorView: View {
         VStack(alignment: .leading, spacing: AppConstants.Methods.Layout.sectionHeaderSpacing) {
             HStack(spacing: 8) {
                 sectionLabel(AppConstants.Text.selectMethod)
+                helpButton(for: .method)
                 Spacer()
-                modeBadge(modeLabel)
             }
             .padding(.horizontal)
 
@@ -139,6 +138,26 @@ struct RecipeEditorView: View {
                 }
             }
             .padding(.horizontal)
+
+            if shouldShowStarterProfiles {
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionLabel("FIRST CUP STYLE")
+
+                    HStack(spacing: AppConstants.Methods.Layout.compactRowSpacing) {
+                        ForEach(FirstCupProfile.allCases) { profile in
+                            Button {
+                                applyStarterProfile(profile)
+                            } label: {
+                                starterProfilePill(for: profile)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    contextualHint(starterProfileSummaryText)
+                }
+                .padding(.horizontal)
+            }
         }
     }
 
@@ -146,10 +165,10 @@ struct RecipeEditorView: View {
         SectionCard("Dose & Yield") {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    parameterLabel(AppConstants.Text.beanWeight, helpTopic: .beanWeight)
+                    parameterLabel(labelText(for: .beanWeight), helpTopic: .beanWeight)
                     Spacer()
                     Text(String(format: "%.1f%@", draft.beanWeight, AppConstants.Text.gramsUnit))
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Color.primaryCopper)
                 }
 
@@ -158,7 +177,7 @@ struct RecipeEditorView: View {
                 })
 
                 if shouldShowContextualHint(for: .beanWeight) {
-                    contextualHint(beanWeightHelperText)
+                    contextualHint(contextualHintText(for: .beanWeight))
                 }
             }
 
@@ -167,10 +186,10 @@ struct RecipeEditorView: View {
             if draft.isPourOverMethod {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        parameterLabel(AppConstants.Text.waterRatio, helpTopic: .waterRatio)
+                        parameterLabel(labelText(for: .waterRatio), helpTopic: .waterRatio)
                         Spacer()
-                        Text(String(format: "1:%.1f", draft.ratio))
-                            .font(.system(.headline, design: .monospaced))
+                        Text("1:\(Int(draft.ratio.rounded()))")
+                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -179,16 +198,16 @@ struct RecipeEditorView: View {
                     })
 
                     if shouldShowContextualHint(for: .waterRatio) {
-                        contextualHint(waterControlHelperText)
+                        contextualHint(contextualHintText(for: .waterRatio))
                     }
                 }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        parameterLabel(AppConstants.Text.targetWaterVolume, helpTopic: .waterVolume)
+                        parameterLabel(labelText(for: .waterVolume), helpTopic: .waterVolume)
                         Spacer()
                         Text("\(Int(draft.waterVolume))\(AppConstants.Text.gramsUnit)")
-                            .font(.system(.headline, design: .monospaced))
+                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -197,7 +216,7 @@ struct RecipeEditorView: View {
                     })
 
                     if shouldShowContextualHint(for: .waterVolume) {
-                        contextualHint(waterControlHelperText)
+                        contextualHint(contextualHintText(for: .waterVolume))
                     }
                 }
             }
@@ -209,10 +228,10 @@ struct RecipeEditorView: View {
             if draft.isPourOverMethod {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        parameterLabel(AppConstants.Text.bloomDuration, helpTopic: .bloomDuration)
+                        parameterLabel(labelText(for: .bloomDuration), helpTopic: .bloomDuration)
                         Spacer()
                         Text("\(Int(draft.preInfusionDuration))\(AppConstants.Text.secondsUnit)")
-                            .font(.system(.subheadline, design: .monospaced))
+                            .font(.system(size: 20, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -221,16 +240,16 @@ struct RecipeEditorView: View {
                     })
 
                     if shouldShowContextualHint(for: .bloomDuration) {
-                        contextualHint(bloomDurationHelperText)
+                        contextualHint(contextualHintText(for: .bloomDuration))
                     }
                 }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        parameterLabel(AppConstants.Text.steepDuration, helpTopic: .steepDuration)
+                        parameterLabel(labelText(for: .steepDuration), helpTopic: .steepDuration)
                         Spacer()
                         Text("\(Int(draft.steepDuration))\(AppConstants.Text.secondsUnit)")
-                            .font(.system(.headline, design: .monospaced))
+                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -239,7 +258,7 @@ struct RecipeEditorView: View {
                     })
 
                     if shouldShowContextualHint(for: .steepDuration) {
-                        contextualHint(steepDurationHelperText)
+                        contextualHint(contextualHintText(for: .steepDuration))
                     }
 
                     if draft.method == .aeropress {
@@ -248,10 +267,10 @@ struct RecipeEditorView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                parameterLabel(AppConstants.Text.pressDuration, helpTopic: .pressDuration)
+                                parameterLabel(labelText(for: .pressDuration), helpTopic: .pressDuration)
                                 Spacer()
                                 Text("\(Int(draft.pressDuration))\(AppConstants.Text.secondsUnit)")
-                                    .font(.system(.headline, design: .monospaced))
+                                    .font(.system(size: 22, weight: .semibold, design: .monospaced))
                                     .foregroundStyle(Color.primaryCopper)
                             }
 
@@ -260,7 +279,7 @@ struct RecipeEditorView: View {
                             })
 
                             if shouldShowContextualHint(for: .pressDuration) {
-                                contextualHint(pressDurationHelperText)
+                                contextualHint(contextualHintText(for: .pressDuration))
                             }
                         }
                     }
@@ -271,10 +290,10 @@ struct RecipeEditorView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    parameterLabel(AppConstants.Text.targetTemperature, helpTopic: .temperature)
+                    parameterLabel(labelText(for: .temperature), helpTopic: .temperature)
                     Spacer()
                     Text(String(format: "%.1f%@", draft.targetTemperature, AppConstants.Text.celsiusUnit))
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Color.primaryCopper)
                 }
 
@@ -284,7 +303,7 @@ struct RecipeEditorView: View {
                 .padding(.vertical, 8)
 
                 if shouldShowContextualHint(for: .temperature) {
-                    contextualHint(temperatureHelperText)
+                    contextualHint(contextualHintText(for: .temperature))
                 }
             }
         }
@@ -293,7 +312,7 @@ struct RecipeEditorView: View {
     private var recipeNameSection: some View {
         SectionCard(AppConstants.Text.recipeName) {
             TextField(AppConstants.Methods.Text.recipeNamePlaceholder, text: $draft.name)
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(.system(size: 24, weight: .semibold, design: .rounded))
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.coffeeCream)
                 .textFieldStyle(.plain)
@@ -309,8 +328,7 @@ struct RecipeEditorView: View {
                     Spacer()
                     Image(systemName: "play.fill")
                     Text(AppConstants.Methods.Text.startBrew)
-                        .font(.headline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                     Spacer()
                 }
                 .foregroundStyle(Color.deepRoastInk)
@@ -332,8 +350,7 @@ struct RecipeEditorView: View {
                     Spacer()
                     Image(systemName: saveButtonSystemImage)
                     Text(saveButtonTitle)
-                        .font(.headline)
-                        .fontWeight(.bold)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     Spacer()
@@ -396,10 +413,6 @@ struct RecipeEditorView: View {
         ProfileExperienceLevel(rawValue: experienceLevelRaw) ?? .justStarting
     }
 
-    private var guidanceMode: GuidanceMode {
-        GuidanceMode(rawValue: guidanceModeRaw) ?? .guided
-    }
-
     private var preferredMethods: [BrewMethod] {
         let selectedMethods = ProfilePreferences.decode(methods: methodsUsedRaw)
         return BrewMethod.allCases.filter { selectedMethods.contains($0) }
@@ -410,12 +423,58 @@ struct RecipeEditorView: View {
         return preferredMethods + BrewMethod.allCases.filter { !preferredSet.contains($0) }
     }
 
-    private var shouldShowParameterHelp: Bool {
-        guidanceMode == .guided && experienceLevel == .justStarting
+    private var shouldShowStarterProfiles: Bool {
+        experienceLevel != .enthusiast
     }
 
-    private var modeLabel: String {
-        guidanceMode == .guided ? AppConstants.Methods.Text.guidedMode : AppConstants.Methods.Text.manualMode
+    private var shouldShowTasteHints: Bool {
+        experienceLevel != .enthusiast
+    }
+
+    private var currentStarterProfile: FirstCupProfile? {
+        FirstCupProfile.allCases.first { draft.matchesStarterProfile($0) }
+    }
+
+    private var starterProfileSummaryText: String {
+        if let profile = currentStarterProfile {
+            return profile.summary
+        }
+
+        return "Tuned manually • \(overallTasteSummaryText)"
+    }
+
+    private var overallTasteSummaryText: String {
+        switch brewStrengthDirection {
+        case .stronger:
+            return draft.isPourOverMethod ? "Stronger • Fuller" : "Stronger • Shorter cup"
+        case .balanced:
+            return "Balanced everyday cup"
+        case .lighter:
+            return draft.isPourOverMethod ? "Lighter • Brighter" : "Lighter • Longer cup"
+        }
+    }
+
+    private var brewStrengthDirection: BrewStrengthDirection {
+        if draft.isPourOverMethod {
+            switch draft.ratio {
+            case ..<15.5:
+                return .stronger
+            case 16.5...:
+                return .lighter
+            default:
+                return .balanced
+            }
+        }
+
+        let concentration = draft.waterVolume / max(draft.beanWeight, 1)
+        switch concentration {
+        case ..<14.5:
+            return .stronger
+        case 16.5...:
+            return .lighter
+        default:
+            return .balanced
+        }
     }
 
     private var beanWeightHelperText: String {
@@ -477,7 +536,7 @@ struct RecipeEditorView: View {
     @ViewBuilder
     private func contextualHint(_ text: String) -> some View {
         Text(text)
-            .font(.footnote)
+            .font(.system(size: 14, weight: .medium, design: .rounded))
             .foregroundStyle(Color.coffeeCream.opacity(0.58))
             .fixedSize(horizontal: false, vertical: true)
             .transition(.opacity.combined(with: .move(edge: .top)))
@@ -486,7 +545,7 @@ struct RecipeEditorView: View {
     @ViewBuilder
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
-            .font(.caption2)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
             .fontWeight(.bold)
             .foregroundStyle(Color.coffeeCream)
             .tracking(AppConstants.UI.captionEmphasisTracking)
@@ -505,12 +564,12 @@ struct RecipeEditorView: View {
         let isSelected = draft.method == method
 
         Text(method.rawValue)
-            .font(.system(size: 11, weight: .bold))
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
             .lineLimit(1)
             .minimumScaleFactor(0.8)
             .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.8))
-            .padding(.horizontal, 4)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .background(
                 Capsule()
@@ -523,26 +582,25 @@ struct RecipeEditorView: View {
     }
 
     @ViewBuilder
-    private func modeBadge(_ title: String) -> some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(Color.primaryCopper.opacity(0.9))
-                .frame(width: 6, height: 6)
+    private func starterProfilePill(for profile: FirstCupProfile) -> some View {
+        let isSelected = currentStarterProfile == profile
 
-            Text(title)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.coffeeCream.opacity(0.82))
-        }
-        .padding(.horizontal, AppConstants.Methods.Layout.pillHorizontalPadding)
-        .padding(.vertical, AppConstants.Methods.Layout.pillVerticalPadding)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
-        .overlay(
-            Capsule(style: .continuous)
-                .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
-        )
+        Text(profile.title)
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 11)
+            .frame(maxWidth: .infinity)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.05))
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+            )
     }
 
     @ViewBuilder
@@ -560,11 +618,13 @@ struct RecipeEditorView: View {
     }
 
     private func shouldShowContextualHint(for topic: HelpTopic) -> Bool {
-        shouldShowParameterHelp && activeHintTopic == topic
+        shouldShowTasteHints && activeHintTopic == topic
     }
 
     private func registerInteraction(_ topic: HelpTopic) {
-        guard shouldShowParameterHelp else { return }
+        syncDraftMathIfNeeded(for: topic)
+
+        guard shouldShowTasteHints else { return }
 
         hintDismissTask?.cancel()
 
@@ -587,83 +647,251 @@ struct RecipeEditorView: View {
         }
     }
 
+    private func syncDraftMathIfNeeded(for topic: HelpTopic) {
+        switch topic {
+        case .beanWeight, .waterRatio, .waterVolume:
+            draft.syncBrewingMath()
+        case .bloomDuration, .steepDuration, .pressDuration, .temperature, .method:
+            break
+        }
+    }
+
+    private func contextualHintText(for topic: HelpTopic) -> String {
+        switch topic {
+        case .beanWeight:
+            switch brewStrengthDirection {
+            case .stronger:
+                return "More coffee • fuller body"
+            case .balanced:
+                return "Balanced body • easy place to start"
+            case .lighter:
+                return "Gentler body • lighter feel"
+            }
+        case .waterRatio:
+            switch brewStrengthDirection {
+            case .stronger:
+                return "Stronger • Fuller"
+            case .balanced:
+                return "Balanced • Smooth"
+            case .lighter:
+                return "Lighter • Brighter"
+            }
+        case .waterVolume:
+            switch brewStrengthDirection {
+            case .stronger:
+                return "Shorter cup • stronger feel"
+            case .balanced:
+                return "Balanced cup size"
+            case .lighter:
+                return "Longer cup • lighter feel"
+            }
+        case .bloomDuration:
+            if draft.preInfusionDuration < 40 {
+                return "Quicker start • brighter feel"
+            } else if draft.preInfusionDuration > 47 {
+                return "More settling time • rounder cup"
+            }
+            return "Balanced bloom time"
+        case .steepDuration:
+            if draft.steepDuration < 90 {
+                return "Cleaner • lighter"
+            } else if draft.steepDuration > 210 {
+                return "Deeper • fuller"
+            }
+            return "Balanced • round"
+        case .pressDuration:
+            if draft.pressDuration < 28 {
+                return "Quicker press • more direct finish"
+            } else if draft.pressDuration > 32 {
+                return "Slower press • cleaner finish"
+            }
+            return "Balanced press feel"
+        case .temperature:
+            if draft.targetTemperature < 91 {
+                return "Softer • smoother"
+            } else if draft.targetTemperature > 94 {
+                return "Bolder • brighter"
+            }
+            return "Balanced sweetness"
+        case .method:
+            return starterProfileSummaryText
+        }
+    }
+
     private func helpContent(for topic: HelpTopic) -> HelpContent {
         switch topic {
         case .method:
-            switch draft.method {
-            case .v60:
-                return HelpContent(title: "V60", summary: "V60 usually gives you a cleaner, brighter cup where the flavors feel a little more separated and vivid.", startingPoint: "If you want a calm everyday pour-over, this is a lovely place to begin.", note: "It rewards a steady pour more than force, so small adjustments show up clearly in the cup.")
-            case .chemex:
-                return HelpContent(title: "Chemex", summary: "Chemex leans elegant and tea-like, with more space, clarity, and softness in the finish.", startingPoint: "It is a great pick when you want a larger cup that still feels light on its feet.", note: "A slightly looser ratio usually keeps it open and polished instead of heavy.")
-            case .frenchPress:
-                return HelpContent(title: "French Press", summary: "French Press brings more body and texture, so the cup feels deeper, warmer, and a little more comforting.", startingPoint: "Choose this when you want brewing to feel simple and the cup to feel fuller.", note: "Steep time matters, but this brewer is usually more forgiving than it first looks.")
-            case .aeropress:
-                return HelpContent(title: "Aeropress", summary: "Aeropress is flexible and forgiving, so it can land anywhere from punchy and short to smooth and easy-going.", startingPoint: "It is a great choice when you want a brewer that adapts quickly to your mood.", note: "Steep time and press time work together here, so gentle changes go a long way.")
-            }
+            let content = draft.method.guideContent
+            return HelpContent(title: content.title, summary: content.summary, startingPoint: content.startingPoint, note: content.note)
         case .beanWeight:
             switch draft.method {
             case .v60:
-                return HelpContent(title: "Coffee Dose", summary: beanWeightHelperText, startingPoint: "18g is an easy, balanced place to start for a single mug.", note: "Once the cup feels right, you can scale the recipe up or down without changing its personality too much.")
+                return HelpContent(title: helpTitle(for: .beanWeight), summary: beanWeightHelperText, startingPoint: "18g is an easy, balanced place to start for a single mug.", note: "Once the cup feels right, you can scale the recipe up or down without changing its personality too much.")
             case .chemex:
-                return HelpContent(title: "Coffee Dose", summary: beanWeightHelperText, startingPoint: "Start around 18-20g if you want a clean cup for one generous serving.", note: "Chemex tends to shine when you think in servings and flow, not just precision on paper.")
+                return HelpContent(title: helpTitle(for: .beanWeight), summary: beanWeightHelperText, startingPoint: "Start around 18-20g if you want a clean cup for one generous serving.", note: "Chemex tends to shine when you think in servings and flow, not just precision on paper.")
             case .frenchPress:
-                return HelpContent(title: "Coffee Dose", summary: beanWeightHelperText, startingPoint: "18-20g is a nice first stop if you like the cup round and comforting.", note: "A touch more coffee adds weight quickly here, so small moves are enough.")
+                return HelpContent(title: helpTitle(for: .beanWeight), summary: beanWeightHelperText, startingPoint: "18-20g is a nice first stop if you like the cup round and comforting.", note: "A touch more coffee adds weight quickly here, so small moves are enough.")
             case .aeropress:
-                return HelpContent(title: "Coffee Dose", summary: beanWeightHelperText, startingPoint: "15-18g gives you room to go either lighter or stronger without fuss.", note: "If the cup feels too quiet, this is often the first dial worth nudging.")
+                return HelpContent(title: helpTitle(for: .beanWeight), summary: beanWeightHelperText, startingPoint: "15-18g gives you room to go either lighter or stronger without fuss.", note: "If the cup feels too quiet, this is often the first dial worth nudging.")
             }
         case .waterRatio:
             switch draft.method {
             case .v60:
-                return HelpContent(title: "Water Ratio", summary: waterControlHelperText, startingPoint: "Around 1:15 or 1:16 usually lands in a balanced, easy first cup.", note: "Go tighter for more weight and a touch looser when you want the cup to feel brighter.")
+                return HelpContent(title: helpTitle(for: .waterRatio), summary: waterControlHelperText, startingPoint: "Around 1:15 or 1:16 usually lands in a balanced, easy first cup.", note: "Go tighter for more weight and a touch looser when you want the cup to feel brighter.")
             case .chemex:
-                return HelpContent(title: "Water Ratio", summary: waterControlHelperText, startingPoint: "1:15.5 to 1:16.5 is a comfortable window for keeping Chemex light and clean.", note: "If the cup starts feeling heavy, easing the ratio open is usually kinder than chasing bigger changes elsewhere.")
+                return HelpContent(title: helpTitle(for: .waterRatio), summary: waterControlHelperText, startingPoint: "1:16 to 1:17 is a comfortable window for keeping Chemex light and clean.", note: "If the cup starts feeling heavy, easing the ratio open is usually kinder than chasing bigger changes elsewhere.")
             case .frenchPress, .aeropress:
-                return HelpContent(title: "Water Ratio", summary: waterControlHelperText, startingPoint: "Start near the middle and let taste decide whether you want more weight or more space.", note: "This dial mainly decides how concentrated the final cup feels.")
+                return HelpContent(title: helpTitle(for: .waterRatio), summary: waterControlHelperText, startingPoint: "Start near the middle and let taste decide whether you want more weight or more space.", note: "This dial mainly decides how concentrated the final cup feels.")
             }
         case .waterVolume:
-            return HelpContent(title: "Water Yield", summary: waterControlHelperText, startingPoint: "Pick the cup size you actually want first, then let the recipe meet you there.", note: "If you want a shorter, stronger cup, stay lower; if you want a longer one, stretch it gently.")
+            return HelpContent(title: helpTitle(for: .waterVolume), summary: waterControlHelperText, startingPoint: "Pick the cup size you actually want first, then let the recipe meet you there.", note: "If you want a shorter, stronger cup, stay lower; if you want a longer one, stretch it gently.")
         case .bloomDuration:
-            return HelpContent(title: "Bloom Duration", summary: bloomDurationHelperText, startingPoint: "45 seconds is a calm middle ground that works nicely most days.", note: "If the bed still looks lively, a little more time can help the main pour settle in more evenly.")
+            return HelpContent(title: helpTitle(for: .bloomDuration), summary: bloomDurationHelperText, startingPoint: "45 seconds is a calm middle ground that works nicely most days.", note: "If the bed still looks lively, a little more time can help the main pour settle in more evenly.")
         case .steepDuration:
             switch draft.method {
             case .frenchPress:
-                return HelpContent(title: "Steep Duration", summary: steepDurationHelperText, startingPoint: "About 4 minutes is the classic easy start for French Press.", note: "If the cup feels thin, go a little longer; if it feels too heavy, pull it back.")
+                return HelpContent(title: helpTitle(for: .steepDuration), summary: steepDurationHelperText, startingPoint: "About 4 minutes is the classic easy start for French Press.", note: "If the cup feels thin, go a little longer; if it feels too heavy, pull it back.")
             case .aeropress:
-                return HelpContent(title: "Steep Duration", summary: steepDurationHelperText, startingPoint: "Around 60 seconds keeps the cup friendly and easy to repeat.", note: "You can use press time after this to fine-tune texture without overcomplicating things.")
+                return HelpContent(title: helpTitle(for: .steepDuration), summary: steepDurationHelperText, startingPoint: "Around 60 seconds keeps the cup friendly and easy to repeat.", note: "You can use press time after this to fine-tune texture without overcomplicating things.")
             case .v60, .chemex:
-                return HelpContent(title: "Steep Duration", summary: steepDurationHelperText, startingPoint: "Keep it around the middle first and let the cup tell you if it wants more time.", note: "Gentle changes are usually enough.")
+                return HelpContent(title: helpTitle(for: .steepDuration), summary: steepDurationHelperText, startingPoint: "Keep it around the middle first and let the cup tell you if it wants more time.", note: "Gentle changes are usually enough.")
             }
         case .pressDuration:
-            return HelpContent(title: "Press Duration", summary: pressDurationHelperText, startingPoint: "Around 30 seconds is a nice, unhurried push.", note: "If you rush the press, the cup can feel a little rougher than it needs to.")
+            return HelpContent(title: helpTitle(for: .pressDuration), summary: pressDurationHelperText, startingPoint: "Around 30 seconds is a nice, unhurried push.", note: "If you rush the press, the cup can feel a little rougher than it needs to.")
         case .temperature:
             switch draft.method {
             case .v60, .chemex:
-                return HelpContent(title: "Temperature", summary: temperatureHelperText, startingPoint: "93-94°C is a comfortable place to begin for most pour-overs.", note: "If the cup feels sharp, lower it a touch; if it feels flat, let it climb a little.")
+                return HelpContent(title: helpTitle(for: .temperature), summary: temperatureHelperText, startingPoint: "93-94°C is a comfortable place to begin for most pour-overs.", note: "If the cup feels sharp, lower it a touch; if it feels flat, let it climb a little.")
             case .frenchPress:
-                return HelpContent(title: "Temperature", summary: temperatureHelperText, startingPoint: "Start around 92-94°C to keep the cup full without getting too heavy.", note: "This brewer usually responds better to small changes than dramatic ones.")
+                return HelpContent(title: helpTitle(for: .temperature), summary: temperatureHelperText, startingPoint: "Start around 92-94°C to keep the cup full without getting too heavy.", note: "This brewer usually responds better to small changes than dramatic ones.")
             case .aeropress:
-                return HelpContent(title: "Temperature", summary: temperatureHelperText, startingPoint: "Start near 90-92°C if you want a smooth, forgiving baseline.", note: "Aeropress gives you plenty of room to experiment once the rest of the recipe feels steady.")
+                return HelpContent(title: helpTitle(for: .temperature), summary: temperatureHelperText, startingPoint: "Start near 90-92°C if you want a smooth, forgiving baseline.", note: "Aeropress gives you plenty of room to experiment once the rest of the recipe feels steady.")
             }
         }
     }
 
+    private func labelText(for topic: HelpTopic) -> String {
+        guard experienceLevel != .enthusiast else {
+            switch topic {
+            case .beanWeight:
+                return AppConstants.Text.beanWeight
+            case .waterRatio:
+                return AppConstants.Text.waterRatio
+            case .waterVolume:
+                return AppConstants.Text.targetWaterVolume
+            case .bloomDuration:
+                return AppConstants.Text.bloomDuration
+            case .steepDuration:
+                return AppConstants.Text.steepDuration
+            case .pressDuration:
+                return AppConstants.Text.pressDuration
+            case .temperature:
+                return AppConstants.Text.targetTemperature
+            case .method:
+                return AppConstants.Text.selectMethod
+            }
+        }
+
+        switch topic {
+        case .beanWeight:
+            return "COFFEE AMOUNT"
+        case .waterRatio:
+            return "COFFEE TO WATER"
+        case .waterVolume:
+            return "WATER AMOUNT"
+        case .bloomDuration:
+            return "BLOOM TIME"
+        case .steepDuration:
+            return "STEEP TIME"
+        case .pressDuration:
+            return "PRESS TIME"
+        case .temperature:
+            return "WATER TEMPERATURE"
+        case .method:
+            return AppConstants.Text.selectMethod
+        }
+    }
+
+    private func helpTitle(for topic: HelpTopic) -> String {
+        guard experienceLevel != .enthusiast else {
+            switch topic {
+            case .beanWeight:
+                return "Coffee Dose"
+            case .waterRatio:
+                return "Water Ratio"
+            case .waterVolume:
+                return "Water Yield"
+            case .bloomDuration:
+                return "Bloom Duration"
+            case .steepDuration:
+                return "Steep Duration"
+            case .pressDuration:
+                return "Press Duration"
+            case .temperature:
+                return "Temperature"
+            case .method:
+                return draft.method.rawValue
+            }
+        }
+
+        switch topic {
+        case .beanWeight:
+            return "Coffee Amount"
+        case .waterRatio:
+            return "Coffee to Water Ratio"
+        case .waterVolume:
+            return "Water Amount"
+        case .bloomDuration:
+            return "Bloom Time"
+        case .steepDuration:
+            return "Steep Time"
+        case .pressDuration:
+            return "Press Time"
+        case .temperature:
+            return "Water Temperature"
+        case .method:
+            return draft.method.rawValue
+        }
+    }
+
     private func selectMethod(_ method: BrewMethod) {
+        let selectedProfile = shouldShowStarterProfiles ? currentStarterProfile : nil
+
         withAnimation {
             activeHintTopic = nil
-            draft.applyDefaults(for: method)
+
+            if let selectedProfile {
+                draft.applyStarterProfile(selectedProfile, for: method)
+            } else {
+                draft.applyDefaults(for: method)
+            }
         }
-        presentedHelpTopic = .method
+    }
+
+    private func applyStarterProfile(_ profile: FirstCupProfile) {
+        withAnimation {
+            activeHintTopic = nil
+            draft.applyStarterProfile(profile)
+        }
     }
 
     private func applyProfilePreferencesIfNeeded() {
         guard !hasAppliedProfileDefaults else { return }
         hasAppliedProfileDefaults = true
 
-        guard case .create = mode, let firstPreferredMethod = preferredMethods.first else { return }
-        draft.applyDefaults(for: firstPreferredMethod)
+        guard case .create = mode else { return }
+
+        let firstPreferredMethod = preferredMethods.first ?? draft.method
+
+        if shouldShowStarterProfiles {
+            draft.applyStarterProfile(.balanced, for: firstPreferredMethod)
+        } else {
+            draft.applyDefaults(for: firstPreferredMethod)
+        }
     }
 
     private func startBrew() {
+        draft.syncBrewingMath()
         brewSessionStore.startTransientBrew(from: draft)
         selectedTab = .brew
         dismiss()
@@ -671,6 +899,7 @@ struct RecipeEditorView: View {
 
     private func saveDraft() {
         guard !isSaveDisabled else { return }
+        draft.syncBrewingMath()
 
         do {
             switch mode {
@@ -686,6 +915,14 @@ struct RecipeEditorView: View {
         } catch {
             saveErrorMessage = AppConstants.Methods.Text.saveFailedMessage
         }
+    }
+}
+
+private extension RecipeEditorView {
+    enum BrewStrengthDirection {
+        case stronger
+        case balanced
+        case lighter
     }
 }
 
@@ -770,14 +1007,14 @@ private struct SectionCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title.localizedUppercase)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 12, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.primaryCopper)
                 .tracking(AppConstants.UI.eyebrowTracking)
                 .padding(.bottom, 4)
 
             content
         }
-        .padding(16)
+        .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white.opacity(0.03))

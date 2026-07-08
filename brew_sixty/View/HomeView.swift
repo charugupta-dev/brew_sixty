@@ -6,7 +6,6 @@ struct HomeView: View {
     @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
     @AppStorage(ProfilePreferences.Keys.name) private var profileName = ""
     @AppStorage(ProfilePreferences.Keys.experienceLevel) private var experienceLevelRaw = ProfileExperienceLevel.justStarting.rawValue
-    @AppStorage(ProfilePreferences.Keys.guidanceMode) private var guidanceModeRaw = GuidanceMode.guided.rawValue
     
     @Binding var selectedTab: ContentView.Tab
     let brewSessionStore: BrewSessionStore
@@ -168,8 +167,7 @@ struct HomeView: View {
 
     private var profileSummaryText: String {
         let experience = ProfileExperienceLevel(rawValue: experienceLevelRaw)?.title ?? ProfileExperienceLevel.justStarting.title
-        let guidance = GuidanceMode(rawValue: guidanceModeRaw)?.title ?? GuidanceMode.guided.title
-        return "\(experience) • \(guidance) mode"
+        return "\(experience) level"
     }
 
     private func syncFocusIfNeeded(for viewModels: [HomeBrewViewModel]) {
@@ -238,100 +236,171 @@ private struct ProfileAvatarView: View {
 @MainActor
 struct LiveTimerCard: View {
     let viewModel: HomeBrewViewModel
+    @State private var animatedCountdownValue = AppConstants.BrewTimer.preBrewCountdownDuration
+    @State private var countdownScale: CGFloat = 0.78
+    @State private var countdownOpacity = 0.0
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 14) {
-                // Inner Timer Card Container wrapping the timer circle, Kettle canvas animation, and overlay text
-                VStack(spacing: 10) {
-                    TimerCircleView(viewModel: viewModel)
-                    
-                    // Recipe info overlays
-                    VStack(spacing: 6) {
-                        Text(formatTime(viewModel.elapsed > 0 ? viewModel.elapsed : viewModel.totalDuration))
-                            .font(.system(size: 28, weight: .bold, design: .monospaced))
-                            .foregroundStyle(Color.coffeeCream)
+        ZStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 14) {
+                    // Inner Timer Card Container wrapping the timer circle, Kettle canvas animation, and overlay text
+                    VStack(spacing: 10) {
+                        TimerCircleView(viewModel: viewModel)
                         
-                        HStack(spacing: 8) {
-                            let targetWaterStr = "\(Int(viewModel.targetWater))g"
-                            let doseStr = viewModel.beanWeight.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(viewModel.beanWeight))g" : String(format: "%.1fg", viewModel.beanWeight)
+                        // Recipe info overlays
+                        VStack(spacing: 6) {
+                            Text(timerReadoutText)
+                                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                                .foregroundStyle(Color.coffeeCream)
                             
-                            Text("\(viewModel.method.rawValue.lowercased()) - Target: \(targetWaterStr) - \(doseStr)")
-                                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                                .foregroundStyle(Color.primaryCopper)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
+                            phaseMetricView
                         }
+                        .padding(.bottom, 12)
                     }
-                    .padding(.bottom, 12)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
-                
-                PhaseStackPickerView(phases: phases, selectedIndex: pickerPhaseIndex)
-                    .padding(.horizontal, 16)
-                
-                // Start / Pause Brew button
-                Button {
-                    viewModel.toggleTimer()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Image(systemName: viewModel.isRunning ? "pause.fill" : "play.fill")
-                            .font(.subheadline)
-                        Text(viewModel.isRunning ? AppConstants.Text.pauseBrew : AppConstants.Text.startBrew)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                        Spacer()
-                    }
-                    .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
-                    .padding(.vertical, 16)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.primaryCopper, Color.brushedCopper],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+                    
+                    PhaseStackPickerView(
+                        phases: phases,
+                        selectedIndex: pickerPhaseIndex,
+                        phaseProgress: viewModel.currentPhaseProgress
                     )
-                    .cornerRadius(28)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 2)
-                
-                // Reset & Skip buttons shown only when timer is running or has elapsed
-                if viewModel.isRunning || viewModel.elapsed > 0 {
-                    HStack(spacing: 16) {
-                        Spacer()
-                        
-                        Button {
-                            viewModel.resetTimer()
-                        } label: {
-                            Text(AppConstants.Text.reset)
+                        .padding(.horizontal, 16)
+                    
+                    // Start / Pause Brew button
+                    Button {
+                        viewModel.toggleTimer()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Image(systemName: startButtonSystemImage)
+                                .font(.subheadline)
+                            Text(startButtonTitle)
+                                .font(.headline)
+                                .fontWeight(.bold)
+                            Spacer()
                         }
-                        .buttonStyle(TimerControlButtonStyle())
-                        
-                        Button {
-                            viewModel.skipPhase()
-                        } label: {
-                            Text(AppConstants.Text.skipPhase)
-                        }
-                        .buttonStyle(TimerControlButtonStyle())
-                        
-                        Spacer()
+                        .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.primaryCopper, Color.brushedCopper],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(28)
                     }
-                    .padding(.top, 4)
-                    .transition(.opacity)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 2)
+                    .disabled(viewModel.isCountingDown)
+                    
+                    // Reset & Skip buttons shown only when timer is running or has elapsed
+                    if viewModel.isRunning || viewModel.elapsed > 0 {
+                        HStack(spacing: 16) {
+                            Spacer()
+                            
+                            Button {
+                                viewModel.resetTimer()
+                            } label: {
+                                Text(AppConstants.Text.reset)
+                            }
+                            .buttonStyle(TimerControlButtonStyle())
+                            
+                            Button {
+                                viewModel.skipPhase()
+                            } label: {
+                                Text(AppConstants.Text.skipPhase)
+                            }
+                            .buttonStyle(TimerControlButtonStyle())
+                            
+                            Spacer()
+                        }
+                        .padding(.top, 4)
+                        .transition(.opacity)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .top)
+                .padding()
+                .padding(.bottom, 12)
             }
-            .frame(maxWidth: .infinity, alignment: .top)
-            .padding()
-            .padding(.bottom, 12)
+            
+            if viewModel.isCountingDown {
+                countdownOverlay
+                    .transition(.opacity)
+            }
         }
         .background(
             RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius)
                 .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
         )
         .liquidGlassBorder(cornerRadius: 24)
+        .onAppear {
+            if viewModel.isCountingDown {
+                synchronizeCountdownOverlay()
+            }
+        }
+        .onChange(of: viewModel.isCountingDown) { _, isCountingDown in
+            if isCountingDown {
+                synchronizeCountdownOverlay()
+            } else {
+                countdownOpacity = 0
+            }
+        }
+        .onChange(of: viewModel.countdownRemaining) { _, _ in
+            guard viewModel.isCountingDown else { return }
+            synchronizeCountdownOverlay()
+        }
+    }
+
+    private var countdownOverlay: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius, style: .continuous)
+                .fill(Color.black.opacity(0.66))
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.08),
+                    Color.primaryCopper.opacity(0.10)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius, style: .continuous))
+
+            VStack(spacing: 14) {
+                Text("\(animatedCountdownValue)")
+                    .font(.system(size: 116, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.coffeeCream)
+                    .scaleEffect(countdownScale)
+                    .opacity(countdownOpacity)
+                    .shadow(color: Color.primaryCopper.opacity(0.22), radius: 16, y: 6)
+
+                Text("Get Ready to Pour")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.primaryCopper.opacity(0.92))
+                    .opacity(min(countdownOpacity + 0.15, 1.0))
+            }
+            .padding(24)
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func synchronizeCountdownOverlay() {
+        animatedCountdownValue = viewModel.countdownRemaining
+        countdownScale = 0.78
+        countdownOpacity = 0.15
+
+        withAnimation(.spring(response: 0.34, dampingFraction: 0.64)) {
+            countdownScale = 1.0
+            countdownOpacity = 1.0
+        }
+
+        withAnimation(.easeOut(duration: 0.88).delay(0.12)) {
+            countdownScale = 1.08
+            countdownOpacity = 0.92
+        }
     }
     
     
@@ -342,13 +411,14 @@ struct LiveTimerCard: View {
             let bloom = viewModel.bloomDuration
             if bloom > 0 {
                 return [
-                    BrewPhase(title: "Bloom", description: "Swirl gently to saturate grounds", duration: "\(Int(bloom))s", icon: "stopwatch", waterAmount: "to \(formatGrams(viewModel.bloomWater))"),
-                    BrewPhase(title: "First Pour", description: "Pour in circular spiral motion", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
+                    BrewPhase(title: "Bloom Pour", description: "Pour just enough to saturate the grounds", duration: "\(Int(viewModel.bloomPourDuration))s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.bloomWater))"),
+                    BrewPhase(title: "Bloom Wait", description: "Let the coffee settle before the main pour", duration: "\(Int(viewModel.bloomWaitDuration))s", icon: "hourglass", waterAmount: nil),
+                    BrewPhase(title: "First Pour", description: "Pour in a slow circular spiral", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
                     BrewPhase(title: "Final Drawdown", description: "Let the water draw down completely", duration: "Ready", icon: "hourglass", waterAmount: "to \(formatGrams(viewModel.targetWater))")
                 ]
             } else {
                 return [
-                    BrewPhase(title: "First Pour", description: "Pour in circular spiral motion", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
+                    BrewPhase(title: "First Pour", description: "Pour in a slow circular spiral", duration: "60s", icon: "drop", waterAmount: "to \(formatGrams(viewModel.firstPourWater))"),
                     BrewPhase(title: "Final Drawdown", description: "Let the water draw down completely", duration: "Ready", icon: "hourglass", waterAmount: "to \(formatGrams(viewModel.targetWater))")
                 ]
             }
@@ -376,6 +446,51 @@ struct LiveTimerCard: View {
         }
         
         return min(viewModel.activePhaseIndex, lastIndex)
+    }
+
+    private var timerReadoutText: String {
+        if viewModel.isCountingDown {
+            return "\(viewModel.countdownRemaining)"
+        }
+
+        return formatTime(viewModel.currentPhaseRemainingTime)
+    }
+
+    @ViewBuilder
+    private var phaseMetricView: some View {
+        if let metricText = viewModel.currentPhaseMetricText {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(viewModel.currentPhaseSupportText)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.coffeeCream.opacity(0.72))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+
+                Text(metricText)
+                    .font(.system(size: 20, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color.primaryCopper)
+            }
+        } else {
+            Text(viewModel.currentPhaseSupportText)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.primaryCopper)
+        }
+    }
+
+    private var startButtonSystemImage: String {
+        if viewModel.isCountingDown {
+            return "timer"
+        }
+
+        return viewModel.isRunning ? "pause.fill" : "play.fill"
+    }
+
+    private var startButtonTitle: String {
+        if viewModel.isCountingDown {
+            return "Starting in \(viewModel.countdownRemaining)..."
+        }
+
+        return viewModel.isRunning ? AppConstants.Text.pauseBrew : AppConstants.Text.startBrew
     }
     
     private func formatTime(_ time: TimeInterval) -> String {
@@ -664,7 +779,7 @@ struct TimerCircleView: View {
                         }
                         
                         // 3. DRAW CONSTELLATION FLOW (Only when running)
-                        let showStream = isRunning || (viewModel.elapsed > 0 && viewModel.elapsed < viewModel.totalDuration)
+                        let showStream = viewModel.shouldShowPourStream
                         
                         if showStream {
                             let animTime = isRunning ? time : (time * 0.05) // slow crawl on pause
@@ -696,7 +811,7 @@ struct TimerCircleView: View {
                             let particleCount = 18
                             var points: [CGPoint] = []
                             let flowSpeed = viewModel.method == .chemex ? 0.12 : 0.22
-                            let isBloom = viewModel.getPhaseText().localizedCaseInsensitiveContains("bloom")
+                            let isBloom = viewModel.currentPhaseTitle == AppConstants.BrewTimer.bloomPourPhaseTitle
                             
                             for i in 0..<particleCount {
                                 let offset = Double(i) / Double(particleCount)

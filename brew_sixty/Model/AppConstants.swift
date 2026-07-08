@@ -81,7 +81,7 @@ struct AppConstants {
         }
 
         struct Steps {
-            static let waterRatio = 0.5
+            static let waterRatio = 1.0
             static let waterVolume = 10.0
             static let bloomDuration = 5.0
             static let steepDuration = 5.0
@@ -101,8 +101,6 @@ struct AppConstants {
             static let rowSpacing: CGFloat = 8
             static let compactRowSpacing: CGFloat = 6
             static let controlInset: CGFloat = 8
-            static let pillHorizontalPadding: CGFloat = 12
-            static let pillVerticalPadding: CGFloat = 8
             static let methodsBottomPadding: CGFloat = 40
             static let methodPickerTopPadding: CGFloat = 8
         }
@@ -114,8 +112,6 @@ struct AppConstants {
             static let recipesNavigationTitle = "Recipes"
             static let createRecipeNavigationTitle = "New Recipe"
             static let editRecipeNavigationTitle = "Edit Recipe"
-            static let guidedMode = "Guided setup"
-            static let manualMode = "Manual setup"
             static let recipeNamePlaceholder = "Recipe Name"
             static let startBrew = "Start Brew"
             static let saveAsPreset = "Save as Preset"
@@ -164,6 +160,8 @@ struct AppConstants {
     }
 
     struct BrewTimer {
+        static let preBrewCountdownDuration = 3
+        static let bloomPourDuration: TimeInterval = 10.0
         static let v60BloomDuration: TimeInterval = 45.0
         static let frenchPressSteepDuration: TimeInterval = 240.0
         static let frenchPressPlungeDuration: TimeInterval = 15.0
@@ -176,6 +174,9 @@ struct AppConstants {
         static let chemexDrawdownDuration: TimeInterval = 195.0
         static let timerInterval: TimeInterval = 0.1
 
+        static let readyPhaseTitle = "Get Ready"
+        static let bloomPourPhaseTitle = "Bloom Pour"
+        static let bloomWaitPhaseTitle = "Bloom Wait"
         static let donePhaseTitle = "Done"
         static let bloomPhaseTitle = "Bloom"
         static let firstPourPhaseTitle = "First Pour"
@@ -186,7 +187,10 @@ struct AppConstants {
 
         static let enjoyCoffeeMessage = "Enjoy your coffee!"
         static let targetPrefix = "Target:"
+        static let getReadyToBloomPrefix = "Get ready: Bloom to"
+        static let getReadyToBrewPrefix = "Get ready: Target"
         static let bloomInstructionPrefix = "Bloom: Pour"
+        static let bloomWaitInstruction = "Wait: Let the coffee bloom"
         static let firstPourInstructionPrefix = "First Pour: Pour to"
         static let drawdownInstructionPrefix = "Drawdown: Pour to"
         static let steepInstructionPrefix = "Steep: Pour"

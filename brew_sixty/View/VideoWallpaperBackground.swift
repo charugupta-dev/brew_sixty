@@ -24,17 +24,6 @@ struct VideoWallpaperBackground: View {
         case quiet
         case onboarding
 
-        var blurRadius: CGFloat {
-            switch self {
-            case .hero:
-                return 2
-            case .quiet:
-                return 4
-            case .onboarding:
-                return 3
-            }
-        }
-
         var baseDimOpacity: Double {
             switch self {
             case .hero:
@@ -63,7 +52,6 @@ struct VideoWallpaperBackground: View {
             if isMasked {
                 ZStack {
                     LoopingVideoPlayerView()
-                        .blur(radius: style.blurRadius)
                     Color.black.opacity(style.baseDimOpacity)
                 }
                 .mask(
@@ -76,7 +64,6 @@ struct VideoWallpaperBackground: View {
                 .opacity(0.4)
             } else {
                 LoopingVideoPlayerView()
-                    .blur(radius: style.blurRadius)
                 Color.black.opacity(style.baseDimOpacity)
             }
         }

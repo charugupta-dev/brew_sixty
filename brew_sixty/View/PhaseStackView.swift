@@ -11,101 +11,110 @@ struct BrewPhase {
 struct PhaseStackPickerView: View {
     let phases: [BrewPhase]
     let selectedIndex: Int
-    
+    let phaseProgress: Double
+
+    private var safeSelectedIndex: Int {
+        guard !phases.isEmpty else { return 0 }
+        return min(max(selectedIndex, 0), phases.count - 1)
+    }
+
     var body: some View {
-        ZStack {
-            ForEach(Array(phases.enumerated()), id: \.offset) { index, phase in
-                let layout = cardLayout(for: index)
-                if layout.isVisible {
-                    PhaseStackCard(phase: phase, isActive: index == selectedIndex)
-                        .scaleEffect(layout.scale)
-                        .offset(y: layout.offsetY)
-                        .opacity(layout.opacity)
-                        .blur(radius: layout.blur)
-                        .zIndex(layout.zIndex)
+        VStack(spacing: 10) {
+            HStack(spacing: 0) {
+                ForEach(Array(phases.enumerated()), id: \.offset) { index, _ in
+                    HStack(spacing: 0) {
+                        phaseMarker(for: index)
+
+                        if index < phases.count - 1 {
+                            phaseConnector(for: index)
+                        }
+                    }
                 }
+            }
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity)
+
+            if !phases.isEmpty {
+                Text(phases[safeSelectedIndex].title)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.coffeeCream.opacity(0.84))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .contentTransition(.opacity)
+                    .id(phases[safeSelectedIndex].title)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 64)
-        .clipped()
-        .animation(.easeInOut(duration: 0.6), value: selectedIndex)
+        .frame(height: 42)
+        .animation(.spring(response: 0.32, dampingFraction: 0.82), value: selectedIndex)
+        .animation(.linear(duration: 0.12), value: phaseProgress)
     }
-    
-    private func cardLayout(for index: Int) -> PhaseStackLayout {
-        let delta = index - selectedIndex
-        
-        switch delta {
-        case 0:
-            return PhaseStackLayout(scale: 1.0, offsetY: 0, opacity: 1.0, blur: 0, zIndex: 3, isVisible: true)
-        case -1:
-            return PhaseStackLayout(scale: 0.95, offsetY: -40, opacity: 0.0, blur: 0, zIndex: 2, isVisible: true)
-        case 1:
-            return PhaseStackLayout(scale: 0.95, offsetY: 40, opacity: 0.0, blur: 0, zIndex: 1, isVisible: true)
-        default:
-            return PhaseStackLayout(scale: 0.9, offsetY: delta < 0 ? -60 : 60, opacity: 0, blur: 0, zIndex: -1, isVisible: false)
-        }
-    }
-}
 
-struct PhaseStackCard: View {
-    let phase: BrewPhase
-    let isActive: Bool
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 4) {
-                Text(phase.title)
-                    .font(.system(size: 15, weight: isActive ? .bold : .semibold))
-                    .foregroundStyle(isActive ? Color.coffeeCream : Color.coffeeCream.opacity(0.78))
-                
-                if let water = phase.waterAmount {
-                    Text("— \(water)")
-                        .font(.system(size: 15, weight: isActive ? .bold : .semibold))
-                        .foregroundStyle(isActive ? Color.primaryCopper : Color.primaryCopper.opacity(0.7))
+    @ViewBuilder
+    private func phaseMarker(for index: Int) -> some View {
+        let isActive = index == safeSelectedIndex
+        let isCompleted = index < safeSelectedIndex
+
+        Capsule(style: .continuous)
+            .fill(markerColor(isActive: isActive, isCompleted: isCompleted))
+            .frame(width: isActive ? 24 : 8, height: 8)
+            .overlay {
+                if isActive {
+                    Capsule(style: .continuous)
+                        .stroke(Color.white.opacity(0.16), lineWidth: 0.8)
                 }
             }
-            .lineLimit(1)
-            .minimumScaleFactor(0.85)
-            
-            Spacer(minLength: 10)
-            
-            if phase.duration != "Ready" {
-                Text(phase.duration)
-                    .font(.system(size: 15, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(isActive ? Color.primaryCopper : Color.coffeeCream.opacity(0.45))
-            }
-        }
-        .padding(.horizontal, 20)
-        .frame(maxWidth: .infinity, minHeight: 64)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.coffeeCream.opacity(isActive ? 0.10 : 0.06))
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.17, green: 0.12, blue: 0.11).opacity(isActive ? 0.98 : 0.9),
-                            Color(red: 0.12, green: 0.09, blue: 0.08).opacity(isActive ? 0.98 : 0.88)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-                )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(isActive ? Color.primaryCopper.opacity(0.4) : Color.coffeeCream.opacity(0.08), lineWidth: 1)
-        )
-        .shadow(color: isActive ? Color.primaryCopper.opacity(0.12) : .clear, radius: 16, y: 8)
+            .shadow(color: isActive ? Color.primaryCopper.opacity(0.18) : .clear, radius: 8, y: 2)
     }
-}
 
-private struct PhaseStackLayout {
-    let scale: CGFloat
-    let offsetY: CGFloat
-    let opacity: Double
-    let blur: CGFloat
-    let zIndex: Double
-    let isVisible: Bool
+    private func markerColor(isActive: Bool, isCompleted: Bool) -> Color {
+        if isActive {
+            return Color.primaryCopper
+        }
+
+        if isCompleted {
+            return Color.primaryCopper.opacity(0.42)
+        }
+
+        return Color.white.opacity(0.22)
+    }
+
+    private func connectorColor(for index: Int) -> Color {
+        index < safeSelectedIndex ? Color.primaryCopper.opacity(0.30) : Color.white.opacity(0.12)
+    }
+
+    @ViewBuilder
+    private func phaseConnector(for index: Int) -> some View {
+        GeometryReader { proxy in
+            let width = max(proxy.size.width, 0)
+
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(connectorColor(for: index))
+                    .frame(height: 1)
+
+                if currentConnectorFillWidth(for: index, totalWidth: width) > 0 {
+                    Rectangle()
+                        .fill(Color.primaryCopper.opacity(0.72))
+                        .frame(width: currentConnectorFillWidth(for: index, totalWidth: width), height: 1.5)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 8)
+        .padding(.horizontal, 6)
+    }
+
+    private func currentConnectorFillWidth(for index: Int, totalWidth: CGFloat) -> CGFloat {
+        if index < safeSelectedIndex {
+            return totalWidth
+        }
+
+        if index == safeSelectedIndex && safeSelectedIndex < phases.count - 1 {
+            return totalWidth * CGFloat(min(max(phaseProgress, 0), 1))
+        }
+
+        return 0
+    }
 }
