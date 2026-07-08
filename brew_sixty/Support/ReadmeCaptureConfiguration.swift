@@ -57,7 +57,7 @@ enum ReadmeCaptureConfiguration {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: ProfilePreferences.Keys.hasCompletedProfile)
         defaults.set("Charu", forKey: ProfilePreferences.Keys.name)
-        defaults.set(ProfileExperienceLevel.someExperience.rawValue, forKey: ProfilePreferences.Keys.experienceLevel)
+        defaults.set(readmeExperienceLevel.rawValue, forKey: ProfilePreferences.Keys.experienceLevel)
         defaults.set(
             ProfilePreferences.encode(methods: [.v60, .chemex, .frenchPress, .aeropress]),
             forKey: ProfilePreferences.Keys.methodsUsed
@@ -74,17 +74,26 @@ enum ReadmeCaptureConfiguration {
         try context.save()
     }
 
+    private static var readmeExperienceLevel: ProfileExperienceLevel {
+        switch scenario {
+        case .editor:
+            return .justStarting
+        case .brew, .recipes, .none:
+            return .someExperience
+        }
+    }
+
     private static var sampleTemplates: [BrewTemplate] {
         [
             BrewTemplate(
                 name: "Morning Ritual",
                 method: .v60,
                 beanWeight: 18.0,
-                ratio: 15.5,
-                waterVolume: 279.0,
+                ratio: 16.0,
+                waterVolume: 288.0,
                 preInfusionActive: true,
                 preInfusionDuration: 45.0,
-                targetTemperature: 93.5,
+                targetTemperature: 93.0,
                 hapticFeedbackEnabled: true,
                 autoSyncEnabled: true,
                 steepDuration: 0.0,

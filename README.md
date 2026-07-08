@@ -1,33 +1,33 @@
 # Brew Sixty
 
-Brew Sixty is a premium-feeling coffee brewing companion for iPhone. It helps you build recipes, save presets, and run clean step-by-step brew timers for V60, Chemex, French Press, and Aeropress.
+Brew Sixty is a premium-feeling coffee brewing companion for iPhone. It helps you build recipes, save presets, and run calm step-by-step brew timers for V60, Chemex, French Press, and Aeropress.
 
-The app is built with **SwiftUI** and **SwiftData**, stores data locally on-device, and does not require a backend or paid service to run from source.
+The app is built with **SwiftUI** and **SwiftData**, stores data locally on-device, and runs fully offline with no backend or paid service required.
 
 ## Screenshots
 
 <table>
   <tr>
-    <td align="center"><strong>Active Brew</strong></td>
+    <td align="center"><strong>Live Brew Timer</strong></td>
     <td align="center"><strong>Recipes Library</strong></td>
-    <td align="center"><strong>Recipe Editor</strong></td>
+    <td align="center"><strong>Beginner Recipe Builder</strong></td>
   </tr>
   <tr>
-    <td><img src="docs/readme/brew-active.png" alt="Active brew timer screen" width="260"></td>
+    <td><img src="docs/readme/brew-active.png" alt="Live brew timer screen with phase guidance" width="260"></td>
     <td><img src="docs/readme/recipes-library.png" alt="Saved recipes library screen" width="260"></td>
-    <td><img src="docs/readme/recipe-editor.png" alt="Recipe editor screen" width="260"></td>
+    <td><img src="docs/readme/recipe-editor.png" alt="Beginner-friendly recipe builder screen" width="260"></td>
   </tr>
 </table>
 
 ## What the App Does
 
-- **Brew tab** for active brew sessions and live timers
-- **Recipes tab** for browsing saved recipes separately from recipe creation
+- **Live brew screen** with a 3-second start countdown, phase stepper, per-phase timer, and clean passive wait states
+- **Recipe builder** with beginner-friendly presets like **Cup Size** and **Taste Style**
+- **Experience-aware setup** with simpler language and live taste hints for newer brewers, plus technical labels for comfortable users
+- **Recipes library** for saving, editing, reusing, and instantly brewing presets
 - **One-off brewing** so you can start a brew immediately without saving it first
-- **Saved presets** for recipes you want to reuse
-- **Profile-based setup** with experience level, preferred methods, and guidance mode
-- **Guided and manual flows** for different levels of brewing confidence
-- **Premium visual styling** with animated background video and glassmorphic panels
+- **Profile setup** for your name, experience level, and preferred brew methods
+- **Premium visual styling** with animated video wallpaper and glassmorphic cards
 
 ## Supported Brew Methods
 
@@ -120,15 +120,15 @@ brew_sixty/
 
 ### Brew
 
-- shows live brew sessions
-- runs timer-driven phases such as bloom, steep, press, and drawdown
-- supports immediate one-off brews and saved recipes
+- runs live brew sessions with phase-by-phase timing
+- supports countdown, bloom, steep, press, and drawdown flows depending on method
+- shows clear current-step guidance without forcing recipe saving first
 
 ### Recipes
 
-- shows saved recipes as the primary view
-- lets you create, edit, brew, and delete presets
-- keeps browsing and recipe building separated for a cleaner mental model
+- shows saved recipes as the primary library view
+- opens a focused recipe composer for creating or editing brews
+- supports beginner presets, manual fine-tuning, and direct brew start from the editor
 
 ## Data and Privacy
 

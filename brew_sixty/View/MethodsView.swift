@@ -145,10 +145,8 @@ struct MethodsView: View {
 
         hasAppliedReadmeCaptureState = true
 
-        guard let template = templates.first else { return }
-
         DispatchQueue.main.async {
-            editorMode = .edit(template)
+            editorMode = .create
         }
     }
 
