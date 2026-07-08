@@ -191,10 +191,10 @@ struct ProfileSetupView: View {
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.footnote.weight(.bold))
-                                .foregroundStyle(Color.coffeeCream)
+                                .foregroundStyle(Color.coffeeCream.opacity(0.84))
                                 .frame(width: 32, height: 32)
-                                .background(Color.white.opacity(0.06), in: Circle())
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }

@@ -8,6 +8,7 @@ final class BrewSessionStore {
     @ObservationIgnored private var pendingPersistentRefreshes: Set<UUID> = []
     private(set) var transientBrews: [HomeBrewViewModel] = []
     var pendingFocusBrewID: UUID?
+    var shouldPresentRecipeComposer = false
 
     func brewViewModels(for templates: [BrewTemplate]) -> [HomeBrewViewModel] {
         syncPersistentBrews(with: templates)
@@ -46,6 +47,16 @@ final class BrewSessionStore {
         let pendingID = pendingFocusBrewID
         pendingFocusBrewID = nil
         return pendingID
+    }
+
+    func requestRecipeComposer() {
+        shouldPresentRecipeComposer = true
+    }
+
+    func consumeRecipeComposerRequest() -> Bool {
+        let shouldPresent = shouldPresentRecipeComposer
+        shouldPresentRecipeComposer = false
+        return shouldPresent
     }
 
     private func syncPersistentBrews(with templates: [BrewTemplate]) {

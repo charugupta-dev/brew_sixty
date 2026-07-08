@@ -46,6 +46,15 @@ final class HomeBrewViewModel: Identifiable {
         }
     }
 
+    var immersionPourDuration: TimeInterval {
+        guard !isPourOverMethod else { return 0.0 }
+        return min(steepPhaseDuration, AppConstants.BrewTimer.immersionPourDuration)
+    }
+
+    var immersionWaitDuration: TimeInterval {
+        max(steepPhaseDuration - immersionPourDuration, 0.0)
+    }
+
     var bloomDuration: TimeInterval {
         if isPourOverMethod {
             return customBloomDuration ?? AppConstants.BrewTimer.v60BloomDuration
@@ -106,6 +115,28 @@ final class HomeBrewViewModel: Identifiable {
         }
     }
 
+    var isPassiveWaitPhase: Bool {
+        guard !isCountingDown, !isFinished else { return false }
+
+        switch method {
+        case .v60, .chemex:
+            return bloomDuration > 0 && elapsed >= bloomPourDuration && elapsed < bloomDuration
+        case .frenchPress, .aeropress:
+            return elapsed >= immersionPourDuration && elapsed < steepPhaseDuration
+        }
+    }
+
+    var waitingMessage: String? {
+        guard isPassiveWaitPhase else { return nil }
+
+        let messages = isPourOverMethod
+            ? AppConstants.BrewTimer.bloomWaitMessages
+            : AppConstants.BrewTimer.immersionWaitMessages
+
+        let index = (Int(initialBeanWeight.rounded()) + method.rawValue.count + max(activePhaseIndex, 0)) % messages.count
+        return messages[index]
+    }
+
     var currentPhaseRemainingTime: TimeInterval {
         let (_, phaseEnd) = currentPhaseBounds
         return max(phaseEnd - elapsed, 0)
@@ -135,7 +166,7 @@ final class HomeBrewViewModel: Identifiable {
                 return formattedGrams(targetWater)
             }
         case .frenchPress, .aeropress:
-            return formattedGrams(targetWater)
+            return activePhaseIndex < 2 ? formattedGrams(targetWater) : nil
         }
     }
 
@@ -162,9 +193,23 @@ final class HomeBrewViewModel: Identifiable {
                 return "Final total"
             }
         case .frenchPress:
-            return activePhaseIndex == 0 ? "Steeping with" : "Press gently"
+            switch activePhaseIndex {
+            case 0:
+                return "Pour to"
+            case 1:
+                return "Let it steep"
+            default:
+                return "Plunge gently"
+            }
         case .aeropress:
-            return activePhaseIndex == 0 ? "Steeping with" : "Press gently"
+            switch activePhaseIndex {
+            case 0:
+                return "Pour to"
+            case 1:
+                return "Let it steep"
+            default:
+                return "Press gently"
+            }
         }
     }
 
@@ -190,10 +235,12 @@ final class HomeBrewViewModel: Identifiable {
                 return 1
             }
         case .frenchPress, .aeropress:
-            if elapsed < steepPhaseDuration {
+            if elapsed < immersionPourDuration {
                 return 0
-            } else {
+            } else if elapsed < steepPhaseDuration {
                 return 1
+            } else {
+                return 2
             }
         }
     }
@@ -220,9 +267,23 @@ final class HomeBrewViewModel: Identifiable {
                 return activePhaseIndex == 0 ? AppConstants.BrewTimer.firstPourPhaseTitle : AppConstants.BrewTimer.finalDrawdownPhaseTitle
             }
         case .frenchPress:
-            return activePhaseIndex == 0 ? AppConstants.BrewTimer.steepPhaseTitle : AppConstants.BrewTimer.plungePhaseTitle
+            switch activePhaseIndex {
+            case 0:
+                return AppConstants.BrewTimer.firstPourPhaseTitle
+            case 1:
+                return AppConstants.BrewTimer.steepPhaseTitle
+            default:
+                return AppConstants.BrewTimer.plungePhaseTitle
+            }
         case .aeropress:
-            return activePhaseIndex == 0 ? AppConstants.BrewTimer.steepPhaseTitle : AppConstants.BrewTimer.pressPhaseTitle
+            switch activePhaseIndex {
+            case 0:
+                return AppConstants.BrewTimer.firstPourPhaseTitle
+            case 1:
+                return AppConstants.BrewTimer.steepPhaseTitle
+            default:
+                return AppConstants.BrewTimer.pressPhaseTitle
+            }
         }
     }
 
@@ -246,9 +307,12 @@ final class HomeBrewViewModel: Identifiable {
                 return (AppConstants.BrewTimer.pourOverMainPourDuration, totalDuration)
             }
         case .frenchPress, .aeropress:
-            if activePhaseIndex == 0 {
-                return (0, steepPhaseDuration)
-            } else {
+            switch activePhaseIndex {
+            case 0:
+                return (0, immersionPourDuration)
+            case 1:
+                return (immersionPourDuration, steepPhaseDuration)
+            default:
                 return (steepPhaseDuration, totalDuration)
             }
         }
@@ -427,7 +491,9 @@ final class HomeBrewViewModel: Identifiable {
                 }
             }
         case .frenchPress, .aeropress:
-            if elapsed < steepPhaseDuration {
+            if elapsed < immersionPourDuration {
+                newElapsed = immersionPourDuration
+            } else if elapsed < steepPhaseDuration {
                 newElapsed = steepPhaseDuration
             } else {
                 newElapsed = totalDuration
@@ -482,8 +548,10 @@ final class HomeBrewViewModel: Identifiable {
         case .frenchPress, .aeropress:
             if elapsed == 0 {
                 return "\(AppConstants.BrewTimer.targetPrefix) \(formattedGrams(targetWater))"
+            } else if elapsed < immersionPourDuration {
+                return "\(AppConstants.BrewTimer.immersionPourInstructionPrefix) \(formattedGrams(targetWater))"
             } else if elapsed < steepPhaseDuration {
-                return "\(AppConstants.BrewTimer.steepInstructionPrefix) \(formattedGrams(targetWater))"
+                return AppConstants.BrewTimer.immersionWaitInstruction
             } else {
                 return method == .frenchPress ? AppConstants.BrewTimer.plungeInstruction : AppConstants.BrewTimer.pressInstruction
             }

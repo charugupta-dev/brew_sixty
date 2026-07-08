@@ -36,11 +36,11 @@ struct SteppedWeightPicker: View {
                 Spacer()
                 
                 VStack(spacing: 2) {
-                    Text(String(format: "%.1f", value))
-                        .font(.system(size: 32, weight: .bold, design: .monospaced))
+                    Text("\(Int(value.rounded()))")
+                        .font(.system(size: 28, weight: .bold, design: .monospaced))
                         .foregroundStyle(.white)
                     Text("GRAMS")
-                        .font(.system(size: 8, weight: .bold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(Color.primaryCopper)
                         .tracking(AppConstants.UI.eyebrowTracking)
                 }

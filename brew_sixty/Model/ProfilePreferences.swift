@@ -21,11 +21,11 @@ enum ProfileExperienceLevel: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .justStarting:
-            return "More help and safer starting points"
+            return "Beginner presets, simpler wording, and more help"
         case .someExperience:
-            return "A balanced mix of clarity and control"
+            return "Cleaner setup with simpler wording"
         case .enthusiast:
-            return "Fast, streamlined setup"
+            return "Technical labels and the leanest setup"
         }
     }
 }

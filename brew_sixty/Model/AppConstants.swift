@@ -154,7 +154,7 @@ struct AppConstants {
         static let rulerTriangleHeight: CGFloat = 6
 
         static let steppedWeightRange: ClosedRange<Double> = 1.0...40.0
-        static let steppedWeightStep = 0.5
+        static let steppedWeightStep = 1.0
         static let steppedWeightPresets = [12.0, 15.0, 18.0, 20.0, 30.0]
         static let steppedWeightButtonSize: CGFloat = 40
     }
@@ -162,6 +162,7 @@ struct AppConstants {
     struct BrewTimer {
         static let preBrewCountdownDuration = 3
         static let bloomPourDuration: TimeInterval = 10.0
+        static let immersionPourDuration: TimeInterval = 10.0
         static let v60BloomDuration: TimeInterval = 45.0
         static let frenchPressSteepDuration: TimeInterval = 240.0
         static let frenchPressPlungeDuration: TimeInterval = 15.0
@@ -193,8 +194,22 @@ struct AppConstants {
         static let bloomWaitInstruction = "Wait: Let the coffee bloom"
         static let firstPourInstructionPrefix = "First Pour: Pour to"
         static let drawdownInstructionPrefix = "Drawdown: Pour to"
+        static let immersionPourInstructionPrefix = "Pour: Pour to"
+        static let immersionWaitInstruction = "Steep: Let it sit"
         static let steepInstructionPrefix = "Steep: Pour"
         static let plungeInstruction = "Plunge: Press down slowly"
         static let pressInstruction = "Press: Press down slowly"
+        static let bloomWaitMessages = [
+            "Nice. Let the coffee wake up for a second.",
+            "Tiny pause, big payoff.",
+            "This short wait makes the next pour taste smoother.",
+            "You are doing great. The next pour is almost here."
+        ]
+        static let immersionWaitMessages = [
+            "Now let it hang out for a bit.",
+            "Coffee is doing its thing. You just look cool.",
+            "A short wait now, a smoother cup soon.",
+            "Let it settle. The good part is already on the way."
+        ]
     }
 }

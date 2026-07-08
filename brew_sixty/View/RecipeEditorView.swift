@@ -53,6 +53,7 @@ struct RecipeEditorView: View {
     @State private var saveErrorMessage: String?
     @State private var hasAppliedProfileDefaults = false
     @State private var hintDismissTask: Task<Void, Never>?
+    @State private var starterServingSize: FirstCupServingSize = .oneCup
 
     init(mode: Mode, selectedTab: Binding<ContentView.Tab>, brewSessionStore: BrewSessionStore) {
         self.mode = mode
@@ -119,15 +120,24 @@ struct RecipeEditorView: View {
     }
 
     private var methodSelectionSection: some View {
-        VStack(alignment: .leading, spacing: AppConstants.Methods.Layout.sectionHeaderSpacing) {
-            HStack(spacing: 8) {
-                sectionLabel(AppConstants.Text.selectMethod)
-                helpButton(for: .method)
-                Spacer()
-            }
-            .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Choose Brewer")
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.coffeeCream)
 
-            HStack(spacing: AppConstants.Methods.Layout.compactRowSpacing) {
+                    Text("Start with the brewer you want to make right now.")
+                        .font(.footnote)
+                        .foregroundStyle(Color.coffeeCream.opacity(0.66))
+                }
+
+                Spacer()
+                helpButton(for: .method)
+            }
+
+            LazyVGrid(columns: methodColumns, spacing: 10) {
                 ForEach(orderedMethods, id: \.self) { method in
                     Button {
                         selectMethod(method)
@@ -137,11 +147,25 @@ struct RecipeEditorView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal)
 
             if shouldShowStarterProfiles {
                 VStack(alignment: .leading, spacing: 10) {
-                    sectionLabel("FIRST CUP STYLE")
+                    sectionLabel("CUP SIZE")
+
+                    HStack(spacing: AppConstants.Methods.Layout.compactRowSpacing) {
+                        ForEach(FirstCupServingSize.allCases) { servingSize in
+                            Button {
+                                applyStarterServingSize(servingSize)
+                            } label: {
+                                starterServingSizePill(for: servingSize)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    sectionLabel("TASTE STYLE")
 
                     HStack(spacing: AppConstants.Methods.Layout.compactRowSpacing) {
                         ForEach(FirstCupProfile.allCases) { profile in
@@ -156,19 +180,25 @@ struct RecipeEditorView: View {
 
                     contextualHint(starterProfileSummaryText)
                 }
-                .padding(.horizontal)
             }
         }
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.03))
+        )
+        .liquidGlassBorder(cornerRadius: 16)
+        .padding(.horizontal, 16)
     }
 
     private var doseAndYieldSection: some View {
-        SectionCard("Dose & Yield") {
+        SectionCard(experienceLevel == .enthusiast ? "Dose & Yield" : "Coffee & Water") {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     parameterLabel(labelText(for: .beanWeight), helpTopic: .beanWeight)
                     Spacer()
-                    Text(String(format: "%.1f%@", draft.beanWeight, AppConstants.Text.gramsUnit))
-                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                    Text("\(Int(draft.beanWeight.rounded()))\(AppConstants.Text.gramsUnit)")
+                        .font(.system(size: 19, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Color.primaryCopper)
                 }
 
@@ -189,7 +219,7 @@ struct RecipeEditorView: View {
                         parameterLabel(labelText(for: .waterRatio), helpTopic: .waterRatio)
                         Spacer()
                         Text("1:\(Int(draft.ratio.rounded()))")
-                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 19, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -207,7 +237,7 @@ struct RecipeEditorView: View {
                         parameterLabel(labelText(for: .waterVolume), helpTopic: .waterVolume)
                         Spacer()
                         Text("\(Int(draft.waterVolume))\(AppConstants.Text.gramsUnit)")
-                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 19, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -231,7 +261,7 @@ struct RecipeEditorView: View {
                         parameterLabel(labelText(for: .bloomDuration), helpTopic: .bloomDuration)
                         Spacer()
                         Text("\(Int(draft.preInfusionDuration))\(AppConstants.Text.secondsUnit)")
-                            .font(.system(size: 20, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 18, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -249,7 +279,7 @@ struct RecipeEditorView: View {
                         parameterLabel(labelText(for: .steepDuration), helpTopic: .steepDuration)
                         Spacer()
                         Text("\(Int(draft.steepDuration))\(AppConstants.Text.secondsUnit)")
-                            .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 18, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.primaryCopper)
                     }
 
@@ -270,7 +300,7 @@ struct RecipeEditorView: View {
                                 parameterLabel(labelText(for: .pressDuration), helpTopic: .pressDuration)
                                 Spacer()
                                 Text("\(Int(draft.pressDuration))\(AppConstants.Text.secondsUnit)")
-                                    .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
                                     .foregroundStyle(Color.primaryCopper)
                             }
 
@@ -292,8 +322,8 @@ struct RecipeEditorView: View {
                 HStack {
                     parameterLabel(labelText(for: .temperature), helpTopic: .temperature)
                     Spacer()
-                    Text(String(format: "%.1f%@", draft.targetTemperature, AppConstants.Text.celsiusUnit))
-                        .font(.system(size: 22, weight: .semibold, design: .monospaced))
+                    Text("\(Int(draft.targetTemperature.rounded()))\(AppConstants.Text.celsiusUnit)")
+                        .font(.system(size: 19, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Color.primaryCopper)
                 }
 
@@ -418,13 +448,17 @@ struct RecipeEditorView: View {
         return BrewMethod.allCases.filter { selectedMethods.contains($0) }
     }
 
+    private var methodColumns: [GridItem] {
+        [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+    }
+
     private var orderedMethods: [BrewMethod] {
         let preferredSet = Set(preferredMethods)
         return preferredMethods + BrewMethod.allCases.filter { !preferredSet.contains($0) }
     }
 
     private var shouldShowStarterProfiles: Bool {
-        experienceLevel != .enthusiast
+        experienceLevel == .justStarting
     }
 
     private var shouldShowTasteHints: Bool {
@@ -432,15 +466,26 @@ struct RecipeEditorView: View {
     }
 
     private var currentStarterProfile: FirstCupProfile? {
-        FirstCupProfile.allCases.first { draft.matchesStarterProfile($0) }
+        FirstCupProfile.allCases.first { draft.matchesStarterProfile($0, servingSize: starterServingSize) }
     }
 
     private var starterProfileSummaryText: String {
         if let profile = currentStarterProfile {
-            return profile.summary
+            return "\(starterServingSize.summary) • \(profile.summary)"
         }
 
         return "Tuned manually • \(overallTasteSummaryText)"
+    }
+
+    private var fallbackStarterProfile: FirstCupProfile {
+        switch brewStrengthDirection {
+        case .stronger:
+            return .stronger
+        case .balanced:
+            return .balanced
+        case .lighter:
+            return .lighter
+        }
     }
 
     private var overallTasteSummaryText: String {
@@ -545,7 +590,7 @@ struct RecipeEditorView: View {
     @ViewBuilder
     private func sectionLabel(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .font(.system(size: 13, weight: .bold, design: .rounded))
             .fontWeight(.bold)
             .foregroundStyle(Color.coffeeCream)
             .tracking(AppConstants.UI.captionEmphasisTracking)
@@ -564,19 +609,19 @@ struct RecipeEditorView: View {
         let isSelected = draft.method == method
 
         Text(method.rawValue)
-            .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.8))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
+            .font(.system(size: 16, weight: .semibold, design: .rounded))
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.84))
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity, minHeight: 58)
             .background(
-                Capsule()
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.08))
             )
             .overlay(
-                Capsule()
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
             )
     }
@@ -589,6 +634,26 @@ struct RecipeEditorView: View {
             .font(.system(size: 14, weight: .semibold, design: .rounded))
             .lineLimit(1)
             .minimumScaleFactor(0.8)
+            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 11)
+            .frame(maxWidth: .infinity)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.05))
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+            )
+    }
+
+    @ViewBuilder
+    private func starterServingSizePill(for servingSize: FirstCupServingSize) -> some View {
+        let isSelected = starterServingSize == servingSize
+
+        Text(servingSize.title)
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
             .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
             .padding(.horizontal, 12)
             .padding(.vertical, 11)
@@ -861,7 +926,7 @@ struct RecipeEditorView: View {
             activeHintTopic = nil
 
             if let selectedProfile {
-                draft.applyStarterProfile(selectedProfile, for: method)
+                draft.applyStarterProfile(selectedProfile, for: method, servingSize: starterServingSize)
             } else {
                 draft.applyDefaults(for: method)
             }
@@ -871,23 +936,44 @@ struct RecipeEditorView: View {
     private func applyStarterProfile(_ profile: FirstCupProfile) {
         withAnimation {
             activeHintTopic = nil
-            draft.applyStarterProfile(profile)
+            draft.applyStarterProfile(profile, servingSize: starterServingSize)
         }
+    }
+
+    private func applyStarterServingSize(_ servingSize: FirstCupServingSize) {
+        let profile = currentStarterProfile ?? fallbackStarterProfile
+
+        withAnimation {
+            activeHintTopic = nil
+            starterServingSize = servingSize
+            draft.applyStarterProfile(profile, servingSize: servingSize)
+        }
+    }
+
+    private func inferredStarterServingSize() -> FirstCupServingSize {
+        if FirstCupProfile.allCases.contains(where: { draft.matchesStarterProfile($0, servingSize: .twoCups) }) {
+            return .twoCups
+        }
+
+        return .oneCup
     }
 
     private func applyProfilePreferencesIfNeeded() {
         guard !hasAppliedProfileDefaults else { return }
         hasAppliedProfileDefaults = true
 
-        guard case .create = mode else { return }
+        if case .create = mode {
+            let firstPreferredMethod = preferredMethods.first ?? draft.method
 
-        let firstPreferredMethod = preferredMethods.first ?? draft.method
-
-        if shouldShowStarterProfiles {
-            draft.applyStarterProfile(.balanced, for: firstPreferredMethod)
-        } else {
-            draft.applyDefaults(for: firstPreferredMethod)
+            if shouldShowStarterProfiles {
+                starterServingSize = .oneCup
+                draft.applyStarterProfile(.balanced, for: firstPreferredMethod, servingSize: starterServingSize)
+            } else {
+                draft.applyDefaults(for: firstPreferredMethod)
+            }
         }
+
+        starterServingSize = inferredStarterServingSize()
     }
 
     private func startBrew() {

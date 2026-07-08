@@ -30,6 +30,31 @@ enum FirstCupProfile: String, CaseIterable, Identifiable {
     }
 }
 
+enum FirstCupServingSize: String, CaseIterable, Identifiable {
+    case oneCup
+    case twoCups
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .oneCup:
+            return "1 Cup"
+        case .twoCups:
+            return "2 Cups"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .oneCup:
+            return "Single cup"
+        case .twoCups:
+            return "Bigger brew"
+        }
+    }
+}
+
 private struct FirstCupProfileSettings {
     let beanWeight: Double
     let ratio: Double
@@ -116,9 +141,13 @@ struct RecipeDraft: Equatable {
         syncBrewingMath()
     }
 
-    mutating func applyStarterProfile(_ profile: FirstCupProfile, for method: BrewMethod? = nil) {
+    mutating func applyStarterProfile(
+        _ profile: FirstCupProfile,
+        for method: BrewMethod? = nil,
+        servingSize: FirstCupServingSize = .oneCup
+    ) {
         let selectedMethod = method ?? self.method
-        let settings = Self.starterSettings(for: selectedMethod, profile: profile)
+        let settings = Self.starterSettings(for: selectedMethod, profile: profile, servingSize: servingSize)
 
         self.method = selectedMethod
         beanWeight = settings.beanWeight
@@ -142,8 +171,8 @@ struct RecipeDraft: Equatable {
         }
     }
 
-    func matchesStarterProfile(_ profile: FirstCupProfile) -> Bool {
-        let settings = Self.starterSettings(for: method, profile: profile)
+    func matchesStarterProfile(_ profile: FirstCupProfile, servingSize: FirstCupServingSize) -> Bool {
+        let settings = Self.starterSettings(for: method, profile: profile, servingSize: servingSize)
 
         return approximatelyEqual(beanWeight, settings.beanWeight, tolerance: 0.26)
             && approximatelyEqual(ratio, settings.ratio, tolerance: 0.1)
@@ -190,127 +219,94 @@ struct RecipeDraft: Equatable {
         value.rounded()
     }
 
-    private static func starterSettings(for method: BrewMethod, profile: FirstCupProfile) -> FirstCupProfileSettings {
-        switch (method, profile) {
-        case (.v60, .balanced):
+    private static func starterSettings(
+        for method: BrewMethod,
+        profile: FirstCupProfile,
+        servingSize: FirstCupServingSize
+    ) -> FirstCupProfileSettings {
+        let ratio: Double
+        let targetTemperature: Double
+
+        switch profile {
+        case .stronger:
+            ratio = method == .aeropress ? 13.0 : 15.0
+            targetTemperature = method == .aeropress ? 89.5 : 93.0
+        case .balanced:
+            ratio = 15.0
+            targetTemperature = method == .aeropress ? 90.5 : 93.5
+        case .lighter:
+            ratio = 17.0
+            targetTemperature = method == .aeropress ? 91.0 : (method == .frenchPress ? 92.5 : 94.0)
+        }
+
+        switch method {
+        case .v60:
+            let beanWeight = servingSize == .oneCup ? 18.0 : 30.0
+            let bloomDuration = profile == .stronger ? 40.0 : 45.0
             return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 16.0,
-                waterVolume: 288.0,
-                preInfusionDuration: 45.0,
+                beanWeight: beanWeight,
+                ratio: ratio,
+                waterVolume: (beanWeight * ratio).rounded(),
+                preInfusionDuration: bloomDuration,
                 steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
                 pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 93.5
+                targetTemperature: targetTemperature
             )
-        case (.v60, .stronger):
+        case .chemex:
+            let beanWeight = servingSize == .oneCup ? 20.0 : 30.0
+            let bloomDuration = profile == .lighter ? 50.0 : 45.0
             return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 15.0,
-                waterVolume: 270.0,
-                preInfusionDuration: 40.0,
+                beanWeight: beanWeight,
+                ratio: ratio,
+                waterVolume: (beanWeight * ratio).rounded(),
+                preInfusionDuration: bloomDuration,
                 steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
                 pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 93.0
+                targetTemperature: targetTemperature
             )
-        case (.v60, .lighter):
+        case .frenchPress:
+            let beanWeight = servingSize == .oneCup ? 18.0 : 30.0
+            let steepDuration: Double
+            switch profile {
+            case .stronger:
+                steepDuration = 255.0
+            case .balanced:
+                steepDuration = 240.0
+            case .lighter:
+                steepDuration = 225.0
+            }
             return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 17.0,
-                waterVolume: 306.0,
-                preInfusionDuration: 45.0,
-                steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
-                pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 94.0
-            )
-        case (.chemex, .balanced):
-            return FirstCupProfileSettings(
-                beanWeight: 20.0,
-                ratio: 16.0,
-                waterVolume: 320.0,
-                preInfusionDuration: 45.0,
-                steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
-                pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 93.5
-            )
-        case (.chemex, .stronger):
-            return FirstCupProfileSettings(
-                beanWeight: 20.0,
-                ratio: 15.0,
-                waterVolume: 300.0,
-                preInfusionDuration: 45.0,
-                steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
-                pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 93.0
-            )
-        case (.chemex, .lighter):
-            return FirstCupProfileSettings(
-                beanWeight: 20.0,
-                ratio: 17.0,
-                waterVolume: 340.0,
-                preInfusionDuration: 50.0,
-                steepDuration: AppConstants.Methods.Defaults.frenchPressSteepDuration,
-                pressDuration: AppConstants.Methods.Defaults.aeropressPressDuration,
-                targetTemperature: 94.0
-            )
-        case (.frenchPress, .balanced):
-            return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 15.0,
-                waterVolume: 270.0,
+                beanWeight: beanWeight,
+                ratio: ratio == 15.0 && profile == .stronger ? 14.0 : ratio,
+                waterVolume: (beanWeight * (ratio == 15.0 && profile == .stronger ? 14.0 : ratio)).rounded(),
                 preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 240.0,
+                steepDuration: steepDuration,
                 pressDuration: AppConstants.BrewTimer.frenchPressPlungeDuration,
-                targetTemperature: 93.5
+                targetTemperature: targetTemperature
             )
-        case (.frenchPress, .stronger):
+        case .aeropress:
+            let beanWeight = servingSize == .oneCup ? 16.0 : 22.0
+            let steepDuration: Double
+            let pressDuration: Double
+            switch profile {
+            case .stronger:
+                steepDuration = 75.0
+                pressDuration = 30.0
+            case .balanced:
+                steepDuration = 60.0
+                pressDuration = 30.0
+            case .lighter:
+                steepDuration = 50.0
+                pressDuration = 25.0
+            }
             return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 14.0,
-                waterVolume: 250.0,
+                beanWeight: beanWeight,
+                ratio: ratio,
+                waterVolume: (beanWeight * ratio).rounded(),
                 preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 255.0,
-                pressDuration: AppConstants.BrewTimer.frenchPressPlungeDuration,
-                targetTemperature: 93.0
-            )
-        case (.frenchPress, .lighter):
-            return FirstCupProfileSettings(
-                beanWeight: 18.0,
-                ratio: 17.0,
-                waterVolume: 300.0,
-                preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 225.0,
-                pressDuration: AppConstants.BrewTimer.frenchPressPlungeDuration,
-                targetTemperature: 92.5
-            )
-        case (.aeropress, .balanced):
-            return FirstCupProfileSettings(
-                beanWeight: 16.0,
-                ratio: 15.0,
-                waterVolume: 240.0,
-                preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 60.0,
-                pressDuration: 30.0,
-                targetTemperature: 90.5
-            )
-        case (.aeropress, .stronger):
-            return FirstCupProfileSettings(
-                beanWeight: 16.0,
-                ratio: 13.0,
-                waterVolume: 210.0,
-                preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 75.0,
-                pressDuration: 30.0,
-                targetTemperature: 89.5
-            )
-        case (.aeropress, .lighter):
-            return FirstCupProfileSettings(
-                beanWeight: 16.0,
-                ratio: 17.0,
-                waterVolume: 270.0,
-                preInfusionDuration: AppConstants.Methods.Defaults.bloomDuration,
-                steepDuration: 50.0,
-                pressDuration: 25.0,
-                targetTemperature: 91.0
+                steepDuration: steepDuration,
+                pressDuration: pressDuration,
+                targetTemperature: targetTemperature
             )
         }
     }

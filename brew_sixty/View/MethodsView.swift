@@ -43,21 +43,11 @@ struct MethodsView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                 }
+
+                floatingAddButton
             }
             .navigationTitle(AppConstants.Methods.Text.recipesNavigationTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        editorMode = .create
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.headline.weight(.bold))
-                    }
-                    .tint(Color.primaryCopper)
-                    .accessibilityLabel(AppConstants.Methods.Text.newRecipe)
-                }
-            }
             .sheet(item: $editorMode) { mode in
                 NavigationStack {
                     RecipeEditorView(mode: mode, selectedTab: $selectedTab, brewSessionStore: brewSessionStore)
@@ -70,7 +60,14 @@ struct MethodsView: View {
             } message: {
                 Text(deletionErrorMessage ?? AppConstants.Methods.Text.deleteFailedMessage)
             }
-            .onAppear(perform: applyReadmeCaptureStateIfNeeded)
+            .onAppear {
+                applyReadmeCaptureStateIfNeeded()
+                applyPendingCreateStateIfNeeded()
+            }
+            .onChange(of: selectedTab) { _, tab in
+                guard tab == .recipes else { return }
+                applyPendingCreateStateIfNeeded()
+            }
         }
     }
 
@@ -82,25 +79,6 @@ struct MethodsView: View {
                 Text(AppConstants.Methods.Text.emptyRecipesDescription)
             }
             .foregroundStyle(Color.coffeeCream)
-
-            Button {
-                editorMode = .create
-            } label: {
-                Text(AppConstants.Methods.Text.createFirstRecipe)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.deepRoastInk)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.primaryCopper, Color.brushedCopper],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .cornerRadius(28)
-            }
         }
         .padding(.horizontal, 24)
     }
@@ -110,6 +88,37 @@ struct MethodsView: View {
             get: { deletionErrorMessage != nil },
             set: { if !$0 { deletionErrorMessage = nil } }
         )
+    }
+
+    private var floatingAddButton: some View {
+        VStack {
+            Spacer()
+
+            HStack {
+                Spacer()
+
+                Button {
+                    editorMode = .create
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(Color.deepRoastInk)
+                        .frame(width: 60, height: 60)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.primaryCopper, Color.brushedCopper],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Circle())
+                        .shadow(color: Color.black.opacity(0.22), radius: 14, y: 8)
+                }
+                .accessibilityLabel(AppConstants.Methods.Text.newRecipe)
+                .padding(.trailing, 20)
+                .padding(.bottom, 24)
+            }
+        }
     }
 
     private func startTemplate(_ template: BrewTemplate) {
@@ -142,6 +151,11 @@ struct MethodsView: View {
             editorMode = .edit(template)
         }
     }
+
+    private func applyPendingCreateStateIfNeeded() {
+        guard brewSessionStore.consumeRecipeComposerRequest() else { return }
+        editorMode = .create
+    }
 }
 
 private struct RecipeTemplateCard: View {
@@ -172,7 +186,7 @@ private struct RecipeTemplateCard: View {
             }
 
             HStack(spacing: 12) {
-                Label(String(format: "%.1f%@", template.beanWeight, AppConstants.Text.gramsUnit), systemImage: "scalemass.fill")
+                Label("\(Int(template.beanWeight.rounded()))\(AppConstants.Text.gramsUnit)", systemImage: "scalemass.fill")
 
                 if template.method == .v60 || template.method == .chemex {
                     Label("1:\(Int(template.ratio.rounded()))", systemImage: "drop.fill")
@@ -180,7 +194,7 @@ private struct RecipeTemplateCard: View {
                     Label("\(Int(template.waterVolume))\(AppConstants.Text.gramsUnit)", systemImage: "drop.fill")
                 }
 
-                Label(String(format: "%.1f%@", template.targetTemperature, AppConstants.Text.celsiusUnit), systemImage: "thermometer.medium")
+                Label("\(Int(template.targetTemperature.rounded()))\(AppConstants.Text.celsiusUnit)", systemImage: "thermometer.medium")
             }
             .font(.caption)
             .foregroundStyle(.white.opacity(0.64))
