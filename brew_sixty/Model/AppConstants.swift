@@ -203,13 +203,21 @@ struct AppConstants {
             "Nice. Let the coffee wake up for a second.",
             "Tiny pause, big payoff.",
             "This short wait makes the next pour taste smoother.",
-            "You are doing great. The next pour is almost here."
+            "You are doing great. The next pour is almost here.",
+            "Give it a breath. The bloom is doing the quiet work.",
+            "Small pause, better balance in the cup.",
+            "Let the grounds settle in. You are right on track.",
+            "A calm bloom now makes the rest feel easy."
         ]
         static let immersionWaitMessages = [
             "Now let it hang out for a bit.",
             "Coffee is doing its thing. You just look cool.",
             "A short wait now, a smoother cup soon.",
-            "Let it settle. The good part is already on the way."
+            "Let it settle. The good part is already on the way.",
+            "This is the easy part. Let the brewer do the work.",
+            "A little patience here goes a long way in the cup.",
+            "Let it rest for a moment. You are almost there.",
+            "Nothing to do right now except enjoy the smell."
         ]
     }
 }

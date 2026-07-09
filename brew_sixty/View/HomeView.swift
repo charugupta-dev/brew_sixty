@@ -233,9 +233,11 @@ struct LiveTimerCard: View {
                         
                         // Recipe info overlays
                         VStack(spacing: 6) {
-                            Text(timerReadoutText)
-                                .font(.system(size: 28, weight: .bold, design: .monospaced))
-                                .foregroundStyle(Color.coffeeCream)
+                            if let timerReadoutText {
+                                Text(timerReadoutText)
+                                    .font(.system(size: 28, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(Color.coffeeCream)
+                            }
                             
                             phaseMetricView
                         }
@@ -430,9 +432,9 @@ struct LiveTimerCard: View {
         return min(viewModel.activePhaseIndex, lastIndex)
     }
 
-    private var timerReadoutText: String {
+    private var timerReadoutText: String? {
         if viewModel.isCountingDown {
-            return "\(viewModel.countdownRemaining)"
+            return nil
         }
 
         return formatTime(viewModel.currentPhaseRemainingTime)
@@ -469,7 +471,7 @@ struct LiveTimerCard: View {
 
     private var startButtonTitle: String {
         if viewModel.isCountingDown {
-            return "Starting in \(viewModel.countdownRemaining)..."
+            return "Starting..."
         }
 
         return viewModel.isRunning ? AppConstants.Text.pauseBrew : AppConstants.Text.startBrew

@@ -23,6 +23,9 @@ final class HomeBrewViewModel: Identifiable {
     private var timer: Timer? = nil
     private var countdownTimer: Timer? = nil
     private var startDate: Date? = nil
+    private var activeWaitMessage: String? = nil
+    private var activeWaitPhaseIdentifier: String? = nil
+    private var lastWaitMessage: String? = nil
 
     // Custom recipe properties
     var customBloomDuration: TimeInterval? = nil
@@ -128,13 +131,7 @@ final class HomeBrewViewModel: Identifiable {
 
     var waitingMessage: String? {
         guard isPassiveWaitPhase else { return nil }
-
-        let messages = isPourOverMethod
-            ? AppConstants.BrewTimer.bloomWaitMessages
-            : AppConstants.BrewTimer.immersionWaitMessages
-
-        let index = (Int(initialBeanWeight.rounded()) + method.rawValue.count + max(activePhaseIndex, 0)) % messages.count
-        return messages[index]
+        return activeWaitMessage
     }
 
     var currentPhaseRemainingTime: TimeInterval {
@@ -436,6 +433,7 @@ final class HomeBrewViewModel: Identifiable {
                 }
                 guard self.isRunning, let startDate = self.startDate else { return }
                 let nowElapsed = Date().timeIntervalSince(startDate)
+                let previousWaitPhaseIdentifier = self.activeWaitPhaseIdentifier
 
                 if nowElapsed >= self.totalDuration {
                     self.elapsed = self.totalDuration
@@ -446,6 +444,8 @@ final class HomeBrewViewModel: Identifiable {
                 } else {
                     self.elapsed = nowElapsed
                 }
+
+                self.updateWaitMessageIfNeeded(previousPhaseIdentifier: previousWaitPhaseIdentifier)
             }
         }
     }
@@ -466,6 +466,7 @@ final class HomeBrewViewModel: Identifiable {
 
     func skipPhase() {
         let newElapsed: TimeInterval
+        let previousWaitPhaseIdentifier = activeWaitPhaseIdentifier
 
         switch method {
         case .v60, .chemex:
@@ -512,6 +513,8 @@ final class HomeBrewViewModel: Identifiable {
                 startDate = Date().addingTimeInterval(-newElapsed)
             }
         }
+
+        updateWaitMessageIfNeeded(previousPhaseIdentifier: previousWaitPhaseIdentifier)
     }
 
     func getProgress() -> Double {
@@ -574,5 +577,36 @@ final class HomeBrewViewModel: Identifiable {
         timer?.invalidate()
         timer = nil
         beanWeight = initialBeanWeight
+        activeWaitMessage = nil
+        activeWaitPhaseIdentifier = nil
+    }
+
+    private var passiveWaitPhaseIdentifier: String? {
+        guard isPassiveWaitPhase else { return nil }
+        return "\(method.rawValue)-\(activePhaseIndex)"
+    }
+
+    private func updateWaitMessageIfNeeded(previousPhaseIdentifier: String?) {
+        guard let currentPhaseIdentifier = passiveWaitPhaseIdentifier else {
+            activeWaitPhaseIdentifier = nil
+            activeWaitMessage = nil
+            return
+        }
+
+        if currentPhaseIdentifier == previousPhaseIdentifier, activeWaitMessage != nil {
+            activeWaitPhaseIdentifier = currentPhaseIdentifier
+            return
+        }
+
+        let messages = isPourOverMethod
+            ? AppConstants.BrewTimer.bloomWaitMessages
+            : AppConstants.BrewTimer.immersionWaitMessages
+
+        let candidateMessages = messages.filter { $0 != lastWaitMessage }
+        let nextMessage = (candidateMessages.isEmpty ? messages : candidateMessages).randomElement()
+
+        activeWaitPhaseIdentifier = currentPhaseIdentifier
+        activeWaitMessage = nextMessage
+        lastWaitMessage = nextMessage
     }
 }
