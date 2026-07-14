@@ -1,6 +1,6 @@
 import Foundation
 
-enum FirstCupProfile: String, CaseIterable, Identifiable {
+enum FirstCupProfile: String, CaseIterable, Identifiable, Codable {
     case balanced
     case stronger
     case lighter
@@ -30,7 +30,7 @@ enum FirstCupProfile: String, CaseIterable, Identifiable {
     }
 }
 
-enum FirstCupServingSize: String, CaseIterable, Identifiable {
+enum FirstCupServingSize: String, CaseIterable, Identifiable, Codable {
     case oneCup
     case twoCups
 
@@ -55,6 +55,15 @@ enum FirstCupServingSize: String, CaseIterable, Identifiable {
     }
 }
 
+enum RecipeAdjustmentType: String, Codable {
+    case stronger
+    case lighter
+    case oneCup
+    case twoCups
+    case increaseBloom
+    case decreaseTemperature
+}
+
 private struct FirstCupProfileSettings {
     let beanWeight: Double
     let ratio: Double
@@ -65,7 +74,7 @@ private struct FirstCupProfileSettings {
     let targetTemperature: Double
 }
 
-struct RecipeDraft: Equatable {
+struct RecipeDraft: Equatable, Codable {
     var name: String
     var method: BrewMethod
     var beanWeight: Double
@@ -122,6 +131,49 @@ struct RecipeDraft: Equatable {
 
     var isPourOverMethod: Bool {
         method == .v60 || method == .chemex
+    }
+
+    mutating func applyAdjustment(_ type: RecipeAdjustmentType) {
+        switch type {
+        case .stronger:
+            if isPourOverMethod {
+                beanWeight = min((beanWeight + 1.5).rounded(), 40.0)
+            } else {
+                beanWeight = min((beanWeight + 2.0).rounded(), 40.0)
+            }
+            syncBrewingMath()
+        case .lighter:
+            beanWeight = max((beanWeight - 1.5).rounded(), 5.0)
+            syncBrewingMath()
+        case .oneCup:
+            applyDefaults(for: method)
+            beanWeight = 15.0
+            if isPourOverMethod {
+                ratio = 17.0
+            } else {
+                waterVolume = 250.0
+            }
+            syncBrewingMath()
+        case .twoCups:
+            applyDefaults(for: method)
+            beanWeight = 30.0
+            if isPourOverMethod {
+                ratio = 17.0
+            } else {
+                waterVolume = 500.0
+            }
+            syncBrewingMath()
+        case .increaseBloom:
+            if method == .frenchPress {
+                steepDuration = min(steepDuration + 15.0, 360.0)
+            } else if method == .aeropress {
+                steepDuration = min(steepDuration + 10.0, 180.0)
+            } else {
+                preInfusionDuration = min(preInfusionDuration + 5.0, 90.0)
+            }
+        case .decreaseTemperature:
+            targetTemperature = max(targetTemperature - 2.0, 75.0)
+        }
     }
 
     mutating func applyDefaults(for method: BrewMethod) {

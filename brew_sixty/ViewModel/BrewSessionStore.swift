@@ -1,14 +1,27 @@
 import Foundation
 import Observation
 
+struct PendingRecipeComposerRequest {
+    let draft: RecipeDraft?
+}
+
+struct IntentHandoffBanner: Identifiable, Equatable {
+    let id = UUID()
+    let title: String
+    let subtitle: String?
+}
+
 @Observable
 @MainActor
 final class BrewSessionStore {
     @ObservationIgnored private var persistentBrews: [UUID: HomeBrewViewModel] = [:]
     @ObservationIgnored private var pendingPersistentRefreshes: Set<UUID> = []
+    @ObservationIgnored private var bannerDismissTask: Task<Void, Never>?
     private(set) var transientBrews: [HomeBrewViewModel] = []
     var pendingFocusBrewID: UUID?
-    var shouldPresentRecipeComposer = false
+    var pendingRecipeComposerRequest: PendingRecipeComposerRequest?
+    var intentHandoffBanner: IntentHandoffBanner?
+    var activeEditingDraft: RecipeDraft?
 
     func brewViewModels(for templates: [BrewTemplate]) -> [HomeBrewViewModel] {
         syncPersistentBrews(with: templates)
@@ -23,9 +36,21 @@ final class BrewSessionStore {
         start(viewModel)
     }
 
+    func prepareTransientBrew(from draft: RecipeDraft) {
+        let viewModel = HomeBrewViewModel(draft: draft)
+        configureTransientCallbacks(for: viewModel)
+        transientBrews.insert(viewModel, at: 0)
+        prepare(viewModel)
+    }
+
     func startSavedTemplate(_ template: BrewTemplate) {
         let viewModel = persistentBrewViewModel(for: template)
         start(viewModel)
+    }
+
+    func prepareSavedTemplate(_ template: BrewTemplate) {
+        let viewModel = persistentBrewViewModel(for: template)
+        prepare(viewModel)
     }
 
     func discardPersistentBrew(for templateID: UUID) {
@@ -49,14 +74,27 @@ final class BrewSessionStore {
         return pendingID
     }
 
-    func requestRecipeComposer() {
-        shouldPresentRecipeComposer = true
+    func requestRecipeComposer(with draft: RecipeDraft? = nil) {
+        pendingRecipeComposerRequest = PendingRecipeComposerRequest(draft: draft)
     }
 
-    func consumeRecipeComposerRequest() -> Bool {
-        let shouldPresent = shouldPresentRecipeComposer
-        shouldPresentRecipeComposer = false
-        return shouldPresent
+    func consumeRecipeComposerRequest() -> PendingRecipeComposerRequest? {
+        let request = pendingRecipeComposerRequest
+        pendingRecipeComposerRequest = nil
+        return request
+    }
+
+    func presentIntentHandoff(title: String, subtitle: String? = nil) {
+        bannerDismissTask?.cancel()
+        intentHandoffBanner = IntentHandoffBanner(title: title, subtitle: subtitle)
+
+        bannerDismissTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                self?.intentHandoffBanner = nil
+            }
+        }
     }
 
     private func syncPersistentBrews(with templates: [BrewTemplate]) {
@@ -101,6 +139,11 @@ final class BrewSessionStore {
     private func start(_ viewModel: HomeBrewViewModel) {
         viewModel.resetTimer(notifyObservers: false)
         viewModel.toggleTimer()
+        pendingFocusBrewID = viewModel.id
+    }
+
+    private func prepare(_ viewModel: HomeBrewViewModel) {
+        viewModel.resetTimer(notifyObservers: false)
         pendingFocusBrewID = viewModel.id
     }
 

@@ -46,6 +46,29 @@ struct ProfileSetupView: View {
         mode == .onboarding ? "Choose the one you have now or the one you want to start with" : "Select all that apply"
     }
 
+    private var siriExamples: [String] {
+        switch experienceLevel {
+        case .justStarting:
+            return [
+                "Start a V60 brew",
+                "Create a 2 cup Chemex",
+                "Show my recipes"
+            ]
+        case .someExperience:
+            return [
+                "Start my Aeropress brew",
+                "Create a lighter V60",
+                "Show my recipes"
+            ]
+        case .enthusiast:
+            return [
+                "Start Morning Ritual",
+                "Create a Chemex recipe",
+                "Show my recipes"
+            ]
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -145,6 +168,42 @@ struct ProfileSetupView: View {
                                                 )
                                         }
                                         .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+
+                        profileCard {
+                            VStack(alignment: .leading, spacing: 14) {
+                                sectionLabel("USE WITH SIRI")
+
+                                Text("Say one command to Siri or run the shortcut from Shortcuts. Brew Sixty will open in the right screen and keep the rest of the flow inside the app.")
+                                    .font(.footnote)
+                                    .foregroundStyle(Color.coffeeCream.opacity(0.72))
+                                    .fixedSize(horizontal: false, vertical: true)
+
+                                VStack(spacing: 10) {
+                                    ForEach(siriExamples, id: \.self) { example in
+                                        siriExampleRow(example)
+                                    }
+                                }
+
+                                if let shortcutsURL = URL(string: "shortcuts://") {
+                                    Link(destination: shortcutsURL) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "waveform.badge.mic")
+                                                .font(.system(size: 13, weight: .semibold))
+
+                                            Text("Open Shortcuts")
+                                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        }
+                                        .foregroundStyle(Color.deepRoastInk)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 10)
+                                        .background(
+                                            Capsule(style: .continuous)
+                                                .fill(Color.primaryCopper)
+                                        )
                                     }
                                 }
                             }
@@ -260,6 +319,32 @@ struct ProfileSetupView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func siriExampleRow(_ example: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "mic.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.primaryCopper)
+                .frame(width: 20)
+
+            Text("“\(example)”")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundStyle(Color.coffeeCream.opacity(0.82))
+
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.white.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 
     private func loadStoredValues() {

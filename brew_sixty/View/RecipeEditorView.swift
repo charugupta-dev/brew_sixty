@@ -5,12 +5,15 @@ import SwiftData
 struct RecipeEditorView: View {
     enum Mode: Identifiable {
         case create
+        case createDraft(RecipeDraft)
         case edit(BrewTemplate)
 
         var id: String {
             switch self {
             case .create:
                 return "create"
+            case .createDraft(let draft):
+                return "create-\(draft.method.rawValue)-\(Int(draft.beanWeight.rounded()))-\(Int(draft.ratio.rounded()))-\(Int(draft.waterVolume.rounded()))"
             case .edit(let template):
                 return template.id.uuidString
             }
@@ -63,6 +66,8 @@ struct RecipeEditorView: View {
         switch mode {
         case .create:
             _draft = State(initialValue: RecipeDraft())
+        case .createDraft(let draft):
+            _draft = State(initialValue: draft)
         case .edit(let template):
             _draft = State(initialValue: RecipeDraft(template: template))
         }
@@ -113,9 +118,31 @@ struct RecipeEditorView: View {
         } message: {
             Text(saveErrorMessage ?? AppConstants.Methods.Text.saveFailedMessage)
         }
-        .onAppear(perform: applyProfilePreferencesIfNeeded)
+        .overlay(alignment: .top) {
+            if let banner = brewSessionStore.intentHandoffBanner {
+                IntentHandoffBannerView(banner: banner)
+                    .padding(.top, 10)
+                    .padding(.horizontal, 16)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .onAppear {
+            applyProfilePreferencesIfNeeded()
+            brewSessionStore.activeEditingDraft = draft
+        }
         .onDisappear {
             hintDismissTask?.cancel()
+            brewSessionStore.activeEditingDraft = nil
+        }
+        .onChange(of: draft) { _, newDraft in
+            if newDraft != brewSessionStore.activeEditingDraft {
+                brewSessionStore.activeEditingDraft = newDraft
+            }
+        }
+        .onChange(of: brewSessionStore.activeEditingDraft) { _, newGlobalDraft in
+            if let newGlobalDraft, newGlobalDraft != draft {
+                self.draft = newGlobalDraft
+            }
         }
     }
 
@@ -405,6 +432,8 @@ struct RecipeEditorView: View {
         switch mode {
         case .create:
             return AppConstants.Methods.Text.createRecipeNavigationTitle
+        case .createDraft:
+            return AppConstants.Methods.Text.createRecipeNavigationTitle
         case .edit:
             return AppConstants.Methods.Text.editRecipeNavigationTitle
         }
@@ -414,6 +443,8 @@ struct RecipeEditorView: View {
         switch mode {
         case .create:
             return AppConstants.Methods.Text.saveAsPreset
+        case .createDraft:
+            return AppConstants.Methods.Text.saveAsPreset
         case .edit:
             return AppConstants.Methods.Text.saveChanges
         }
@@ -422,6 +453,8 @@ struct RecipeEditorView: View {
     private var saveButtonSystemImage: String {
         switch mode {
         case .create:
+            return "square.and.arrow.down.fill"
+        case .createDraft:
             return "square.and.arrow.down.fill"
         case .edit:
             return "checkmark.circle.fill"
@@ -962,7 +995,8 @@ struct RecipeEditorView: View {
         guard !hasAppliedProfileDefaults else { return }
         hasAppliedProfileDefaults = true
 
-        if case .create = mode {
+        switch mode {
+        case .create:
             let firstPreferredMethod = preferredMethods.first ?? draft.method
 
             if shouldShowStarterProfiles {
@@ -971,6 +1005,10 @@ struct RecipeEditorView: View {
             } else {
                 draft.applyDefaults(for: firstPreferredMethod)
             }
+        case .createDraft:
+            break
+        case .edit:
+            break
         }
 
         starterServingSize = inferredStarterServingSize()
@@ -990,6 +1028,8 @@ struct RecipeEditorView: View {
         do {
             switch mode {
             case .create:
+                modelContext.insert(draft.makeTemplate())
+            case .createDraft:
                 modelContext.insert(draft.makeTemplate())
             case .edit(let template):
                 draft.apply(to: template)

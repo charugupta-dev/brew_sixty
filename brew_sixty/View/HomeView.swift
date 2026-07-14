@@ -5,6 +5,7 @@ import SwiftData
 struct HomeView: View {
     @Query(sort: \BrewTemplate.createdAt, order: .forward) private var templates: [BrewTemplate]
     @AppStorage(ProfilePreferences.Keys.name) private var profileName = ""
+    @AppStorage(Phase1IntentActionStore.key) private var pendingActionData: Data?
     
     @Binding var selectedTab: ContentView.Tab
     let brewSessionStore: BrewSessionStore
@@ -129,13 +130,23 @@ struct HomeView: View {
         .onAppear {
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
             startReadmeCaptureBrewIfNeeded()
+            applyPendingIntentActionIfNeeded()
         }
         .onChange(of: templates.map(\.id)) { _, _ in
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
             startReadmeCaptureBrewIfNeeded()
+            applyPendingIntentActionIfNeeded()
         }
         .onChange(of: brewSessionStore.pendingFocusBrewID) { _, _ in
             syncFocusIfNeeded(for: brewSessionStore.brewViewModels(for: templates))
+        }
+        .onChange(of: selectedTab) { _, tab in
+            guard tab == .brew else { return }
+            applyPendingIntentActionIfNeeded()
+        }
+        .onChange(of: pendingActionData) { _, _ in
+            guard selectedTab == .brew else { return }
+            applyPendingIntentActionIfNeeded()
         }
         .sheet(isPresented: $showProfileSheet) {
             ProfileSetupView(mode: .edit)
@@ -166,6 +177,33 @@ struct HomeView: View {
 
         hasStartedReadmeCaptureBrew = true
         brewSessionStore.startSavedTemplate(template)
+    }
+
+    private func applyPendingIntentActionIfNeeded() {
+        guard selectedTab == .brew, let data = pendingActionData else { return }
+        guard let action = try? JSONDecoder().decode(Phase1IntentAction.self, from: data) else {
+            pendingActionData = nil // Clear corrupt action
+            return
+        }
+        guard action.destination == .brew else { return }
+
+        switch action {
+        case .prepareSavedTemplate(let templateID, let bannerTitle, let bannerSubtitle):
+            guard let template = templates.first(where: { $0.id == templateID }) else {
+                // Template not found yet. Query is probably loading asynchronously.
+                // Return without clearing pendingActionData so we check again when query updates.
+                return
+            }
+            pendingActionData = nil // Consume action
+            brewSessionStore.prepareSavedTemplate(template)
+            brewSessionStore.presentIntentHandoff(title: bannerTitle, subtitle: bannerSubtitle)
+        case .prepareTransientBrew(let draft, let bannerTitle, let bannerSubtitle):
+            pendingActionData = nil // Consume action
+            brewSessionStore.prepareTransientBrew(from: draft)
+            brewSessionStore.presentIntentHandoff(title: bannerTitle, subtitle: bannerSubtitle)
+        case .openRecipeComposer, .openRecipes, .adjustRecipe:
+            break
+        }
     }
 }
 

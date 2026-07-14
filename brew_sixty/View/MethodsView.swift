@@ -12,36 +12,81 @@ struct MethodsView: View {
     @State private var editorMode: RecipeEditorView.Mode?
     @State private var deletionErrorMessage: String?
     @State private var hasAppliedReadmeCaptureState = false
+    @AppStorage(Phase1IntentActionStore.key) private var pendingActionData: Data?
+    @State private var methodFilter: BrewMethod? = nil
+
+    private var filteredTemplates: [BrewTemplate] {
+        templates.filter { template in
+            guard let filter = methodFilter else { return true }
+            return template.method == filter
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 VideoWallpaperBackground(style: .quiet)
 
-                if templates.isEmpty {
-                    emptyState
-                } else {
-                    List {
-                        ForEach(templates) { template in
-                            RecipeTemplateCard(
-                                template: template,
-                                onBrew: { startTemplate(template) },
-                                onEdit: { editorMode = .edit(template) }
-                            )
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteTemplate(template)
-                                } label: {
-                                    Label(AppConstants.Methods.Text.delete, systemImage: "trash")
+                VStack(spacing: 0) {
+                    if let filter = methodFilter {
+                        HStack(spacing: 8) {
+                            Text("Filter: \(filter.rawValue)")
+                                .font(.system(.footnote, design: .rounded))
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryCopper)
+                            
+                            Button {
+                                methodFilter = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(.footnote, weight: .bold))
+                                    .foregroundStyle(Color.primaryCopper.opacity(0.8))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(Color.primaryCopper.opacity(0.12))
+                        )
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .stroke(Color.primaryCopper.opacity(0.24), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                        .padding(.bottom, 6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    if templates.isEmpty {
+                        emptyState
+                    } else if filteredTemplates.isEmpty {
+                        filteredEmptyState
+                    } else {
+                        List {
+                            ForEach(filteredTemplates) { template in
+                                RecipeTemplateCard(
+                                    template: template,
+                                    onBrew: { startTemplate(template) },
+                                    onEdit: { editorMode = .edit(template) }
+                                )
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        deleteTemplate(template)
+                                    } label: {
+                                        Label(AppConstants.Methods.Text.delete, systemImage: "trash")
+                                    }
                                 }
                             }
                         }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
                     }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
                 }
 
                 floatingAddButton
@@ -63,10 +108,16 @@ struct MethodsView: View {
             .onAppear {
                 applyReadmeCaptureStateIfNeeded()
                 applyPendingCreateStateIfNeeded()
+                applyPendingIntentActionIfNeeded()
             }
             .onChange(of: selectedTab) { _, tab in
                 guard tab == .recipes else { return }
                 applyPendingCreateStateIfNeeded()
+                applyPendingIntentActionIfNeeded()
+            }
+            .onChange(of: pendingActionData) { _, _ in
+                guard selectedTab == .recipes else { return }
+                applyPendingIntentActionIfNeeded()
             }
         }
     }
@@ -77,6 +128,18 @@ struct MethodsView: View {
                 Label(AppConstants.Methods.Text.noSavedRecipes, systemImage: "square.stack.3d.up.slash.fill")
             } description: {
                 Text(AppConstants.Methods.Text.emptyRecipesDescription)
+            }
+            .foregroundStyle(Color.coffeeCream)
+        }
+        .padding(.horizontal, 24)
+    }
+
+    private var filteredEmptyState: some View {
+        VStack(spacing: 18) {
+            ContentUnavailableView {
+                Label("No recipes for this brewer", systemImage: "magnifyingglass")
+            } description: {
+                Text("Try adjusting the filter or add a new recipe.")
             }
             .foregroundStyle(Color.coffeeCream)
         }
@@ -151,8 +214,33 @@ struct MethodsView: View {
     }
 
     private func applyPendingCreateStateIfNeeded() {
-        guard brewSessionStore.consumeRecipeComposerRequest() else { return }
-        editorMode = .create
+        guard let request = brewSessionStore.consumeRecipeComposerRequest() else { return }
+        editorMode = request.draft.map { .createDraft($0) } ?? .create
+    }
+
+    private func applyPendingIntentActionIfNeeded() {
+        guard selectedTab == .recipes, let data = pendingActionData else { return }
+        guard let action = try? JSONDecoder().decode(Phase1IntentAction.self, from: data) else {
+            pendingActionData = nil // Clear corrupt action
+            return
+        }
+        guard action.destination == .recipes else { return }
+        if case .adjustRecipe = action {
+            return // Handled globally by ContentView, do not consume here
+        }
+
+        pendingActionData = nil // Consume action
+
+        switch action {
+        case .openRecipeComposer(let draft, let bannerTitle, let bannerSubtitle):
+            editorMode = .createDraft(draft)
+            brewSessionStore.presentIntentHandoff(title: bannerTitle, subtitle: bannerSubtitle)
+        case .openRecipes(let filter, let bannerTitle, let bannerSubtitle):
+            self.methodFilter = filter
+            brewSessionStore.presentIntentHandoff(title: bannerTitle, subtitle: bannerSubtitle)
+        case .adjustRecipe, .prepareSavedTemplate, .prepareTransientBrew:
+            break
+        }
     }
 }
 
