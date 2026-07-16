@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		56C29D23C943FE75D0379117 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D300CE6C66387F45A9C6D72 /* Foundation.framework */; };
+		995885C99508EC1C32CBB116 /* BrewSixtyWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 425A12BAC3E09EC4A1BD0CB8 /* BrewSixtyWidgets.appex */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2B0865D82FB1DFB300FBF7C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,28 +26,71 @@
 			remoteGlobalIDString = 2B0865C72FB1DFB100FBF7C8;
 			remoteInfo = brew_sixty;
 		};
+		77E7DC2D90EFA2FE5EB8F6C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B0865C02FB1DFB100FBF7C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4AE47B9BC666C1B9468ABE1;
+			remoteInfo = BrewSixtyWidgets;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		95BEA5D90015B843178C3945 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				995885C99508EC1C32CBB116 /* BrewSixtyWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2B0865C82FB1DFB100FBF7C8 /* brew_sixty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = brew_sixty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B0865D72FB1DFB300FBF7C8 /* brew_sixtyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = brew_sixtyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B0865E12FB1DFB300FBF7C8 /* brew_sixtyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = brew_sixtyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D300CE6C66387F45A9C6D72 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		425A12BAC3E09EC4A1BD0CB8 /* BrewSixtyWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BrewSixtyWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		0A5BD260C5F1F5DCE6822868 /* brew_sixty/Support/LiveActivity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = brew_sixty/Support/LiveActivity;
+			sourceTree = "<group>";
+		};
 		2B0865CA2FB1DFB100FBF7C8 /* brew_sixty */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = brew_sixty;
 			sourceTree = "<group>";
 		};
 		2B0865DA2FB1DFB300FBF7C8 /* brew_sixtyTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = brew_sixtyTests;
 			sourceTree = "<group>";
 		};
 		2B0865E42FB1DFB300FBF7C8 /* brew_sixtyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = brew_sixtyUITests;
+			sourceTree = "<group>";
+		};
+		BE975F78C7651AC29C369AE3 /* BrewSixtyWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = BrewSixtyWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +117,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E280CB8748D2D57648ED75D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56C29D23C943FE75D0379117 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -79,6 +135,9 @@
 				2B0865DA2FB1DFB300FBF7C8 /* brew_sixtyTests */,
 				2B0865E42FB1DFB300FBF7C8 /* brew_sixtyUITests */,
 				2B0865C92FB1DFB100FBF7C8 /* Products */,
+				2E4499D69646A2E61E010F3E /* Frameworks */,
+				BE975F78C7651AC29C369AE3 /* BrewSixtyWidgets */,
+				2BAAA9BD300949BF009925C8 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,8 +147,33 @@
 				2B0865C82FB1DFB100FBF7C8 /* brew_sixty.app */,
 				2B0865D72FB1DFB300FBF7C8 /* brew_sixtyTests.xctest */,
 				2B0865E12FB1DFB300FBF7C8 /* brew_sixtyUITests.xctest */,
+				425A12BAC3E09EC4A1BD0CB8 /* BrewSixtyWidgets.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2BAAA9BD300949BF009925C8 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				0A5BD260C5F1F5DCE6822868 /* brew_sixty/Support/LiveActivity */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		2E4499D69646A2E61E010F3E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A20CF17BC2254BCB72850482 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A20CF17BC2254BCB72850482 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				3D300CE6C66387F45A9C6D72 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,17 +186,17 @@
 				2B0865C42FB1DFB100FBF7C8 /* Sources */,
 				2B0865C52FB1DFB100FBF7C8 /* Frameworks */,
 				2B0865C62FB1DFB100FBF7C8 /* Resources */,
+				95BEA5D90015B843178C3945 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				48AFF3C94420C16605536D38 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2B0865CA2FB1DFB100FBF7C8 /* brew_sixty */,
 			);
 			name = brew_sixty;
-			packageProductDependencies = (
-			);
 			productName = brew_sixty;
 			productReference = 2B0865C82FB1DFB100FBF7C8 /* brew_sixty.app */;
 			productType = "com.apple.product-type.application";
@@ -134,8 +218,6 @@
 				2B0865DA2FB1DFB300FBF7C8 /* brew_sixtyTests */,
 			);
 			name = brew_sixtyTests;
-			packageProductDependencies = (
-			);
 			productName = brew_sixtyTests;
 			productReference = 2B0865D72FB1DFB300FBF7C8 /* brew_sixtyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -157,11 +239,30 @@
 				2B0865E42FB1DFB300FBF7C8 /* brew_sixtyUITests */,
 			);
 			name = brew_sixtyUITests;
-			packageProductDependencies = (
-			);
 			productName = brew_sixtyUITests;
 			productReference = 2B0865E12FB1DFB300FBF7C8 /* brew_sixtyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D4AE47B9BC666C1B9468ABE1 /* BrewSixtyWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5E1B19BA5E58998E8B51E1FF /* Build configuration list for PBXNativeTarget "BrewSixtyWidgets" */;
+			buildPhases = (
+				99147C591586C91DBDFCAB66 /* Sources */,
+				E280CB8748D2D57648ED75D1 /* Frameworks */,
+				E30EB788511C1716B119025A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0A5BD260C5F1F5DCE6822868 /* brew_sixty/Support/LiveActivity */,
+				BE975F78C7651AC29C369AE3 /* BrewSixtyWidgets */,
+			);
+			name = BrewSixtyWidgets;
+			productName = BrewSixtyWidgets;
+			productReference = 425A12BAC3E09EC4A1BD0CB8 /* BrewSixtyWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -203,6 +304,7 @@
 				2B0865C72FB1DFB100FBF7C8 /* brew_sixty */,
 				2B0865D62FB1DFB300FBF7C8 /* brew_sixtyTests */,
 				2B0865E02FB1DFB300FBF7C8 /* brew_sixtyUITests */,
+				D4AE47B9BC666C1B9468ABE1 /* BrewSixtyWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -223,6 +325,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2B0865DF2FB1DFB300FBF7C8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30EB788511C1716B119025A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,6 +362,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		99147C591586C91DBDFCAB66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +381,12 @@
 			isa = PBXTargetDependency;
 			target = 2B0865C72FB1DFB100FBF7C8 /* brew_sixty */;
 			targetProxy = 2B0865E22FB1DFB300FBF7C8 /* PBXContainerItemProxy */;
+		};
+		48AFF3C94420C16605536D38 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BrewSixtyWidgets;
+			target = D4AE47B9BC666C1B9468ABE1 /* BrewSixtyWidgets */;
+			targetProxy = 77E7DC2D90EFA2FE5EB8F6C0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -304,6 +426,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = WNR38C2P6Z;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -367,6 +490,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = WNR38C2P6Z;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -395,9 +519,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = WNR38C2P6Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -427,9 +551,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = WNR38C2P6Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -532,6 +656,59 @@
 			};
 			name = Release;
 		};
+		3BB912A0BF965479F95EB762 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BrewSixtyWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = BrewSixtyWidgets;
+				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "practice.brew-sixty.BrewSixtyWidgets";
+				PRODUCT_NAME = BrewSixtyWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6940358F72955ED3C4A7262F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BrewSixtyWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = BrewSixtyWidgets;
+				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "practice.brew-sixty.BrewSixtyWidgets";
+				PRODUCT_NAME = BrewSixtyWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -567,6 +744,15 @@
 			buildConfigurations = (
 				2B0865F22FB1DFB300FBF7C8 /* Debug */,
 				2B0865F32FB1DFB300FBF7C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5E1B19BA5E58998E8B51E1FF /* Build configuration list for PBXNativeTarget "BrewSixtyWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6940358F72955ED3C4A7262F /* Release */,
+				3BB912A0BF965479F95EB762 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

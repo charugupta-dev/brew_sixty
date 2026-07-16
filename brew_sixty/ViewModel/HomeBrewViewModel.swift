@@ -33,6 +33,11 @@ final class HomeBrewViewModel: Identifiable {
     var customPressDuration: TimeInterval? = nil
     var onReset: (() -> Void)?
 
+    // Live Activity properties
+    var recipeName: String = "Brew"
+    private var lastLiveActivityPhaseName: String? = nil
+    private var lastLiveActivitySecond: Int? = nil
+
     // MARK: - Computed Properties
     private var isPourOverMethod: Bool {
         method == .v60 || method == .chemex
@@ -322,6 +327,7 @@ final class HomeBrewViewModel: Identifiable {
         self.initialBeanWeight = beanWeight
         self.ratio = ratio
         self.waterVolume = waterVolume
+        self.recipeName = method.rawValue
     }
 
     convenience init(method: BrewMethod, beanWeight: Double, ratio: Double, waterVolume: Double, bloomDuration: TimeInterval? = nil, steepDuration: TimeInterval? = nil, pressDuration: TimeInterval? = nil) {
@@ -343,6 +349,7 @@ final class HomeBrewViewModel: Identifiable {
             steepDuration: template.steepDuration,
             pressDuration: template.pressDuration
         )
+        self.recipeName = template.name
     }
 
     convenience init(draft: RecipeDraft) {
@@ -355,6 +362,7 @@ final class HomeBrewViewModel: Identifiable {
             steepDuration: draft.isPourOverMethod ? 0.0 : draft.steepDuration,
             pressDuration: draft.pressDuration
         )
+        self.recipeName = draft.name.isEmpty ? draft.method.rawValue : draft.name
     }
 
     // MARK: - Timer Controls
@@ -425,6 +433,23 @@ final class HomeBrewViewModel: Identifiable {
         let currentStartDate = Date().addingTimeInterval(-elapsed)
         startDate = currentStartDate
 
+        #if canImport(ActivityKit)
+        var targetWaterVal = 0.0
+        if let metricText = currentPhaseMetricText {
+            let numericString = metricText.filter { $0.isNumber }
+            targetWaterVal = Double(numericString) ?? 0.0
+        }
+        LiveActivityManager.shared.startActivity(
+            recipeName: recipeName,
+            methodName: method.rawValue,
+            totalWaterVolume: targetWater,
+            initialPhaseName: currentPhaseTitle,
+            phaseRemainingSeconds: currentPhaseRemainingTime,
+            targetWaterVolume: targetWaterVal,
+            currentPhaseProgress: currentPhaseProgress
+        )
+        #endif
+
         timer = Timer.scheduledTimer(withTimeInterval: AppConstants.BrewTimer.timerInterval, repeats: true) { [weak self] timer in
             Task { @MainActor [weak self] in
                 guard let self = self else {
@@ -441,11 +466,24 @@ final class HomeBrewViewModel: Identifiable {
                     self.isFinished = true
                     self.timer?.invalidate()
                     self.timer = nil
+                    
+                    #if canImport(ActivityKit)
+                    let finalState = BrewActivityAttributes.ContentState(
+                        phaseName: AppConstants.BrewTimer.donePhaseTitle,
+                        targetWaterVolume: 0.0,
+                        currentPhaseProgress: 1.0,
+                        phaseEndDate: Date(),
+                        isPaused: false,
+                        pausedRemainingSeconds: 0
+                    )
+                    LiveActivityManager.shared.endActivity(finalState: finalState, delayedDismissal: true)
+                    #endif
                 } else {
                     self.elapsed = nowElapsed
                 }
 
                 self.updateWaitMessageIfNeeded(previousPhaseIdentifier: previousWaitPhaseIdentifier)
+                self.updateLiveActivityIfNeeded()
             }
         }
     }
@@ -454,6 +492,7 @@ final class HomeBrewViewModel: Identifiable {
         isRunning = false
         timer?.invalidate()
         timer = nil
+        updateLiveActivityIfNeeded(force: true)
     }
 
     func resetTimer(notifyObservers: Bool = true) {
@@ -507,11 +546,24 @@ final class HomeBrewViewModel: Identifiable {
             isFinished = true
             timer?.invalidate()
             timer = nil
+            
+            #if canImport(ActivityKit)
+            let finalState = BrewActivityAttributes.ContentState(
+                phaseName: AppConstants.BrewTimer.donePhaseTitle,
+                targetWaterVolume: 0.0,
+                currentPhaseProgress: 1.0,
+                phaseEndDate: Date(),
+                isPaused: false,
+                pausedRemainingSeconds: 0
+            )
+            LiveActivityManager.shared.endActivity(finalState: finalState, delayedDismissal: true)
+            #endif
         } else {
             elapsed = newElapsed
             if isRunning {
                 startDate = Date().addingTimeInterval(-newElapsed)
             }
+            updateLiveActivityIfNeeded(force: true)
         }
 
         updateWaitMessageIfNeeded(previousPhaseIdentifier: previousWaitPhaseIdentifier)
@@ -579,6 +631,10 @@ final class HomeBrewViewModel: Identifiable {
         beanWeight = initialBeanWeight
         activeWaitMessage = nil
         activeWaitPhaseIdentifier = nil
+        
+        #if canImport(ActivityKit)
+        LiveActivityManager.shared.endActivity(finalState: nil, delayedDismissal: false)
+        #endif
     }
 
     private var passiveWaitPhaseIdentifier: String? {
@@ -608,5 +664,34 @@ final class HomeBrewViewModel: Identifiable {
         activeWaitPhaseIdentifier = currentPhaseIdentifier
         activeWaitMessage = nextMessage
         lastWaitMessage = nextMessage
+    }
+
+    // MARK: - Live Activity Support
+    private func updateLiveActivityIfNeeded(force: Bool = false) {
+        #if canImport(ActivityKit)
+        let currentPhase = currentPhaseTitle
+        let currentSecond = Int(currentPhaseRemainingTime.rounded())
+
+        guard force || currentPhase != lastLiveActivityPhaseName || currentSecond != lastLiveActivitySecond else {
+            return
+        }
+
+        lastLiveActivityPhaseName = currentPhase
+        lastLiveActivitySecond = currentSecond
+
+        var targetWaterVal = 0.0
+        if let metricText = currentPhaseMetricText {
+            let numericString = metricText.filter { $0.isNumber }
+            targetWaterVal = Double(numericString) ?? 0.0
+        }
+
+        LiveActivityManager.shared.updateActivity(
+            phaseName: currentPhase,
+            phaseRemainingSeconds: currentPhaseRemainingTime,
+            targetWaterVolume: targetWaterVal,
+            currentPhaseProgress: currentPhaseProgress,
+            isPaused: !isRunning && !isFinished && !isCountingDown
+        )
+        #endif
     }
 }

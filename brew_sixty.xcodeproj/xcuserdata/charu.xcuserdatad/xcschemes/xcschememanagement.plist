@@ -4,11 +4,28 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>brew_sixty.xcscheme_^#shared#^_</key>
+		<key>BrewSixtyWidgets.xcscheme</key>
 		<dict>
-			<key>orderHint</key>
-			<integer>0</integer>
+			<key>isShown</key>
+			<true/>
+		</dict>
+		<key>brew_sixty.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<true/>
+		</dict>
+		<key>brew_sixtyTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<true/>
+		</dict>
+		<key>brew_sixtyUITests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<true/>
 		</dict>
 	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict/>
 </dict>
 </plist>
