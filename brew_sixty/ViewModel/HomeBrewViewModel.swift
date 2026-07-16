@@ -32,6 +32,7 @@ final class HomeBrewViewModel: Identifiable {
     var customSteepDuration: TimeInterval? = nil
     var customPressDuration: TimeInterval? = nil
     var onReset: (() -> Void)?
+    var onBrewComplete: ((Double, Double) -> Void)?
 
     // Live Activity properties
     var recipeName: String = "Brew"
@@ -466,6 +467,7 @@ final class HomeBrewViewModel: Identifiable {
                     self.isFinished = true
                     self.timer?.invalidate()
                     self.timer = nil
+                    self.onBrewComplete?(self.beanWeight, self.ratio)
                     
                     #if canImport(ActivityKit)
                     let finalState = BrewActivityAttributes.ContentState(
@@ -546,6 +548,7 @@ final class HomeBrewViewModel: Identifiable {
             isFinished = true
             timer?.invalidate()
             timer = nil
+            onBrewComplete?(beanWeight, ratio)
             
             #if canImport(ActivityKit)
             let finalState = BrewActivityAttributes.ContentState(

@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @State private var showLaunchScreen: Bool
     @State private var selectedTab: Tab
@@ -75,7 +76,14 @@ struct ContentView: View {
         ) {
             ProfileSetupView(mode: .onboarding)
         }
-        .onAppear(perform: applyPendingIntentDestinationIfNeeded)
+        .onAppear {
+            applyPendingIntentDestinationIfNeeded()
+            brewSessionStore.onInsertLog = { dose, ratio in
+                let log = BrewLog(timestamp: Date(), beanWeightGram: dose, ratio: ratio)
+                modelContext.insert(log)
+                try? modelContext.save()
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             applyPendingIntentDestinationIfNeeded()

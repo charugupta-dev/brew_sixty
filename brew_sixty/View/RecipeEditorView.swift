@@ -48,6 +48,9 @@ struct RecipeEditorView: View {
     let mode: Mode
 
     @AppStorage(ProfilePreferences.Keys.experienceLevel) private var experienceLevelRaw = ProfileExperienceLevel.justStarting.rawValue
+
+    @Query(sort: \BrewTemplate.createdAt, order: .reverse) private var templates: [BrewTemplate]
+    @Query(sort: \BrewLog.timestamp, order: .reverse) private var logs: [BrewLog]
     @AppStorage(ProfilePreferences.Keys.methodsUsed) private var methodsUsedRaw = ""
 
     @State private var draft: RecipeDraft
@@ -80,6 +83,7 @@ struct RecipeEditorView: View {
             ScrollView {
                 VStack(spacing: AppConstants.Methods.Layout.sectionSpacing) {
                     methodSelectionSection
+                    smartSuggestionsSection
                     doseAndYieldSection
                     timingAndTemperatureSection
                     recipeNameSection
@@ -144,6 +148,50 @@ struct RecipeEditorView: View {
                 self.draft = newGlobalDraft
             }
         }
+    }
+
+    private var smartSuggestionsSection: some View {
+        let level = ProfileExperienceLevel(rawValue: experienceLevelRaw) ?? .justStarting
+        let suggestions = BrewRecommendationEngine.generateSuggestions(
+            draft: draft,
+            experienceLevel: level,
+            templates: templates,
+            logs: logs
+        )
+        
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("SMART SUGGESTIONS")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1.5)
+                .foregroundStyle(Color.brushedCopper)
+                .padding(.horizontal, 16)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(suggestions) { suggestion in
+                        HStack(spacing: 8) {
+                            Image(systemName: suggestion.iconName)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.primaryCopper)
+                            
+                            Text(suggestion.message)
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundStyle(Color.coffeeCream.opacity(0.85))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Color(red: 0.11, green: 0.08, blue: 0.07).opacity(0.6))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.primaryCopper.opacity(0.12), lineWidth: 1)
+                        )
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .padding(.vertical, 8)
     }
 
     private var methodSelectionSection: some View {

@@ -60,36 +60,26 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0A5BD260C5F1F5DCE6822868 /* brew_sixty/Support/LiveActivity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = brew_sixty/Support/LiveActivity;
 			sourceTree = "<group>";
 		};
 		2B0865CA2FB1DFB100FBF7C8 /* brew_sixty */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = brew_sixty;
 			sourceTree = "<group>";
 		};
 		2B0865DA2FB1DFB300FBF7C8 /* brew_sixtyTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = brew_sixtyTests;
 			sourceTree = "<group>";
 		};
 		2B0865E42FB1DFB300FBF7C8 /* brew_sixtyUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = brew_sixtyUITests;
 			sourceTree = "<group>";
 		};
 		BE975F78C7651AC29C369AE3 /* BrewSixtyWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = BrewSixtyWidgets;
 			sourceTree = "<group>";
 		};

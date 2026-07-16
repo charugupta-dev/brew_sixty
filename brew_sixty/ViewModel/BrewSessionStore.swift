@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 struct PendingRecipeComposerRequest {
     let draft: RecipeDraft?
@@ -22,6 +23,13 @@ final class BrewSessionStore {
     var pendingRecipeComposerRequest: PendingRecipeComposerRequest?
     var intentHandoffBanner: IntentHandoffBanner?
     var activeEditingDraft: RecipeDraft?
+    var onInsertLog: ((Double, Double) -> Void)? = nil
+
+    func addBrewLog(beanWeight: Double, ratio: Double, thought: String?, context: ModelContext) {
+        let log = BrewLog(timestamp: Date(), beanWeightGram: beanWeight, ratio: ratio, thought: thought)
+        context.insert(log)
+        try? context.save()
+    }
 
     func brewViewModels(for templates: [BrewTemplate]) -> [HomeBrewViewModel] {
         syncPersistentBrews(with: templates)
@@ -31,14 +39,14 @@ final class BrewSessionStore {
 
     func startTransientBrew(from draft: RecipeDraft) {
         let viewModel = HomeBrewViewModel(draft: draft)
-        configureTransientCallbacks(for: viewModel)
+        configureCallbacks(for: viewModel)
         transientBrews.insert(viewModel, at: 0)
         start(viewModel)
     }
 
     func prepareTransientBrew(from draft: RecipeDraft) {
         let viewModel = HomeBrewViewModel(draft: draft)
-        configureTransientCallbacks(for: viewModel)
+        configureCallbacks(for: viewModel)
         transientBrews.insert(viewModel, at: 0)
         prepare(viewModel)
     }
@@ -104,7 +112,9 @@ final class BrewSessionStore {
 
         for template in templates {
             if persistentBrews[template.id] == nil {
-                persistentBrews[template.id] = HomeBrewViewModel(template: template)
+                let viewModel = HomeBrewViewModel(template: template)
+                configureCallbacks(for: viewModel)
+                persistentBrews[template.id] = viewModel
                 continue
             }
 
@@ -113,7 +123,9 @@ final class BrewSessionStore {
             }
 
             if !existing.isRunning, !existing.isCountingDown, existing.elapsed == 0 {
-                persistentBrews[template.id] = HomeBrewViewModel(template: template)
+                let viewModel = HomeBrewViewModel(template: template)
+                configureCallbacks(for: viewModel)
+                persistentBrews[template.id] = viewModel
                 pendingPersistentRefreshes.remove(template.id)
             }
         }
@@ -125,14 +137,18 @@ final class BrewSessionStore {
         }
 
         let viewModel = HomeBrewViewModel(template: template)
+        configureCallbacks(for: viewModel)
         persistentBrews[template.id] = viewModel
         return viewModel
     }
 
-    private func configureTransientCallbacks(for viewModel: HomeBrewViewModel) {
+    private func configureCallbacks(for viewModel: HomeBrewViewModel) {
         let viewModelID = viewModel.id
         viewModel.onReset = { [weak self] in
             self?.removeTransientBrew(withID: viewModelID)
+        }
+        viewModel.onBrewComplete = { [weak self] dose, ratio in
+            self?.onInsertLog?(dose, ratio)
         }
     }
 
