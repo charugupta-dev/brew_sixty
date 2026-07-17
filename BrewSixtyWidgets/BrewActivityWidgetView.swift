@@ -88,10 +88,15 @@ struct BrewActivityWidget: Widget {
                                 .tint(Color.terracotta)
                                 .frame(height: 6)
                         } else {
-                            ProgressView(timerInterval: context.state.phaseStartDate...context.state.phaseEndDate, countsDown: false)
-                                .progressViewStyle(.linear)
-                                .tint(Color.terracotta)
-                                .frame(height: 6)
+                            ProgressView(
+                                timerInterval: context.state.phaseStartDate...context.state.phaseEndDate,
+                                countsDown: false,
+                                label: { EmptyView() },
+                                currentValueLabel: { EmptyView() }
+                            )
+                            .progressViewStyle(.linear)
+                            .tint(Color.terracotta)
+                            .frame(height: 6)
                         }
                     }
                     .padding(.horizontal, 8)
@@ -216,10 +221,15 @@ struct LockScreenWidgetView: View {
                             .tint(Color.terracotta)
                             .frame(height: 6)
                     } else {
-                        ProgressView(timerInterval: context.state.phaseStartDate...context.state.phaseEndDate, countsDown: false)
-                            .progressViewStyle(.linear)
-                            .tint(Color.terracotta)
-                            .frame(height: 6)
+                        ProgressView(
+                            timerInterval: context.state.phaseStartDate...context.state.phaseEndDate,
+                            countsDown: false,
+                            label: { EmptyView() },
+                            currentValueLabel: { EmptyView() }
+                        )
+                        .progressViewStyle(.linear)
+                        .tint(Color.terracotta)
+                        .frame(height: 6)
                     }
                     
                     if context.state.targetWaterVolume > 0 {
