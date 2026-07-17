@@ -6,7 +6,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showLaunchScreen: Bool
     @State private var selectedTab: Tab
-    @State private var brewSessionStore = BrewSessionStore()
+    @State private var brewSessionStore = BrewSessionStore.shared
     @AppStorage(ProfilePreferences.Keys.hasCompletedProfile) private var hasCompletedProfile = false
     @AppStorage(Phase1IntentActionStore.key) private var pendingActionData: Data?
 

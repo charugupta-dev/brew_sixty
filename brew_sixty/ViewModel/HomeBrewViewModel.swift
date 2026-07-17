@@ -33,6 +33,7 @@ final class HomeBrewViewModel: Identifiable {
     var customPressDuration: TimeInterval? = nil
     var onReset: (() -> Void)?
     var onBrewComplete: ((Double, Double) -> Void)?
+    private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
 
     // Live Activity properties
     var recipeName: String = "Brew"
@@ -441,6 +442,14 @@ final class HomeBrewViewModel: Identifiable {
         let currentStartDate = Date().addingTimeInterval(-elapsed)
         startDate = currentStartDate
 
+        #if os(iOS)
+        if backgroundTaskID == .invalid {
+            backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "BrewTimer") { [weak self] in
+                self?.endBackgroundTask()
+            }
+        }
+        #endif
+
         #if canImport(ActivityKit)
         var targetWaterVal = 0.0
         if let metricText = currentPhaseMetricText {
@@ -476,6 +485,7 @@ final class HomeBrewViewModel: Identifiable {
                     self.timer?.invalidate()
                     self.timer = nil
                     self.onBrewComplete?(self.beanWeight, self.ratio)
+                    self.endBackgroundTask()
                     
                     #if canImport(ActivityKit)
                     let finalState = BrewActivityAttributes.ContentState(
@@ -504,10 +514,12 @@ final class HomeBrewViewModel: Identifiable {
         timer?.invalidate()
         timer = nil
         updateLiveActivityIfNeeded(force: true)
+        endBackgroundTask()
     }
 
     func resetTimer(notifyObservers: Bool = true) {
         prepareForRestart()
+        endBackgroundTask()
 
         if notifyObservers {
             onReset?()
@@ -558,6 +570,7 @@ final class HomeBrewViewModel: Identifiable {
             timer?.invalidate()
             timer = nil
             onBrewComplete?(beanWeight, ratio)
+            endBackgroundTask()
             
             #if canImport(ActivityKit)
             let finalState = BrewActivityAttributes.ContentState(
@@ -706,6 +719,15 @@ final class HomeBrewViewModel: Identifiable {
             phaseStartDate: currentPhaseStartDate,
             isPaused: !isRunning && !isFinished && !isCountingDown
         )
+        #endif
+    }
+
+    private func endBackgroundTask() {
+        #if os(iOS)
+        if backgroundTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
+        }
         #endif
     }
 }

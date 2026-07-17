@@ -15,6 +15,8 @@ struct IntentHandoffBanner: Identifiable, Equatable {
 @Observable
 @MainActor
 final class BrewSessionStore {
+    static let shared = BrewSessionStore()
+
     @ObservationIgnored private var persistentBrews: [UUID: HomeBrewViewModel] = [:]
     @ObservationIgnored private var pendingPersistentRefreshes: Set<UUID> = []
     @ObservationIgnored private var bannerDismissTask: Task<Void, Never>?
@@ -24,6 +26,11 @@ final class BrewSessionStore {
     var intentHandoffBanner: IntentHandoffBanner?
     var activeEditingDraft: RecipeDraft?
     var onInsertLog: ((Double, Double) -> Void)? = nil
+
+    var activeBrewViewModel: HomeBrewViewModel? {
+        let allVMs = transientBrews + Array(persistentBrews.values)
+        return allVMs.first { $0.isRunning || ($0.elapsed > 0 && !$0.isFinished) }
+    }
 
     func addBrewLog(beanWeight: Double, ratio: Double, thought: String?, context: ModelContext) {
         let log = BrewLog(timestamp: Date(), beanWeightGram: beanWeight, ratio: ratio, thought: thought)

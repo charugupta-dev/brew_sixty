@@ -20,25 +20,37 @@ struct BrewActivityWidget: Widget {
                     .padding(.leading, 8)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 4) {
                         let now = Date()
-                        if context.state.isPaused {
-                            Text(formatTime(context.state.pausedRemainingSeconds))
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .monospacedDigit()
-                                .foregroundStyle(Color.terracotta)
-                        } else if now < context.state.phaseEndDate {
-                            Text(context.state.phaseEndDate, style: .timer)
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .monospacedDigit()
-                                .foregroundStyle(Color.terracotta)
-                        } else {
-                            Text("Done!")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.terracotta)
+                        HStack(spacing: 8) {
+                            Button(intent: ToggleBrewTimerIntent()) {
+                                Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Color.darkRoast)
+                                    .frame(width: 20, height: 20)
+                                    .background(Color.terracotta)
+                                    .clipShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+
+                            if context.state.isPaused {
+                                Text(formatTime(context.state.pausedRemainingSeconds))
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .monospacedDigit()
+                                    .foregroundStyle(Color.terracotta)
+                            } else if now < context.state.phaseEndDate {
+                                Text(context.state.phaseEndDate, style: .timer)
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .monospacedDigit()
+                                    .foregroundStyle(Color.terracotta)
+                            } else {
+                                Text("Done!")
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.terracotta)
+                            }
                         }
                         Text("remaining")
                             .font(.caption2)
@@ -91,24 +103,24 @@ struct BrewActivityWidget: Widget {
                     .padding(.leading, 4)
             } compactTrailing: {
                 let now = Date()
-                if context.state.isPaused {
-                    Text(formatTime(context.state.pausedRemainingSeconds))
-                        .monospacedDigit()
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.terracotta)
-                        .padding(.trailing, 4)
-                } else if now < context.state.phaseEndDate {
-                    Text(context.state.phaseEndDate, style: .timer)
-                        .monospacedDigit()
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.terracotta)
-                        .padding(.trailing, 4)
-                } else {
-                    Text("Done")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.terracotta)
-                        .padding(.trailing, 4)
+                HStack(spacing: 0) {
+                    if context.state.isPaused {
+                        Text(formatTime(context.state.pausedRemainingSeconds))
+                            .monospacedDigit()
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.terracotta)
+                    } else if now < context.state.phaseEndDate {
+                        Text(context.state.phaseEndDate, style: .timer)
+                            .monospacedDigit()
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.terracotta)
+                    } else {
+                        Text("Done")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.terracotta)
+                    }
                 }
+                .frame(width: 55, alignment: .trailing)
             } minimal: {
                 Image(systemName: "cup.and.saucer.fill")
                     .foregroundStyle(Color.terracotta)
@@ -131,28 +143,40 @@ struct LockScreenWidgetView: View {
     var body: some View {
         HStack(spacing: 16) {
             // Left region: Large Timer
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 let now = Date()
                 if context.state.isPaused {
                     Text(formatTime(context.state.pausedRemainingSeconds))
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(Color.terracotta)
                 } else if now < context.state.phaseEndDate {
                     Text(context.state.phaseEndDate, style: .timer)
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(Color.terracotta)
                 } else {
                     Text("Done!")
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(Color.terracotta)
                 }
                 
-                Text(context.state.isPaused ? "PAUSED" : "ACTIVE BREW")
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(1.5)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Button(intent: ToggleBrewTimerIntent()) {
+                        Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color.darkRoast)
+                            .frame(width: 20, height: 20)
+                            .background(Color.terracotta)
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Text(context.state.isPaused ? "PAUSED" : "ACTIVE")
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(1.5)
+                        .foregroundStyle(.secondary)
+                }
             }
             .frame(width: 110, alignment: .leading)
             
