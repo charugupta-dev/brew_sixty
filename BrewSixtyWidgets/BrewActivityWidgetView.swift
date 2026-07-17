@@ -70,16 +70,17 @@ struct BrewActivityWidget: Widget {
                         }
                         
                         // Custom progress bar
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(Color.white.opacity(0.15))
-                                Capsule()
-                                    .fill(Color.terracotta)
-                                    .frame(width: geo.size.width * CGFloat(context.state.currentPhaseProgress))
-                            }
+                        if context.state.isPaused {
+                            ProgressView(value: context.state.currentPhaseProgress)
+                                .progressViewStyle(.linear)
+                                .tint(Color.terracotta)
+                                .frame(height: 6)
+                        } else {
+                            ProgressView(timerInterval: context.state.phaseStartDate...context.state.phaseEndDate, countsDown: false)
+                                .progressViewStyle(.linear)
+                                .tint(Color.terracotta)
+                                .frame(height: 6)
                         }
-                        .frame(height: 6)
                     }
                     .padding(.horizontal, 8)
                     .padding(.bottom, 4)
@@ -185,16 +186,17 @@ struct LockScreenWidgetView: View {
                 
                 // Progress and Target Weight
                 HStack(spacing: 8) {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(Color.white.opacity(0.1))
-                            Capsule()
-                                .fill(Color.terracotta)
-                                .frame(width: geo.size.width * CGFloat(context.state.currentPhaseProgress))
-                        }
+                    if context.state.isPaused {
+                        ProgressView(value: context.state.currentPhaseProgress)
+                            .progressViewStyle(.linear)
+                            .tint(Color.terracotta)
+                            .frame(height: 6)
+                    } else {
+                        ProgressView(timerInterval: context.state.phaseStartDate...context.state.phaseEndDate, countsDown: false)
+                            .progressViewStyle(.linear)
+                            .tint(Color.terracotta)
+                            .frame(height: 6)
                     }
-                    .frame(height: 6)
                     
                     if context.state.targetWaterVolume > 0 {
                         Text("\(Int(context.state.targetWaterVolume.rounded()))g")

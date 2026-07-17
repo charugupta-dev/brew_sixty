@@ -6,6 +6,7 @@ struct BrewActivityAttributes: ActivityAttributes {
         var phaseName: String
         var targetWaterVolume: Double
         var currentPhaseProgress: Double
+        var phaseStartDate: Date
         var phaseEndDate: Date
         var isPaused: Bool
         var pausedRemainingSeconds: TimeInterval

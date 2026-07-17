@@ -29,7 +29,8 @@ final class LiveActivityManager {
         initialPhaseName: String,
         phaseRemainingSeconds: TimeInterval,
         targetWaterVolume: Double,
-        currentPhaseProgress: Double
+        currentPhaseProgress: Double,
+        phaseStartDate: Date
     ) {
         #if !targetEnvironment(macCatalyst)
         logger.info("Requesting Live Activity... areActivitiesEnabled: \(ActivityAuthorizationInfo().areActivitiesEnabled, privacy: .public)")
@@ -57,6 +58,7 @@ final class LiveActivityManager {
                 phaseName: initialPhaseName,
                 targetWaterVolume: targetWaterVolume,
                 currentPhaseProgress: currentPhaseProgress,
+                phaseStartDate: phaseStartDate,
                 phaseEndDate: Date().addingTimeInterval(phaseRemainingSeconds),
                 isPaused: false,
                 pausedRemainingSeconds: phaseRemainingSeconds
@@ -80,6 +82,7 @@ final class LiveActivityManager {
         phaseRemainingSeconds: TimeInterval,
         targetWaterVolume: Double,
         currentPhaseProgress: Double,
+        phaseStartDate: Date,
         isPaused: Bool = false
     ) {
         #if !targetEnvironment(macCatalyst)
@@ -95,6 +98,7 @@ final class LiveActivityManager {
                 phaseName: phaseName,
                 targetWaterVolume: targetWaterVolume,
                 currentPhaseProgress: currentPhaseProgress,
+                phaseStartDate: phaseStartDate,
                 phaseEndDate: Date().addingTimeInterval(phaseRemainingSeconds),
                 isPaused: isPaused,
                 pausedRemainingSeconds: phaseRemainingSeconds

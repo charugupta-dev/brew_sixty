@@ -152,6 +152,13 @@ final class HomeBrewViewModel: Identifiable {
         return phaseElapsed / phaseDuration
     }
 
+    var currentPhaseStartDate: Date {
+        let (phaseStart, phaseEnd) = currentPhaseBounds
+        let phaseDuration = max(phaseEnd - phaseStart, 0.001)
+        let phaseElapsed = min(max(elapsed - phaseStart, 0), phaseDuration)
+        return Date().addingTimeInterval(-phaseElapsed)
+    }
+
     var currentPhaseMetricText: String? {
         if isFinished {
             return nil
@@ -447,7 +454,8 @@ final class HomeBrewViewModel: Identifiable {
             initialPhaseName: currentPhaseTitle,
             phaseRemainingSeconds: currentPhaseRemainingTime,
             targetWaterVolume: targetWaterVal,
-            currentPhaseProgress: currentPhaseProgress
+            currentPhaseProgress: currentPhaseProgress,
+            phaseStartDate: currentPhaseStartDate
         )
         #endif
 
@@ -474,6 +482,7 @@ final class HomeBrewViewModel: Identifiable {
                         phaseName: AppConstants.BrewTimer.donePhaseTitle,
                         targetWaterVolume: 0.0,
                         currentPhaseProgress: 1.0,
+                        phaseStartDate: Date(),
                         phaseEndDate: Date(),
                         isPaused: false,
                         pausedRemainingSeconds: 0
@@ -555,6 +564,7 @@ final class HomeBrewViewModel: Identifiable {
                 phaseName: AppConstants.BrewTimer.donePhaseTitle,
                 targetWaterVolume: 0.0,
                 currentPhaseProgress: 1.0,
+                phaseStartDate: Date(),
                 phaseEndDate: Date(),
                 isPaused: false,
                 pausedRemainingSeconds: 0
@@ -693,6 +703,7 @@ final class HomeBrewViewModel: Identifiable {
             phaseRemainingSeconds: currentPhaseRemainingTime,
             targetWaterVolume: targetWaterVal,
             currentPhaseProgress: currentPhaseProgress,
+            phaseStartDate: currentPhaseStartDate,
             isPaused: !isRunning && !isFinished && !isCountingDown
         )
         #endif
