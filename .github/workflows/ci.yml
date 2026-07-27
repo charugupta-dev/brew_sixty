@@ -26,10 +26,27 @@ jobs:
           echo "Selected Xcode: $XCODE_PATH"
           sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
 
-      - name: Build and Run Tests
+      - name: Boot Simulator & Run Tests
         run: |
+          # 1. Wake up simctl to register all default simulator templates
+          echo "=== Available Simulators ==="
+          xcrun simctl list devices
+          
+          # 2. Find the first available iOS simulator name
+          DEVICE_NAME=$(xcrun simctl list devices | grep -E "iPhone" | grep -v "unavailable" | head -n 1 | sed -E 's/^[[:space:]]*([^()]+(\([^()]+\))?).*/\1/' | sed -E 's/[[:space:]]+$//')
+          
+          if [ -z "$DEVICE_NAME" ]; then
+            DEVICE_NAME="iPhone 16"
+          fi
+          
+          echo "Selected Simulator Device: $DEVICE_NAME"
+          
+          # 3. Boot the simulator to ensure xcodebuild detects it as active
+          xcrun simctl boot "$DEVICE_NAME" || true
+          
+          # 4. Run the test suite
           xcodebuild test \
             -project brew_sixty.xcodeproj \
             -scheme brew_sixty \
-            -destination "platform=iOS Simulator,name=iPhone 16,OS=latest" \
+            -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
             CODE_SIGNING_ALLOWED=NO
