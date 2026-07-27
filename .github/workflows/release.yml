@@ -1,0 +1,59 @@
+name: Generate Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Package Release Build
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Auto-Select Latest Xcode 16
+        run: |
+          XCODE_PATH=$(find /Applications -maxdepth 1 -name "Xcode_16*.app" | sort -V | tail -n 1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH="/Applications/Xcode.app"
+          fi
+          echo "Selected Xcode: $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+
+      - name: Build Archive
+        run: |
+          xcodebuild archive \
+            -project brew_sixty.xcodeproj \
+            -scheme brew_sixty \
+            -archivePath build/brew_sixty.xcarchive \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package Simulator App Bundle
+        run: |
+          cd build/brew_sixty.xcarchive/Products/Applications
+          zip -r ../../../../brew_sixty_simulator.zip brew_sixty.app
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: brew_sixty_simulator.zip
+          draft: true
+          prerelease: false
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Release ${{ github.ref_name }}
+            
+            Attached is the compiled app bundle for the iOS Simulator.
+            
+            ### How to Install on Simulator:
+            1. Download `brew_sixty_simulator.zip` and extract it.
+            2. Open your iOS Simulator.
+            3. Drag and drop `brew_sixty.app` directly onto the Simulator screen to install it.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
