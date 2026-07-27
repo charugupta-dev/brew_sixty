@@ -22,5 +22,5 @@ jobs:
           xcodebuild test \
             -project brew_sixty.xcodeproj \
             -scheme brew_sixty \
-            -destination "platform=iOS Simulator,name=iPhone 15,OS=latest" \
+            -destination "platform=iOS Simulator,name=iPhone SE (3rd generation),OS=latest" \
             CODE_SIGNING_ALLOWED=NO
