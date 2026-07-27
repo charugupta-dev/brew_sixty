@@ -11,14 +11,21 @@ on:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: macos-14 # Uses stable runner
+    runs-on: macos-14
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+      - name: Auto-Select Latest Xcode 16
+        run: |
+          # Find the highest version of Xcode 16 available in /Applications
+          XCODE_PATH=$(find /Applications -maxdepth 1 -name "Xcode_16*.app" | sort -V | tail -n 1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH="/Applications/Xcode.app"
+          fi
+          echo "Selected Xcode: $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
 
       - name: Build and Run Tests
         run: |
