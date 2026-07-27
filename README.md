@@ -27,7 +27,9 @@ The app is built with **SwiftUI** and **SwiftData**, stores data locally on-devi
 - **Recipes library** for saving, editing, reusing, and instantly brewing presets
 - **One-off brewing** so you can start a brew immediately without saving it first
 - **Profile setup** for your name, experience level, and preferred brew methods
-- **Premium visual styling** with animated video wallpaper and glassmorphic cards
+- **Siri Shortcuts & App Intents** for hands-free voice commands to filter saved templates or adjust draft parameters (e.g. stronger/lighter, extend bloom, scale cups)
+- **Live Activities & Dynamic Island** integration to track remaining step durations and target weight metrics from the lock screen or status bar
+- **Minimalist Nordic Light Styling** with a clean light sand background, pine green indicators, and soft birch gray panel cards
 
 ## Supported Brew Methods
 
