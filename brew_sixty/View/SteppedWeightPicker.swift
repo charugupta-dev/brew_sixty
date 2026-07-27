@@ -26,11 +26,11 @@ struct SteppedWeightPicker: View {
                 } label: {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.coffeeCream)
                         .frame(width: AppConstants.Pickers.steppedWeightButtonSize, height: AppConstants.Pickers.steppedWeightButtonSize)
-                        .background(Color.white.opacity(0.06))
+                        .background(Color(red: 0.94, green: 0.92, blue: 0.89))
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        .overlay(Circle().stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1))
                 }
                 
                 Spacer()
@@ -38,7 +38,7 @@ struct SteppedWeightPicker: View {
                 VStack(spacing: 2) {
                     Text("\(Int(value.rounded()))")
                         .font(.system(size: 28, weight: .bold, design: .monospaced))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.coffeeCream)
                     Text("GRAMS")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(Color.primaryCopper)
@@ -56,11 +56,11 @@ struct SteppedWeightPicker: View {
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.coffeeCream)
                         .frame(width: AppConstants.Pickers.steppedWeightButtonSize, height: AppConstants.Pickers.steppedWeightButtonSize)
-                        .background(Color.white.opacity(0.06))
+                        .background(Color(red: 0.94, green: 0.92, blue: 0.89))
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        .overlay(Circle().stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1))
                 }
             }
             .padding(.vertical, 4)
@@ -77,8 +77,8 @@ struct SteppedWeightPicker: View {
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundStyle(Color.primaryCopper)
                 .padding(.horizontal, 12)
-                .frame(minHeight: 44) // Meets the 44pt HIG touch target requirement
-                .background(Color.white.opacity(0.04))
+                .frame(minHeight: 44)
+                .background(Color(red: 0.94, green: 0.92, blue: 0.89))
                 .cornerRadius(12)
             }
             .buttonStyle(.plain)
@@ -97,16 +97,16 @@ struct SteppedWeightPicker: View {
                             } label: {
                                 Text(String(format: "%.0fg", preset))
                                     .font(.system(size: 12, weight: isSelected ? .bold : .medium, design: .monospaced))
-                                    .foregroundStyle(isSelected ? .black : .white.opacity(0.65))
+                                    .foregroundStyle(isSelected ? .white : Color.coffeeCream.opacity(0.65))
                                     .padding(.horizontal, 14)
                                     .padding(.vertical, 6)
                                     .background(
                                         Capsule()
-                                            .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.04))
+                                            .fill(isSelected ? Color.primaryCopper : Color(red: 0.94, green: 0.92, blue: 0.89))
                                     )
                                     .overlay(
                                         Capsule()
-                                            .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
+                                            .stroke(isSelected ? Color.clear : Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                                     )
                             }
                         }

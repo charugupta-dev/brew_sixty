@@ -78,7 +78,8 @@ struct RecipeEditorView: View {
 
     var body: some View {
         ZStack {
-            VideoWallpaperBackground(style: .quiet)
+            Color(red: 0.96, green: 0.95, blue: 0.93) // Soft sand background
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: AppConstants.Methods.Layout.sectionSpacing) {
@@ -100,7 +101,7 @@ struct RecipeEditorView: View {
                 Button(AppConstants.Methods.Text.cancel) {
                     dismiss()
                 }
-                .tint(Color.primaryCopper)
+                .tint(Color(red: 0.18, green: 0.32, blue: 0.20))
             }
         }
         .sheet(item: $presentedHelpTopic) { topic in
@@ -163,7 +164,7 @@ struct RecipeEditorView: View {
             Text("SMART SUGGESTIONS")
                 .font(.system(size: 11, weight: .bold))
                 .tracking(1.5)
-                .foregroundStyle(Color.brushedCopper)
+                .foregroundStyle(Color(red: 0.54, green: 0.55, blue: 0.49))
                 .padding(.horizontal, 16)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -172,19 +173,19 @@ struct RecipeEditorView: View {
                         HStack(spacing: 8) {
                             Image(systemName: suggestion.iconName)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(Color.primaryCopper)
+                                .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                             
                             Text(suggestion.message)
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundStyle(Color.coffeeCream.opacity(0.85))
+                                .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
-                        .background(Color(red: 0.11, green: 0.08, blue: 0.07).opacity(0.6))
+                        .background(Color(red: 0.98, green: 0.97, blue: 0.96))
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.primaryCopper.opacity(0.12), lineWidth: 1)
+                                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                         )
                     }
                 }
@@ -201,11 +202,11 @@ struct RecipeEditorView: View {
                     Text("Choose Brewer")
                         .font(.system(.title3, design: .rounded))
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color.coffeeCream)
+                        .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
 
                     Text("Start with the brewer you want to make right now.")
                         .font(.footnote)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.66))
+                        .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                 }
 
                 Spacer()
@@ -260,9 +261,12 @@ struct RecipeEditorView: View {
         .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color(red: 0.98, green: 0.97, blue: 0.96))
         )
-        .liquidGlassBorder(cornerRadius: 16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1.5)
+        )
         .padding(.horizontal, 16)
     }
 
@@ -274,7 +278,7 @@ struct RecipeEditorView: View {
                     Spacer()
                     Text("\(Int(draft.beanWeight.rounded()))\(AppConstants.Text.gramsUnit)")
                         .font(.system(size: 19, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(Color.primaryCopper)
+                        .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                 }
 
                 SteppedWeightPicker(value: $draft.beanWeight, onInteraction: {
@@ -295,7 +299,7 @@ struct RecipeEditorView: View {
                         Spacer()
                         Text("1:\(Int(draft.ratio.rounded()))")
                             .font(.system(size: 19, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                     }
 
                     PrecisionSlider(value: $draft.ratio, range: AppConstants.Methods.Ranges.waterRatio, step: AppConstants.Methods.Steps.waterRatio, onInteraction: {
@@ -313,7 +317,7 @@ struct RecipeEditorView: View {
                         Spacer()
                         Text("\(Int(draft.waterVolume))\(AppConstants.Text.gramsUnit)")
                             .font(.system(size: 19, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                     }
 
                     PrecisionSlider(value: $draft.waterVolume, range: AppConstants.Methods.Ranges.waterVolume, step: AppConstants.Methods.Steps.waterVolume, onInteraction: {
@@ -337,7 +341,7 @@ struct RecipeEditorView: View {
                         Spacer()
                         Text("\(Int(draft.preInfusionDuration))\(AppConstants.Text.secondsUnit)")
                             .font(.system(size: 18, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                     }
 
                     PrecisionSlider(value: $draft.preInfusionDuration, range: AppConstants.Methods.Ranges.bloomDuration, step: AppConstants.Methods.Steps.bloomDuration, onInteraction: {
@@ -355,7 +359,7 @@ struct RecipeEditorView: View {
                         Spacer()
                         Text("\(Int(draft.steepDuration))\(AppConstants.Text.secondsUnit)")
                             .font(.system(size: 18, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                     }
 
                     PrecisionSlider(value: $draft.steepDuration, range: AppConstants.Methods.Ranges.steepDuration, step: AppConstants.Methods.Steps.steepDuration, onInteraction: {
@@ -367,7 +371,7 @@ struct RecipeEditorView: View {
                     }
 
                     if draft.method == .aeropress {
-                        Divider().overlay(Color.white.opacity(AppConstants.UI.strongBorderOpacity))
+                        Divider().overlay(Color(red: 0.86, green: 0.84, blue: 0.81))
                             .padding(.vertical, 8)
 
                         VStack(alignment: .leading, spacing: 8) {
@@ -376,7 +380,7 @@ struct RecipeEditorView: View {
                                 Spacer()
                                 Text("\(Int(draft.pressDuration))\(AppConstants.Text.secondsUnit)")
                                     .font(.system(size: 18, weight: .semibold, design: .monospaced))
-                                    .foregroundStyle(Color.primaryCopper)
+                                    .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                             }
 
                             PrecisionSlider(value: $draft.pressDuration, range: AppConstants.Methods.Ranges.pressDuration, step: AppConstants.Methods.Steps.pressDuration, onInteraction: {
@@ -391,7 +395,7 @@ struct RecipeEditorView: View {
                 }
             }
 
-            Divider().overlay(Color.white.opacity(AppConstants.UI.subtleBorderOpacity))
+            Divider().overlay(Color(red: 0.86, green: 0.84, blue: 0.81))
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
@@ -399,7 +403,7 @@ struct RecipeEditorView: View {
                     Spacer()
                     Text("\(Int(draft.targetTemperature.rounded()))\(AppConstants.Text.celsiusUnit)")
                         .font(.system(size: 19, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(Color.primaryCopper)
+                        .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                 }
 
                 RulerPicker(value: $draft.targetTemperature, range: AppConstants.Methods.Ranges.temperature, step: AppConstants.Methods.Steps.temperature, onInteraction: {
@@ -419,7 +423,7 @@ struct RecipeEditorView: View {
             TextField(AppConstants.Methods.Text.recipeNamePlaceholder, text: $draft.name)
                 .font(.system(size: 24, weight: .semibold, design: .rounded))
                 .fontWeight(.semibold)
-                .foregroundStyle(Color.coffeeCream)
+                .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                 .textFieldStyle(.plain)
         }
     }
@@ -436,11 +440,11 @@ struct RecipeEditorView: View {
                         .font(.system(size: 18, weight: .bold, design: .rounded))
                     Spacer()
                 }
-                .foregroundStyle(Color.deepRoastInk)
+                .foregroundStyle(.white)
                 .padding(.vertical, 16)
                 .background(
                     LinearGradient(
-                        colors: [Color.primaryCopper, Color.brushedCopper],
+                        colors: [Color(red: 0.18, green: 0.32, blue: 0.20), Color(red: 0.25, green: 0.42, blue: 0.27)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -460,15 +464,15 @@ struct RecipeEditorView: View {
                         .minimumScaleFactor(0.8)
                     Spacer()
                 }
-                .foregroundStyle(isSaveDisabled ? Color.white.opacity(0.3) : Color.coffeeCream)
+                .foregroundStyle(isSaveDisabled ? Color.coffeeCream.opacity(0.3) : Color(red: 0.18, green: 0.32, blue: 0.20))
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(Color.white.opacity(0.06))
+                        .fill(Color(red: 0.94, green: 0.92, blue: 0.89))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                        .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                 )
             }
             .disabled(isSaveDisabled)
@@ -673,7 +677,7 @@ struct RecipeEditorView: View {
         Text(title)
             .font(.system(size: 13, weight: .bold, design: .rounded))
             .fontWeight(.bold)
-            .foregroundStyle(Color.coffeeCream)
+            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
             .tracking(AppConstants.UI.captionEmphasisTracking)
     }
 
@@ -694,16 +698,16 @@ struct RecipeEditorView: View {
             .multilineTextAlignment(.center)
             .lineLimit(2)
             .minimumScaleFactor(0.85)
-            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.84))
+            .foregroundStyle(isSelected ? .white : Color(red: 0.36, green: 0.33, blue: 0.29))
             .padding(.horizontal, 10)
             .frame(maxWidth: .infinity, minHeight: 58)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.08))
+                    .fill(isSelected ? Color(red: 0.18, green: 0.32, blue: 0.20) : Color(red: 0.94, green: 0.92, blue: 0.89))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                    .stroke(Color(red: 0.86, green: 0.84, blue: 0.81).opacity(isSelected ? 0.0 : 1.0), lineWidth: 1)
             )
     }
 
@@ -715,17 +719,17 @@ struct RecipeEditorView: View {
             .font(.system(size: 14, weight: .semibold, design: .rounded))
             .lineLimit(1)
             .minimumScaleFactor(0.8)
-            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
+            .foregroundStyle(isSelected ? .white : Color(red: 0.36, green: 0.33, blue: 0.29))
             .padding(.horizontal, 12)
             .padding(.vertical, 11)
             .frame(maxWidth: .infinity)
             .background(
                 Capsule()
-                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.05))
+                    .fill(isSelected ? Color(red: 0.18, green: 0.32, blue: 0.20) : Color(red: 0.94, green: 0.92, blue: 0.89))
             )
             .overlay(
                 Capsule()
-                    .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                    .stroke(Color(red: 0.86, green: 0.84, blue: 0.81).opacity(isSelected ? 0.0 : 1.0), lineWidth: 1)
             )
     }
 
@@ -735,17 +739,17 @@ struct RecipeEditorView: View {
 
         Text(servingSize.title)
             .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
+            .foregroundStyle(isSelected ? .white : Color(red: 0.36, green: 0.33, blue: 0.29))
             .padding(.horizontal, 12)
             .padding(.vertical, 11)
             .frame(maxWidth: .infinity)
             .background(
                 Capsule()
-                    .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.05))
+                    .fill(isSelected ? Color(red: 0.18, green: 0.32, blue: 0.20) : Color(red: 0.94, green: 0.92, blue: 0.89))
             )
             .overlay(
                 Capsule()
-                    .stroke(Color.white.opacity(isSelected ? 0.0 : AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                    .stroke(Color(red: 0.86, green: 0.84, blue: 0.81).opacity(isSelected ? 0.0 : 1.0), lineWidth: 1)
             )
     }
 
@@ -756,11 +760,10 @@ struct RecipeEditorView: View {
         } label: {
             Image(systemName: "info.circle")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.coffeeCream.opacity(0.62))
+                .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                 .frame(width: 24, height: 24)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
     }
 
     private func shouldShowContextualHint(for topic: HelpTopic) -> Bool {
@@ -1123,26 +1126,26 @@ private struct MethodsHelpSheet: View {
                     Text(title)
                         .font(.system(.title3, design: .rounded))
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color.coffeeCream)
+                        .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
 
                     Text(summary)
                         .font(.body)
-                        .foregroundStyle(Color.coffeeCream.opacity(0.84))
+                        .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                         .fixedSize(horizontal: false, vertical: true)
 
                     Divider()
-                        .overlay(Color.white.opacity(AppConstants.UI.subtleBorderOpacity))
+                        .overlay(Color(red: 0.86, green: 0.84, blue: 0.81))
 
                     VStack(alignment: .leading, spacing: AppConstants.Methods.HelpSheet.sectionSpacing) {
                         Text(AppConstants.Methods.HelpSheet.goodPlaceToStart)
                             .font(.caption2)
                             .fontWeight(.bold)
                             .tracking(1.2)
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
 
                         Text(startingPoint)
                             .font(.subheadline)
-                            .foregroundStyle(Color.coffeeCream.opacity(0.82))
+                            .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -1151,11 +1154,11 @@ private struct MethodsHelpSheet: View {
                             .font(.caption2)
                             .fontWeight(.bold)
                             .tracking(1.2)
-                            .foregroundStyle(Color.primaryCopper)
+                            .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
 
                         Text(note)
                             .font(.subheadline)
-                            .foregroundStyle(Color.coffeeCream.opacity(0.72))
+                            .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29))
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -1182,7 +1185,7 @@ private struct SectionCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(title.localizedUppercase)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.primaryCopper)
+                .foregroundStyle(Color(red: 0.18, green: 0.32, blue: 0.20))
                 .tracking(AppConstants.UI.eyebrowTracking)
                 .padding(.bottom, 4)
 
@@ -1191,9 +1194,12 @@ private struct SectionCard<Content: View>: View {
         .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color(red: 0.98, green: 0.97, blue: 0.96))
         )
-        .liquidGlassBorder(cornerRadius: 16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1.5)
+        )
         .padding(.horizontal, 16)
     }
 }

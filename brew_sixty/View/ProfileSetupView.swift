@@ -98,10 +98,10 @@ struct ProfileSetupView: View {
                                     .submitLabel(.done)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 14)
-                                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .background(Color(red: 0.94, green: 0.92, blue: 0.89), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                                            .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                                     )
                                     .foregroundStyle(Color.coffeeCream)
                             }
@@ -155,16 +155,16 @@ struct ProfileSetupView: View {
                                             Text(method.rawValue)
                                                 .font(.system(.subheadline, design: .rounded))
                                                 .fontWeight(.semibold)
-                                                .foregroundStyle(isSelected ? Color.black : Color.coffeeCream.opacity(0.82))
+                                                .foregroundStyle(isSelected ? .white : Color.coffeeCream.opacity(0.82))
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 12)
                                                 .background(
                                                     Capsule(style: .continuous)
-                                                        .fill(isSelected ? Color.primaryCopper : Color.white.opacity(0.05))
+                                                        .fill(isSelected ? Color.primaryCopper : Color(red: 0.94, green: 0.92, blue: 0.89))
                                                 )
                                                 .overlay(
                                                     Capsule(style: .continuous)
-                                                        .stroke(isSelected ? Color.clear : Color.white.opacity(0.08), lineWidth: 1)
+                                                        .stroke(isSelected ? Color.clear : Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                                                 )
                                         }
                                         .buttonStyle(.plain)
@@ -217,7 +217,7 @@ struct ProfileSetupView: View {
                                     .fontWeight(.bold)
                                 Spacer()
                             }
-                            .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                            .foregroundStyle(.white)
                             .padding(.vertical, 16)
                             .background(
                                 LinearGradient(
@@ -267,7 +267,7 @@ struct ProfileSetupView: View {
             .padding(18)
             .background(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cardCornerRadius, style: .continuous)
-                    .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
+                    .fill(Color(red: 0.98, green: 0.97, blue: 0.96))
             )
             .liquidGlassBorder(cornerRadius: AppConstants.UI.cardCornerRadius)
     }
@@ -299,7 +299,7 @@ struct ProfileSetupView: View {
                 Spacer()
 
                 Circle()
-                    .stroke(isSelected ? Color.primaryCopper : Color.white.opacity(0.18), lineWidth: 1.5)
+                    .stroke(isSelected ? Color.primaryCopper : Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1.5)
                     .frame(width: 20, height: 20)
                     .overlay {
                         Circle()
@@ -311,11 +311,11 @@ struct ProfileSetupView: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(isSelected ? Color.white.opacity(0.06) : Color.white.opacity(0.03))
+                    .fill(isSelected ? Color(red: 0.94, green: 0.92, blue: 0.89) : Color(red: 0.98, green: 0.97, blue: 0.96))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(isSelected ? Color.primaryCopper.opacity(0.32) : Color.white.opacity(0.06), lineWidth: 1)
+                    .stroke(isSelected ? Color.primaryCopper.opacity(0.32) : Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -339,11 +339,11 @@ struct ProfileSetupView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.04))
+                .fill(Color(red: 0.98, green: 0.97, blue: 0.96))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
         )
     }
 
@@ -466,7 +466,7 @@ private struct MethodEducationCard: View {
                             .fixedSize(horizontal: false, vertical: true)
 
                         Divider()
-                            .overlay(Color.white.opacity(0.08))
+                            .overlay(Color(red: 0.86, green: 0.84, blue: 0.81))
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Good place to start")
@@ -500,11 +500,11 @@ private struct MethodEducationCard: View {
             .padding(18)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.white.opacity(isExpanded ? 0.07 : 0.04))
+                    .fill(isExpanded ? Color(red: 0.94, green: 0.92, blue: 0.89) : Color(red: 0.98, green: 0.97, blue: 0.96))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(isExpanded ? Color.primaryCopper.opacity(0.24) : Color.white.opacity(0.06), lineWidth: 1)
+                    .stroke(isExpanded ? Color.primaryCopper.opacity(0.24) : Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

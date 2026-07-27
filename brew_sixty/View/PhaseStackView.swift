@@ -76,11 +76,11 @@ struct PhaseStackPickerView: View {
             return Color.primaryCopper.opacity(0.42)
         }
 
-        return Color.white.opacity(0.22)
+        return Color(red: 0.86, green: 0.84, blue: 0.81)
     }
 
     private func connectorColor(for index: Int) -> Color {
-        index < safeSelectedIndex ? Color.primaryCopper.opacity(0.30) : Color.white.opacity(0.12)
+        index < safeSelectedIndex ? Color.primaryCopper.opacity(0.30) : Color(red: 0.86, green: 0.84, blue: 0.81)
     }
 
     @ViewBuilder

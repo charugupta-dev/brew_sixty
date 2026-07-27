@@ -67,7 +67,7 @@ struct ContentView: View {
                 .allowsHitTesting(false)
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .fullScreenCover(
             isPresented: Binding(
                 get: { !showLaunchScreen && !hasCompletedProfile },

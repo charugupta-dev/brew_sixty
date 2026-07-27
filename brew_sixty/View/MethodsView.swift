@@ -283,7 +283,7 @@ private struct RecipeTemplateCard: View {
                 Label("\(Int(template.targetTemperature.rounded()))\(AppConstants.Text.celsiusUnit)", systemImage: "thermometer.medium")
             }
             .font(.caption)
-            .foregroundStyle(.white.opacity(0.64))
+            .foregroundStyle(Color.coffeeCream.opacity(0.64))
 
             HStack(spacing: 12) {
                 Button(action: onBrew) {
@@ -319,11 +319,11 @@ private struct RecipeTemplateCard: View {
                     .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
+                            .fill(Color(red: 0.94, green: 0.92, blue: 0.89))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color.white.opacity(AppConstants.UI.subtleBorderOpacity), lineWidth: 1)
+                            .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                     )
                 }
                 .buttonStyle(.borderless)

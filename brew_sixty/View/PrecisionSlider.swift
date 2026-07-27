@@ -28,11 +28,11 @@ struct PrecisionSlider: View {
             
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color(red: 0.94, green: 0.92, blue: 0.89))
                     .frame(height: AppConstants.Pickers.precisionTrackHeight)
                     .overlay(
                         Capsule()
-                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                            .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
                     )
                 
                 Capsule()
@@ -46,7 +46,7 @@ struct PrecisionSlider: View {
                     .frame(width: clampedProgress * width, height: AppConstants.Pickers.precisionTrackHeight)
                 
                 Circle()
-                    .fill(Color.coffeeCream)
+                    .fill(Color.white)
                     .frame(width: thumbSize, height: thumbSize)
                     .overlay(
                         Circle()

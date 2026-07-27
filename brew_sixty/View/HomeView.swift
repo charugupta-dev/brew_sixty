@@ -68,7 +68,7 @@ struct HomeView: View {
                                 
                                 Text(AppConstants.Text.emptyCanvasDescription)
                                     .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.7))
+                                    .foregroundStyle(Color.coffeeCream.opacity(0.7))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 32)
                             }
@@ -213,17 +213,10 @@ private struct ProfileAvatarView: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.white.opacity(0.06))
+                .fill(Color(red: 0.94, green: 0.92, blue: 0.89))
 
             Circle()
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.14), Color.primaryCopper.opacity(0.35)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
+                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
 
             if initials.isEmpty {
                 Image(systemName: "person.fill")
@@ -304,7 +297,7 @@ struct LiveTimerCard: View {
                                 .fontWeight(.bold)
                             Spacer()
                         }
-                        .foregroundStyle(Color(red: 0.12, green: 0.08, blue: 0.08))
+                        .foregroundStyle(.white)
                         .padding(.vertical, 16)
                         .background(
                             LinearGradient(
@@ -356,7 +349,7 @@ struct LiveTimerCard: View {
         }
         .background(
             RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius)
-                .fill(Color(red: 0.10, green: 0.09, blue: 0.09).opacity(AppConstants.UI.cardOpacity))
+                .fill(Color.appPanel)
         )
         .liquidGlassBorder(cornerRadius: 24)
         .onAppear {
@@ -380,11 +373,11 @@ struct LiveTimerCard: View {
     private var countdownOverlay: some View {
         ZStack {
             RoundedRectangle(cornerRadius: AppConstants.UI.homeCardCornerRadius, style: .continuous)
-                .fill(Color.black.opacity(0.66))
+                .fill(Color.white.opacity(0.82))
 
             LinearGradient(
                 colors: [
-                    Color.black.opacity(0.08),
+                    Color.white.opacity(0.12),
                     Color.primaryCopper.opacity(0.10)
                 ],
                 startPoint: .topLeading,
@@ -548,7 +541,7 @@ struct TimerCircleView: View {
             
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.04), lineWidth: 10)
+                    .stroke(Color(red: 0.86, green: 0.84, blue: 0.81).opacity(0.4), lineWidth: 10)
                     .frame(width: 260, height: 260)
                 
                 Circle()
@@ -1164,14 +1157,12 @@ private struct WaitStateCard: View {
                 .font(.system(size: 10, weight: .bold, design: .rounded))
                 .tracking(1.5)
                 .foregroundStyle(Color.primaryCopper)
-                .shadow(color: .black.opacity(0.40), radius: 2, x: 0, y: 1)
 
             Text(message)
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Color.coffeeCream)
                 .fixedSize(horizontal: false, vertical: true)
-                .shadow(color: .black.opacity(0.45), radius: 3, x: 0, y: 1.5)
         }
         .padding(.horizontal, 12)
     }
@@ -1181,16 +1172,16 @@ struct TimerControlButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 15, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white.opacity(configuration.isPressed ? 0.6 : 0.9))
+            .foregroundStyle(Color(red: 0.36, green: 0.33, blue: 0.29).opacity(configuration.isPressed ? 0.6 : 0.9))
             .padding(.horizontal, 18)
             .frame(minWidth: 116, minHeight: AppConstants.UI.minimumTouchHeight)
             .background(
                 Capsule(style: .continuous)
-                    .fill(Color(uiColor: .secondarySystemFill).opacity(configuration.isPressed ? 0.72 : 0.9))
+                    .fill(Color(red: 0.94, green: 0.92, blue: 0.89).opacity(configuration.isPressed ? 0.72 : 0.9))
             )
             .overlay(
                 Capsule(style: .continuous)
-                    .stroke(Color.white.opacity(configuration.isPressed ? 0.10 : 0.16), lineWidth: 1)
+                    .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1)
             )
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeOut(duration: 0.1), value: configuration.isPressed)

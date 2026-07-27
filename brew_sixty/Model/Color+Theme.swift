@@ -8,34 +8,34 @@
 import SwiftUI
 
 extension Color {
-    /// Warm Coffee Accent Color
-    static let coffeeAccent = Color(red: 0.65, green: 0.41, blue: 0.20)      // #A56933: Coffee Caramel
+    /// Warm Coffee Accent Color (Deep Forest Pine Green)
+    static let coffeeAccent = Color(red: 0.18, green: 0.32, blue: 0.20)
     
-    /// Coffee Cream color for text and highlights (Warm ivory/cream #ECE5DD)
-    static let coffeeCream = Color(red: 0.93, green: 0.90, blue: 0.87)
+    /// Coffee Cream color for text and highlights (Charcoal brown)
+    static let coffeeCream = Color(red: 0.36, green: 0.33, blue: 0.29)
     
-    /// Coffee Peach color token
-    static let coffeePeach = Color(red: 0.94, green: 0.67, blue: 0.48)
+    /// Coffee Peach color token (Secondary pine green)
+    static let coffeePeach = Color(red: 0.25, green: 0.42, blue: 0.27)
     
     /// Custom palette from user upload
-    static let appPrimary = Color(red: 0.65, green: 0.41, blue: 0.20)      // #A56933: Coffee Caramel
-    static let appSecondary = Color(red: 0.43, green: 0.47, blue: 0.54)    // #6D788A: Slate Steel
-    static let appTertiary = Color(red: 0.20, green: 0.48, blue: 0.75)     // #337ABE: Sky Blue
-    static let appNeutral = Color(red: 0.54, green: 0.45, blue: 0.36)      // #89735C: Clay Brown
+    static let appPrimary = Color(red: 0.18, green: 0.32, blue: 0.20)
+    static let appSecondary = Color(red: 0.54, green: 0.55, blue: 0.49)
+    static let appTertiary = Color(red: 0.25, green: 0.42, blue: 0.27)
+    static let appNeutral = Color(red: 0.36, green: 0.33, blue: 0.29)
     
-    /// Copper color tokens (Option 1 Warm Amber & Gold)
-    static let primaryCopper = Color.appPrimary
-    static let brushedCopper = Color.appNeutral
-    static let appPanel = Color(red: 0.10, green: 0.09, blue: 0.09)
-    static let appSheetTop = Color(red: 0.11, green: 0.10, blue: 0.09)
-    static let appSheetBottom = Color(red: 0.07, green: 0.07, blue: 0.08)
-    static let deepRoastInk = Color(red: 0.12, green: 0.08, blue: 0.08)
+    /// Copper color tokens (Option 1 Warm Amber & Gold) -> Mapped to Nordic Light
+    static let primaryCopper = Color(red: 0.18, green: 0.32, blue: 0.20)
+    static let brushedCopper = Color(red: 0.54, green: 0.55, blue: 0.49)
+    static let appPanel = Color(red: 0.98, green: 0.97, blue: 0.96)
+    static let appSheetTop = Color(red: 0.96, green: 0.95, blue: 0.93)
+    static let appSheetBottom = Color(red: 0.96, green: 0.95, blue: 0.93)
+    static let deepRoastInk = Color.white // White text inside buttons
 }
 
 extension RadialGradient {
     static var coffeeBackground: RadialGradient {
         RadialGradient(
-            colors: [Color(red: 0.33, green: 0.16, blue: 0.09), Color(red: 0.10, green: 0.08, blue: 0.09)],
+            colors: [Color(red: 0.98, green: 0.97, blue: 0.96), Color(red: 0.96, green: 0.95, blue: 0.93)],
             center: .center,
             startRadius: 10,
             endRadius: 500
@@ -53,18 +53,18 @@ struct LiquidGlassBorder: ViewModifier {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.10),
-                                Color.white.opacity(0.02),
-                                Color.primaryCopper.opacity(0.22),
-                                Color.white.opacity(0.01)
+                                Color(red: 0.86, green: 0.84, blue: 0.81),
+                                Color(red: 0.86, green: 0.84, blue: 0.81).opacity(0.5),
+                                Color(red: 0.18, green: 0.32, blue: 0.20).opacity(0.2),
+                                Color(red: 0.86, green: 0.84, blue: 0.81).opacity(0.1)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 1
+                        lineWidth: 1.5
                     )
             )
-            .shadow(color: Color.black.opacity(0.26), radius: 10, x: 0, y: 6)
+            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -76,15 +76,19 @@ extension View {
     func premiumCardBackground(cornerRadius: CGFloat = 24) -> some View {
         self.background(
             ZStack {
-                Color(red: 0.11, green: 0.10, blue: 0.09).opacity(0.55)
+                Color(red: 0.98, green: 0.97, blue: 0.96) // Crisp white card background
                 
                 Image("timer_card_bg")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .opacity(0.16)
-                    .blendMode(.plusLighter)
+                    .opacity(0.04) // Very subtle texture
+                    .blendMode(.multiply)
                     .clipped()
             }
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color(red: 0.86, green: 0.84, blue: 0.81), lineWidth: 1.5) // Thin birch gray border
         )
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }

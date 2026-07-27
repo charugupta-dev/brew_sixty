@@ -46,29 +46,9 @@ struct VideoWallpaperBackground: View {
     }
 
     var body: some View {
-        ZStack {
-            Color(red: 0.05, green: 0.05, blue: 0.05) // Deep solid obsidian
-            
-            if isMasked {
-                ZStack {
-                    LoopingVideoPlayerView()
-                    Color.black.opacity(style.baseDimOpacity)
-                }
-                .mask(
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.8), .clear],
-                        startPoint: .top,
-                        endPoint: .center
-                    )
-                )
-                .opacity(0.4)
-            } else {
-                LoopingVideoPlayerView()
-                Color.black.opacity(style.baseDimOpacity)
-            }
-        }
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
+        Color(red: 0.96, green: 0.95, blue: 0.93) // Soft sand solid background
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
     }
 }
 
@@ -259,7 +239,7 @@ private final class SeamlessLoopingVideoView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        backgroundColor = .black
+        backgroundColor = UIColor(red: 0.96, green: 0.95, blue: 0.93, alpha: 1)
         clipsToBounds = true
         
         addSubview(primaryPlayerView)
