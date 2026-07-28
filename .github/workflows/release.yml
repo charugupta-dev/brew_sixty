@@ -33,7 +33,8 @@ jobs:
 
       - name: Install Ruby Dependencies
         run: |
-          bundle install --path vendor/bundle
+          bundle config set --local path 'vendor/bundle'
+          bundle install
 
       - name: Build Simulator App via Fastlane
         run: |
