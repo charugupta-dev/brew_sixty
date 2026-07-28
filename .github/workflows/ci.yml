@@ -17,6 +17,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: List Installed Xcode Versions
+        run: |
+          echo "=== Installed Xcode Applications ==="
+          ls -la /Applications | grep -i Xcode || true
+
       - name: Auto-Select Latest Xcode 16
         run: |
           XCODE_PATH=$(find /Applications -maxdepth 1 -name "Xcode_16*.app" | sort -V | tail -n 1)
@@ -32,20 +37,22 @@ jobs:
       - name: Boot Simulator & Run Tests
         run: |
           # 1. Detect the first truly available iOS simulator name and version using the CoreSimulator JSON
-          RESULT=$(xcrun simctl list -j | python3 -c "
+          DEVICE_NAME=$(xcrun simctl list -j | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
           runtime_versions = {}
           for runtime in data.get('runtimes', []):
-              runtime_versions[runtime['identifier']] = runtime['version']
+              is_available = runtime.get('isAvailable', False)
+              if is_available or runtime.get('availability', '') == '(available)':
+                  runtime_versions[runtime['identifier']] = runtime['version']
           for runtime_id, devices in data.get('devices', {}).items():
-              if 'iOS' in runtime_id:
-                  version = runtime_versions.get(runtime_id)
-                  if version:
-                      for device in devices:
-                          if device.get('isAvailable', False):
-                              print(f\"{device['name']}|{version}\")
-                              sys.exit(0)
+              version = runtime_versions.get(runtime_id)
+              if version:
+                  for device in devices:
+                      device_available = device.get('isAvailable', False)
+                      if device_available and 'iPhone' in device.get('name', ''):
+                          print(f\"{device['name']}|{version}\")
+                          sys.exit(0)
           sys.exit(1)
           ")
           
