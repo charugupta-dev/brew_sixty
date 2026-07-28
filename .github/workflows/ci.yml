@@ -31,20 +31,29 @@ jobs:
 
       - name: Boot Simulator & Run Tests
         run: |
-          # 1. Detect the first truly available iOS simulator name using the CoreSimulator JSON
-          DEVICE_NAME=$(xcrun simctl list -j | python3 -c "
+          # 1. Detect the first truly available iOS simulator name and version using the CoreSimulator JSON
+          RESULT=$(xcrun simctl list -j | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          for runtime, devices in data.get('devices', {}).items():
-              if 'iOS' in runtime:
-                  for device in devices:
-                      if device.get('isAvailable', False):
-                          print(device['name'])
-                          sys.exit(0)
+          runtime_versions = {}
+          for runtime in data.get('runtimes', []):
+              runtime_versions[runtime['identifier']] = runtime['version']
+          for runtime_id, devices in data.get('devices', {}).items():
+              if 'iOS' in runtime_id:
+                  version = runtime_versions.get(runtime_id)
+                  if version:
+                      for device in devices:
+                          if device.get('isAvailable', False):
+                              print(f\"{device['name']}|{version}\")
+                              sys.exit(0)
           sys.exit(1)
           ")
           
+          DEVICE_NAME="${RESULT%|*}"
+          OS_VERSION="${RESULT#*|}"
+          
           echo "Selected Simulator Device: $DEVICE_NAME"
+          echo "Selected OS Version: $OS_VERSION"
           
           # 2. Boot the simulator to ensure xcodebuild detects it as active
           xcrun simctl boot "$DEVICE_NAME" || true
@@ -53,5 +62,5 @@ jobs:
           xcodebuild test \
             -project brew_sixty.xcodeproj \
             -scheme brew_sixty \
-            -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
+            -destination "platform=iOS Simulator,name=$DEVICE_NAME,OS=$OS_VERSION" \
             CODE_SIGNING_ALLOWED=NO
