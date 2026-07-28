@@ -17,48 +17,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: List Installed Xcode Versions
+      - name: Set Xcode 16.1 Version
         run: |
-          echo "=== Installed Xcode Applications ==="
-          ls -la /Applications | grep -i Xcode || true
-
-      - name: Auto-Select Working Xcode 16
-        run: |
-          # Find all Xcode 16 versions in descending order
-          XCODE_PATHS=$(find /Applications -maxdepth 1 -name "Xcode_16*.app" | sort -rV)
-          
-          SELECTED_PATH=""
-          for path in $XCODE_PATHS; do
-            echo "Testing Xcode path: $path"
-            sudo xcode-select -s "$path/Contents/Developer"
-            sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
-            
-            # Query if this Xcode version has any available iOS simulator runtimes
-            HAS_RUNTIMES=$(xcrun simctl list runtimes -j | python3 -c "
-            import json, sys
-            data = json.load(sys.stdin)
-            for runtime in data.get('runtimes', []):
-                is_available = runtime.get('isAvailable', False)
-                if (is_available or runtime.get('availability', '') == '(available)') and 'iOS' in runtime.get('name', ''):
-                    sys.exit(0)
-            sys.exit(1)
-            " && echo "YES" || echo "NO")
-            
-            if [ "$HAS_RUNTIMES" = "YES" ]; then
-              echo "Found active iOS Simulator runtimes using Xcode at $path!"
-              SELECTED_PATH="$path"
-              break
-            else
-              echo "No active iOS Simulator runtimes found under Xcode at $path."
-            fi
-          done
-          
-          # Fallback if no matching Xcode 16 with runtimes was found
-          if [ -z "$SELECTED_PATH" ]; then
-            echo "Warning: No Xcode 16 with active iOS Simulator runtimes was found. Falling back to default Xcode."
-            sudo xcode-select -s "/Applications/Xcode.app/Contents/Developer"
-            sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
+          XCODE_PATH="/Applications/Xcode_16.1.app"
+          if [ ! -d "$XCODE_PATH" ]; then
+            echo "Xcode 16.1 not found at $XCODE_PATH, falling back to default Xcode."
+            XCODE_PATH="/Applications/Xcode.app"
           fi
+          echo "Selected Xcode: $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          
+          # Restart CoreSimulator service to match the newly selected Xcode developer directory
+          sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
 
       - name: Boot Simulator & Run Tests
         run: |
