@@ -38,6 +38,8 @@ jobs:
 
       - name: Build Simulator App via Fastlane
         run: |
+          # Update the deployment target in the project file to 17.0 so Xcode matches the simulator runtime versions
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 26.4;/IPHONEOS_DEPLOYMENT_TARGET = 17.0;/g' brew_sixty.xcodeproj/project.pbxproj
           bundle exec fastlane build_simulator
 
       - name: Package Simulator App Bundle

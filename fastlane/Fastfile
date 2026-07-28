@@ -11,6 +11,7 @@ platform :ios do
       configuration: "Release",
       derived_data_path: "build",
       skip_profile_detection: true,
+      skip_package_ipa: true,      # Skip exportArchive to bypass signing/team requirements
       export_method: "development",
       xcargs: "CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO"
     )
