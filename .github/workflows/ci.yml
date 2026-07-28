@@ -61,9 +61,10 @@ jobs:
           # 2. Boot the simulator to ensure xcodebuild detects it as active
           xcrun simctl boot "$DEVICE_NAME" || true
           
-          # 3. Run the test suite
+          # 3. Run the test suite overriding the deployment target to match the simulator version
           xcodebuild test \
             -project brew_sixty.xcodeproj \
             -scheme brew_sixty \
             -destination "platform=iOS Simulator,name=$DEVICE_NAME,OS=$OS_VERSION" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            IPHONEOS_DEPLOYMENT_TARGET="$OS_VERSION"
