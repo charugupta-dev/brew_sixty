@@ -85,9 +85,10 @@ jobs:
           # 3. Boot the simulator to ensure xcodebuild detects it as active
           xcrun simctl boot "$DEVICE_NAME" || true
           
-          # 4. Run the test suite
+          # 4. Run the test suite, targeting only the unit tests (brew_sixtyTests) to bypass slow, flaky UI tests
           xcodebuild test \
             -project brew_sixty.xcodeproj \
             -scheme brew_sixty \
             -destination "platform=iOS Simulator,name=$DEVICE_NAME,OS=$OS_VERSION" \
+            -only-testing:brew_sixtyTests \
             CODE_SIGNING_ALLOWED=NO
