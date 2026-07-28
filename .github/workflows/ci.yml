@@ -30,6 +30,27 @@ jobs:
           # Restart CoreSimulator service to match the newly selected Xcode developer directory
           sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
 
+      - name: Diagnostics - Simulator Runtimes
+        run: |
+          echo "=== Available Simulator Runtimes (Detailed) ==="
+          xcrun simctl list runtimes -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for r in data.get('runtimes', []):
+              print(f\"Runtime: {r.get('name')} | ID: {r.get('identifier')} | Available: {r.get('isAvailable')} | Error: {r.get('availabilityError', 'None')}\")
+          "
+          
+          echo "=== Available iOS Devices in simctl ==="
+          xcrun simctl list devices -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for rt, devs in data.get('devices', {}).items():
+              if 'iOS' in rt:
+                  print(f\"Runtime Group: {rt}\")
+                  for d in devs:
+                      print(f\"  Device: {d.get('name')} | Available: {d.get('isAvailable')} | State: {d.get('state')}\")
+          "
+
       - name: Boot Simulator & Run Tests
         run: |
           # 1. Detect the first truly available iOS simulator name and version using the CoreSimulator JSON
