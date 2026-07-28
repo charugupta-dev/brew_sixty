@@ -1,0 +1,2 @@
+app_identifier("com.charugupta.brew-sixty") # Your app bundle identifier
+apple_id("your-apple-id@email.com")          # Your Apple ID developer email

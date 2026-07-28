@@ -1,0 +1,18 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build the application for the iOS Simulator"
+  lane :build_simulator do
+    # Build the app targeting the iOS Simulator SDK and bypass signing
+    build_app(
+      project: "brew_sixty.xcodeproj",
+      scheme: "brew_sixty",
+      sdk: "iphonesimulator",
+      configuration: "Release",
+      derived_data_path: "build",
+      skip_profile_detection: true,
+      export_method: "development",
+      xcargs: "CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO"
+    )
+  end
+end

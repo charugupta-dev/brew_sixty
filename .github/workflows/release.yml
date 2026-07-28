@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,26 +18,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Auto-Select Latest Xcode 16
+      - name: Set Xcode 16.1 Version
         run: |
-          XCODE_PATH=$(find /Applications -maxdepth 1 -name "Xcode_16*.app" | sort -V | tail -n 1)
-          if [ -z "$XCODE_PATH" ]; then
+          XCODE_PATH="/Applications/Xcode_16.1.app"
+          if [ ! -d "$XCODE_PATH" ]; then
+            echo "Xcode 16.1 not found at $XCODE_PATH, falling back to default Xcode."
             XCODE_PATH="/Applications/Xcode.app"
           fi
           echo "Selected Xcode: $XCODE_PATH"
           sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          
+          # Restart CoreSimulator service to match the newly selected Xcode developer directory
+          sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
 
-      - name: Build Archive
+      - name: Install Ruby Dependencies
         run: |
-          xcodebuild archive \
-            -project brew_sixty.xcodeproj \
-            -scheme brew_sixty \
-            -archivePath build/brew_sixty.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
+          bundle install --path vendor/bundle
+
+      - name: Build Simulator App via Fastlane
+        run: |
+          bundle exec fastlane build_simulator
 
       - name: Package Simulator App Bundle
         run: |
-          cd build/brew_sixty.xcarchive/Products/Applications
+          cd build/Build/Products/Release-iphonesimulator
           zip -r ../../../../brew_sixty_simulator.zip brew_sixty.app
 
       - name: Create GitHub Release
@@ -45,9 +50,9 @@ jobs:
           files: brew_sixty_simulator.zip
           draft: true
           prerelease: false
-          name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name || 'manual' }}
           body: |
-            ## Release ${{ github.ref_name }}
+            ## Release ${{ github.ref_name || 'manual' }}
             
             Attached is the compiled app bundle for the iOS Simulator.
             

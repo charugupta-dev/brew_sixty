@@ -2,7 +2,7 @@
 //  Color+Theme.swift
 //  brew_sixty
 //
-//  Created by Antigravity.
+//  Created by Charu Gupta.
 //
 
 import SwiftUI
